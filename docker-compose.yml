@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mm-backend:
+    build:
+      context: ./packages/mm-backend
+      dockerfile: Dockerfile
+    container_name: mm-backend
+    working_dir: /usr/src/app/packages/mm-backend
+    command: ["pnpm", "start"]
+    ports:
+      - '${MM_BE_PORT}:${MM_BE_PORT}'
+    environment:
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MM_BE_PORT: ${MM_BE_PORT}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_LOGGING_LEVEL: ${DATABASE_LOGGING_LEVEL}
+      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
+      DATABASE_AUTO_RUN_MIGRATIONS: ${DATABASE_AUTO_RUN_MIGRATIONS}
+
+  tse-backend:
+    build:
+      context: ./packages/tse-backend
+      dockerfile: Dockerfile
+    container_name: tse-backend
+    working_dir: /usr/src/app/packages/tse-backend
+    command: ["pnpm", "start"]
+    ports:
+      - '${TSE_BE_PORT}:${TSE_BE_PORT}'
+    environment:
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      TSE_BE_PORT: ${TSE_BE_PORT}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_LOGGING_LEVEL: ${DATABASE_LOGGING_LEVEL}
+      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
+      DATABASE_AUTO_RUN_MIGRATIONS: ${DATABASE_AUTO_RUN_MIGRATIONS}
