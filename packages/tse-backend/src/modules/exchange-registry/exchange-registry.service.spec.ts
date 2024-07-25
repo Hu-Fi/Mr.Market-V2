@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExchangeRegistryService } from './exchangeRegistry.service';
+import { ExchangeRegistryService } from './exchange-registry.service';
 import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtGateway } from '../../integrations/ccxt.gateway';

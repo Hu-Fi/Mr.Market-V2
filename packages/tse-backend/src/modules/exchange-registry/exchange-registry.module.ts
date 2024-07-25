@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ExchangeRegistryService } from './exchangeRegistry.service';
+import { ExchangeRegistryService } from './exchange-registry.service';
 import { ConfigService } from '@nestjs/config';
 import { IntegrationsModule } from '../../integrations/integrations.module';
 

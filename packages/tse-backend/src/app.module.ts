@@ -3,8 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './common/config/typeorm-config.service';
 import { IntegrationsModule } from './integrations/integrations.module';
-import { ExchangeRegistryModule } from './modules/exchangeRegistry/exchangeRegistry.module';
-import { ExchangeRegistryService } from './modules/exchangeRegistry/exchangeRegistry.service';
+import { ExchangeRegistryModule } from './modules/exchange-registry/exchange-registry.module';
+import { ExchangeRegistryService } from './modules/exchange-registry/exchange-registry.service';
 
 @Module({
   imports: [
