@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CcxtGateway } from './ccxt.gateway';
 
 @Module({
-  providers: [CcxtGateway],
-  exports: [CcxtGateway]
+  providers: [],
+  exports: []
 })
 export class IntegrationsModule {}

@@ -37,9 +37,6 @@ importers:
       axios:
         specifier: ^1.7.2
         version: 1.7.2
-      ccxt:
-        specifier: ^4.3.66
-        version: 4.3.66
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -155,6 +152,9 @@ importers:
       axios:
         specifier: ^1.7.2
         version: 1.7.2
+      ccxt:
+        specifier: ^4.3.66
+        version: 4.3.66
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
