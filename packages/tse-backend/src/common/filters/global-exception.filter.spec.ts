@@ -29,51 +29,79 @@ describe('GlobalExceptionFilter', () => {
 
   it('should handle HttpException', () => {
     const exception = new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    const mockResponse = {};
+    const mockRequest = {};
     const host = {
       switchToHttp: jest.fn().mockReturnValue({
-        getResponse: jest.fn(),
-        getRequest: jest.fn(),
+        getResponse: jest.fn().mockReturnValue(mockResponse),
+        getRequest: jest.fn().mockReturnValue(mockRequest),
       }),
     } as unknown as ArgumentsHost;
 
     filter.catch(exception, host);
 
-    expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(
-        host.switchToHttp().getRequest(),
-    );
+    expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(mockRequest);
     expect(mockHttpAdapter.reply).toHaveBeenCalledWith(
-        host.switchToHttp().getResponse(),
-        {
-          statusCode: HttpStatus.FORBIDDEN,
-          timestamp: expect.any(String),
-          path: '/test-url',
-        },
-        HttpStatus.FORBIDDEN,
+      mockResponse,
+      {
+        statusCode: HttpStatus.FORBIDDEN,
+        message: 'Forbidden',
+        timestamp: expect.any(String),
+        path: '/test-url',
+      },
+      HttpStatus.FORBIDDEN,
     );
   });
 
   it('should handle unknown exceptions', () => {
     const exception = new Error('Unknown error');
+    const mockResponse = {};
+    const mockRequest = {};
     const host = {
       switchToHttp: jest.fn().mockReturnValue({
-        getResponse: jest.fn(),
-        getRequest: jest.fn(),
+        getResponse: jest.fn().mockReturnValue(mockResponse),
+        getRequest: jest.fn().mockReturnValue(mockRequest),
       }),
     } as unknown as ArgumentsHost;
 
     filter.catch(exception, host);
 
-    expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(
-        host.switchToHttp().getRequest(),
-    );
+    expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(mockRequest);
     expect(mockHttpAdapter.reply).toHaveBeenCalledWith(
-        host.switchToHttp().getResponse(),
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          timestamp: expect.any(String),
-          path: '/test-url',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      mockResponse,
+      {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Unknown error',
+        timestamp: expect.any(String),
+        path: '/test-url',
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  });
+
+  it('should handle exceptions that are not instances of Error', () => {
+    const exception = { message: 'Not an instance of Error' };
+    const mockResponse = {};
+    const mockRequest = {};
+    const host = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getResponse: jest.fn().mockReturnValue(mockResponse),
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+      }),
+    } as unknown as ArgumentsHost;
+
+    filter.catch(exception, host);
+
+    expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(mockRequest);
+    expect(mockHttpAdapter.reply).toHaveBeenCalledWith(
+      mockResponse,
+      {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Unknown error',
+        timestamp: expect.any(String),
+        path: '/test-url',
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   });
 });

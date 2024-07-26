@@ -5,6 +5,9 @@ import { TypeOrmConfigService } from './common/config/typeorm-config.service';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { ExchangeRegistryModule } from './modules/exchange-registry/exchange-registry.module';
 import { ExchangeRegistryService } from './modules/exchange-registry/exchange-registry.service';
+import { ExchangeDataModule } from './modules/exchange-data/exchange-data.module';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
 
 @Module({
   imports: [
@@ -20,8 +23,12 @@ import { ExchangeRegistryService } from './modules/exchange-registry/exchange-re
         return typeOrmConfigService.getTypeOrmConfig();
       },
     }),
+    AutomapperModule.forRoot({
+      strategyInitializer: classes(),
+    }),
     IntegrationsModule,
     ExchangeRegistryModule,
+    ExchangeDataModule,
   ],
   controllers: [],
   providers: [

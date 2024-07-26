@@ -10,20 +10,20 @@ export class ExchangeRegistryService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly ccxtGateway: CcxtGateway
-  ) {
-  }
+    private readonly ccxtGateway: CcxtGateway,
+  ) {}
 
   async initializeExchanges() {
     const exchangeConfigs = Object.keys(process.env)
-      .filter(key => key.startsWith('EXCHANGE'))
+      .filter((key) => key.startsWith('EXCHANGE'))
       .reduce((configs, key) => {
         const [_, exchangeName, field] = key.split('_');
         const lowerCaseExchangeName = exchangeName.toLowerCase();
         if (!configs[lowerCaseExchangeName]) {
           configs[lowerCaseExchangeName] = { name: lowerCaseExchangeName };
         }
-        configs[lowerCaseExchangeName][field.toLowerCase()] = this.configService.get<string>(key);
+        configs[lowerCaseExchangeName][field.toLowerCase()] =
+          this.configService.get<string>(key);
         return configs;
       }, {});
 
@@ -35,7 +35,11 @@ export class ExchangeRegistryService {
           );
           return;
         }
-        const exchange = await this.ccxtGateway.initializeExchange(config.name, config.api, config.secret);
+        const exchange = await this.ccxtGateway.initializeExchange(
+          config.name,
+          config.api,
+          config.secret,
+        );
         if (exchange) {
           this.ccxtGateway.addExchange(config.name, exchange);
           this.logger.log(`${config.name} initialized successfully.`);

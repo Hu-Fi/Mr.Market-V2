@@ -3,6 +3,6 @@ import { CcxtGateway } from './ccxt.gateway';
 
 @Module({
   providers: [CcxtGateway],
-  exports: [CcxtGateway]
+  exports: [CcxtGateway],
 })
 export class IntegrationsModule {}

@@ -125,6 +125,15 @@ importers:
 
   packages/tse-backend:
     dependencies:
+      '@automapper/classes':
+        specifier: ^8.8.1
+        version: 8.8.1(@automapper/core@8.8.1)(reflect-metadata@0.1.14)
+      '@automapper/core':
+        specifier: ^8.8.1
+        version: 8.8.1
+      '@automapper/nestjs':
+        specifier: ^8.8.1
+        version: 8.8.1(@automapper/core@8.8.1)(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.1.14)(rxjs@7.8.1))
       '@nestjs/axios':
         specifier: ^3.0.2
         version: 3.0.2(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(axios@1.7.2)(rxjs@7.8.1)
@@ -264,6 +273,25 @@ packages:
   '@angular-devkit/schematics@17.3.8':
     resolution: {integrity: sha512-QRVEYpIfgkprNHc916JlPuNbLzOgrm9DZalHasnLUz4P6g7pR21olb8YCyM2OTJjombNhya9ZpckcADU5Qyvlg==}
     engines: {node: ^18.13.0 || >=20.9.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
+
+  '@automapper/classes@8.8.1':
+    resolution: {integrity: sha512-qWP92Vz4z5zGWVXVkoGKmI9PIiAh8uhTBcKpKMmTVwmS1wfOQgj3ceD+A3mlC9ZUTohwvXebS3M30scLaUZmeg==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@automapper/core': 8.8.1
+      reflect-metadata: ~0.1.13
+
+  '@automapper/core@8.8.1':
+    resolution: {integrity: sha512-VIRULNAImqaTojp8zqhVGVimjxjriawqZWlemooWh5B5tX2XlgA6icPrQBQh+M9wY8IVQipBTOcr338N9lf8RA==}
+    engines: {node: '>=16.0.0'}
+
+  '@automapper/nestjs@8.8.1':
+    resolution: {integrity: sha512-EeC0UBoBIchnWwNdfVUb0bbOKaHhuDLBOFXeZbwUxFcOn2CR+zOs96Dv6gd9x0WGZGcdZ39h4hkDaos6QPCG+Q==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@automapper/core': 8.8.1
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
+      '@nestjs/core': ^7.0.0 || ^8.0.0  || ^9.0.0 || ^10.0.0
 
   '@babel/code-frame@7.24.7':
     resolution: {integrity: sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA==}
@@ -3312,6 +3340,19 @@ snapshots:
       rxjs: 7.8.1
     transitivePeerDependencies:
       - chokidar
+
+  '@automapper/classes@8.8.1(@automapper/core@8.8.1)(reflect-metadata@0.1.14)':
+    dependencies:
+      '@automapper/core': 8.8.1
+      reflect-metadata: 0.1.14
+
+  '@automapper/core@8.8.1': {}
+
+  '@automapper/nestjs@8.8.1(@automapper/core@8.8.1)(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.1.14)(rxjs@7.8.1))':
+    dependencies:
+      '@automapper/core': 8.8.1
+      '@nestjs/common': 10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/core': 10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.1.14)(rxjs@7.8.1)
 
   '@babel/code-frame@7.24.7':
     dependencies:

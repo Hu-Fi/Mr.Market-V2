@@ -1,13 +1,13 @@
-import {HttpAdapterHost, NestFactory} from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import {GlobalExceptionFilter} from "./common/filters/global-exception.filter";
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule);
 
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new GlobalExceptionFilter(httpAdapterHost));
