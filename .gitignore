@@ -40,3 +40,4 @@ lerna-debug.log*
 /packages/tse-backend/node_modules/
 /.env
 /packages/mm-backend/dist/
+/packages/tse-backend/dist/
