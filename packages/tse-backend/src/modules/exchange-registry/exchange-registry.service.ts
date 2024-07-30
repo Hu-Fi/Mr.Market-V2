@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtGateway } from '../../integrations/ccxt.gateway';
-import { ExchangeConfig } from '../../common/interfaces/exchangeRegistry.interfaces';
+import { ExchangeConfig } from '../../common/interfaces/exchange-registry.interfaces';
 
 @Injectable()
 export class ExchangeRegistryService {

@@ -4,6 +4,7 @@ import { Logger, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { CustomAdapter } from './common/config/socket-io-adapter.config';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
@@ -33,6 +34,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.useWebSocketAdapter(new CustomAdapter(app, configService));
 
   const port = configService.get<number>('TSE_BE_PORT', 3001);
   await app.listen(port, async () => {

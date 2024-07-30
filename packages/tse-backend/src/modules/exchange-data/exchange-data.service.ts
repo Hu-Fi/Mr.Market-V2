@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 import { CustomLogger } from '../logger/logger.service';
 import {
@@ -8,6 +8,13 @@ import {
   GetTickerPriceCommand,
   GetTickersCommand,
 } from './model/exchange-data.model';
+import { ExchangeDataSubscriptionManager } from './subscription-manager.ws.service';
+import { createCompositeKey } from '../../common/utils/subscriptionKey';
+import { MarketDataType } from '../../common/enums/exchange-data.enums';
+import {
+  OHLCVResponse,
+  TickerPriceResponse,
+} from '../../common/interfaces/exchange-data.interfaces';
 
 @Injectable()
 export class ExchangeDataService {
@@ -15,6 +22,8 @@ export class ExchangeDataService {
 
   constructor(
     private readonly exchangeRegistryService: ExchangeRegistryService,
+    @Inject(forwardRef(() => ExchangeDataSubscriptionManager))
+    private readonly subscriptionManager: ExchangeDataSubscriptionManager,
   ) {}
 
   async getTickers(command: GetTickersCommand) {
@@ -67,7 +76,7 @@ export class ExchangeDataService {
           high: data[3],
           low: data[4],
           volume: data[5],
-        };
+        } as OHLCVResponse;
       });
     } catch (error) {
       this.logger.error(error);
@@ -118,7 +127,7 @@ export class ExchangeDataService {
       return {
         pair: upperCaseSymbol,
         price: ticker.last,
-      };
+      } as TickerPriceResponse;
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -127,8 +136,10 @@ export class ExchangeDataService {
 
   async getMultipleTickerPrices(command: GetMultipleTickerPricesCommand) {
     const { exchangeNames, symbols } = command;
-    const fetchPromises: Promise<any>[] = [];
-    const results: { [exchange: string]: { [symbol: string]: any } } = {};
+    const fetchPromises: Promise<TickerPriceResponse>[] = [];
+    const results: {
+      [exchange: string]: { [symbol: string]: TickerPriceResponse };
+    } = {};
 
     const exchangeNamesArray = exchangeNames.split(',');
     const symbolsArray = symbols.split(',');
@@ -142,11 +153,13 @@ export class ExchangeDataService {
               results[exchangeName] = {};
             }
             results[exchangeName][symbol] = price;
+            return price;
           })
           .catch((error) => {
             this.logger.error(
               `Error fetching ticker price for ${exchangeName}:${symbol}: ${error}`,
             );
+            return null;
           });
         fetchPromises.push(fetchPromise);
       });
@@ -171,5 +184,115 @@ export class ExchangeDataService {
       this.logger.error(error);
       throw error;
     }
+  }
+
+  private async watchMarketData(
+    type: MarketDataType,
+    exchange: string,
+    symbol: string | undefined,
+    symbols: string[] | undefined,
+    timeFrame: string | undefined,
+    onData: (data: any) => void,
+    extraParams: any = {},
+  ): Promise<void> {
+    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const methodName = `watch${type}`;
+    const compositeKey = createCompositeKey(
+      type,
+      exchange,
+      symbol,
+      symbols,
+      timeFrame,
+    );
+
+    if (!exchangeInstance || !exchangeInstance.has[methodName]) {
+      throw new Error(
+        `Exchange ${exchange} does not support ${methodName} or is not configured.`,
+      );
+    }
+
+    try {
+      while (this.subscriptionManager.isSubscribed(compositeKey)) {
+        const data = await exchangeInstance[methodName](
+          symbol || symbols,
+          ...Object.values(extraParams),
+        );
+        onData(data);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error watching ${type} for ${symbol || symbols} on ${exchange}: ${error.message}`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Reconnect after a delay
+    }
+  }
+
+  async watchOrderBook(
+    exchange: string,
+    symbol: string,
+    onData: (data: any) => void,
+    limit = 14,
+  ): Promise<void> {
+    if (exchange === 'bitfinex') {
+      limit = 25;
+    }
+    await this.watchMarketData(
+      MarketDataType.ORDERBOOK,
+      exchange,
+      symbol,
+      undefined,
+      undefined,
+      onData,
+      { limit },
+    );
+  }
+
+  async watchOHLCV(
+    exchange: string,
+    symbol: string,
+    timeframe: string,
+    since: number,
+    limit: number,
+    callback: (data: any) => void,
+  ) {
+    await this.watchMarketData(
+      MarketDataType.OHLCV,
+      exchange,
+      symbol,
+      undefined,
+      timeframe,
+      callback,
+      { since, limit },
+    );
+  }
+
+  async watchTicker(
+    exchange: string,
+    symbol: string,
+    callback: (data: any) => void,
+  ) {
+    await this.watchMarketData(
+      MarketDataType.TICKER,
+      exchange,
+      symbol,
+      undefined,
+      undefined,
+      callback,
+    );
+  }
+
+  async watchTickers(
+    exchange: string,
+    symbols: string[],
+    callback: (data: any) => void,
+  ) {
+    await this.watchMarketData(
+      MarketDataType.TICKERS,
+      exchange,
+      undefined,
+      symbols,
+      undefined,
+      callback,
+    );
   }
 }

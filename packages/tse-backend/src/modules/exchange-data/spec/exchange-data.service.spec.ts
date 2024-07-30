@@ -9,14 +9,21 @@ import {
   GetMultipleTickerPricesCommand,
   GetSupportedSymbolsCommand,
 } from '../model/exchange-data.model';
+import { ExchangeDataSubscriptionManager } from '../subscription-manager.ws.service';
+import { MarketDataType } from '../../../common/enums/exchange-data.enums';
 
 describe('ExchangeDataService', () => {
   let service: ExchangeDataService;
   let exchangeRegistryService: ExchangeRegistryService;
+  let subscriptionManager: ExchangeDataSubscriptionManager;
 
   const mockExchangeRegistryService = {
     getExchange: jest.fn(),
     getSupportedExchanges: jest.fn(),
+  };
+
+  const mockSubscriptionManager = {
+    isSubscribed: jest.fn(),
   };
 
   const mockLogger = {
@@ -30,10 +37,18 @@ describe('ExchangeDataService', () => {
       fetchTickers: true,
       fetchOHLCV: true,
       fetchTicker: true,
+      watchOrderBook: true,
+      watchOHLCV: true,
+      watchTicker: true,
+      watchTickers: true,
     },
     fetchTickers: jest.fn(),
     fetchOHLCV: jest.fn(),
     fetchTicker: jest.fn(),
+    watchOrderBook: jest.fn(),
+    watchOHLCV: jest.fn(),
+    watchTicker: jest.fn(),
+    watchTickers: jest.fn(),
     loadMarkets: jest.fn(),
     markets: { 'ETH/USDT': {}, 'BTC/USDT': {} },
   };
@@ -46,6 +61,10 @@ describe('ExchangeDataService', () => {
           provide: ExchangeRegistryService,
           useValue: mockExchangeRegistryService,
         },
+        {
+          provide: ExchangeDataSubscriptionManager,
+          useValue: mockSubscriptionManager,
+        },
         { provide: CustomLogger, useValue: mockLogger },
       ],
     }).compile();
@@ -53,6 +72,9 @@ describe('ExchangeDataService', () => {
     service = module.get<ExchangeDataService>(ExchangeDataService);
     exchangeRegistryService = module.get<ExchangeRegistryService>(
       ExchangeRegistryService,
+    );
+    subscriptionManager = module.get<ExchangeDataSubscriptionManager>(
+      ExchangeDataSubscriptionManager,
     );
   });
 
@@ -278,6 +300,155 @@ describe('ExchangeDataService', () => {
 
       await expect(service.getSupportedSymbols(command)).rejects.toThrow(
         'Exchange mockExchange is not configured.',
+      );
+    });
+  });
+
+  describe('watchOrderBook', () => {
+    it('should call watchMarketData with correct parameters', async () => {
+      const spyWatchMarketData = jest
+        .spyOn(service as any, 'watchMarketData')
+        .mockImplementation(() => Promise.resolve());
+      mockExchangeRegistryService.getExchange.mockReturnValue(
+        mockExchangeInstance,
+      );
+      mockSubscriptionManager.isSubscribed.mockReturnValue(true);
+
+      const callback = jest.fn();
+      await service.watchOrderBook('binance', 'BTC/USDT', callback);
+
+      expect(spyWatchMarketData).toHaveBeenCalledWith(
+        MarketDataType.ORDERBOOK,
+        'binance',
+        'BTC/USDT',
+        undefined,
+        undefined,
+        callback,
+        { limit: 14 },
+      );
+    });
+
+    it('should adjust limit for bitfinex exchange', async () => {
+      const spyWatchMarketData = jest
+        .spyOn(service as any, 'watchMarketData')
+        .mockImplementation(() => Promise.resolve());
+      mockExchangeRegistryService.getExchange.mockReturnValue(
+        mockExchangeInstance,
+      );
+      mockSubscriptionManager.isSubscribed.mockReturnValue(true);
+
+      const callback = jest.fn();
+      await service.watchOrderBook('bitfinex', 'BTC/USDT', callback);
+
+      expect(spyWatchMarketData).toHaveBeenCalledWith(
+        MarketDataType.ORDERBOOK,
+        'bitfinex',
+        'BTC/USDT',
+        undefined,
+        undefined,
+        callback,
+        { limit: 25 },
+      );
+    });
+  });
+
+  describe('watchOHLCV', () => {
+    it('should call watchMarketData with correct parameters', async () => {
+      const spyWatchMarketData = jest
+        .spyOn(service as any, 'watchMarketData')
+        .mockImplementation(() => Promise.resolve());
+      mockExchangeRegistryService.getExchange.mockReturnValue(
+        mockExchangeInstance,
+      );
+      mockSubscriptionManager.isSubscribed.mockReturnValue(true);
+
+      const callback = jest.fn();
+      await service.watchOHLCV(
+        'binance',
+        'BTC/USDT',
+        '1m',
+        1620000000000,
+        100,
+        callback,
+      );
+
+      expect(spyWatchMarketData).toHaveBeenCalledWith(
+        MarketDataType.OHLCV,
+        'binance',
+        'BTC/USDT',
+        undefined,
+        '1m',
+        callback,
+        { since: 1620000000000, limit: 100 },
+      );
+    });
+  });
+
+  describe('watchTicker', () => {
+    it('should call watchMarketData with correct parameters', async () => {
+      const spyWatchMarketData = jest
+        .spyOn(service as any, 'watchMarketData')
+        .mockImplementation(() => Promise.resolve());
+      mockExchangeRegistryService.getExchange.mockReturnValue(
+        mockExchangeInstance,
+      );
+      mockSubscriptionManager.isSubscribed.mockReturnValue(true);
+
+      const callback = jest.fn();
+      await service.watchTicker('binance', 'BTC/USDT', callback);
+
+      expect(spyWatchMarketData).toHaveBeenCalledWith(
+        MarketDataType.TICKER,
+        'binance',
+        'BTC/USDT',
+        undefined,
+        undefined,
+        callback,
+      );
+    });
+  });
+
+  describe('watchTickers', () => {
+    it('should call watchMarketData with correct parameters', async () => {
+      const spyWatchMarketData = jest
+        .spyOn(service as any, 'watchMarketData')
+        .mockImplementation(() => Promise.resolve());
+      mockExchangeRegistryService.getExchange.mockReturnValue(
+        mockExchangeInstance,
+      );
+      mockSubscriptionManager.isSubscribed.mockReturnValue(true);
+
+      const callback = jest.fn();
+      await service.watchTickers('binance', ['BTC/USDT', 'ETH/USDT'], callback);
+
+      expect(spyWatchMarketData).toHaveBeenCalledWith(
+        MarketDataType.TICKERS,
+        'binance',
+        undefined,
+        ['BTC/USDT', 'ETH/USDT'],
+        undefined,
+        callback,
+      );
+    });
+  });
+
+  describe('watchMarketData', () => {
+    it('should throw an error if the exchange does not support the method', async () => {
+      mockExchangeRegistryService.getExchange.mockReturnValue({
+        has: { watchOrderBook: false },
+      });
+
+      await expect(
+        service['watchMarketData'](
+          MarketDataType.ORDERBOOK,
+          'binance',
+          'BTC/USDT',
+          undefined,
+          undefined,
+          jest.fn(),
+        ),
+      ).rejects.toThrow(
+        'Exchange binance does not support watchOrderBook or is not configured.',
       );
     });
   });

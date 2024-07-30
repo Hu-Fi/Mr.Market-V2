@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
 
 @Injectable()
-export class TypeOrmConfigService {
+export class TypeormConfig {
   constructor(private configService: ConfigService) {}
 
   getTypeOrmConfig(): DataSourceOptions {
