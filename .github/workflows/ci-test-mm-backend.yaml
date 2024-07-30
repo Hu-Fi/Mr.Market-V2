@@ -1,0 +1,32 @@
+name: Mr Market App Check
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths:
+      - 'packages/mm-backend/**'
+  workflow_dispatch:
+
+jobs:
+  job-app-test:
+    name: Mr Market App Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install dependencies
+        working-directory: packages/mm-backend
+        run: pnpm install
+      - name: Build the project
+        working-directory: packages/mm-backend
+        run: pnpm build
+      - name: Run unit tests
+        working-directory: packages/mm-backend
+        run: pnpm test
