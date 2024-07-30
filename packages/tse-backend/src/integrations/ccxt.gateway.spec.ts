@@ -1,23 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as ccxt from 'ccxt';
 import { CcxtGateway } from './ccxt.gateway';
+import { CustomLogger } from '../modules/logger/logger.service';
 
 jest.mock('ccxt', () => {
+  const mockBinance = jest.fn().mockImplementation(({ apiKey, secret }) => ({
+    apiKey,
+    secret,
+    loadMarkets: jest.fn().mockResolvedValue(true),
+  }));
+
   return {
-    binance: jest.fn().mockImplementation(({ apiKey, secret }) => ({
-      apiKey,
-      secret,
-      loadMarkets: jest.fn().mockResolvedValue(true),
-    })),
+    binance: mockBinance,
+    pro: {
+      binance: mockBinance,
+    }
   };
 });
+
+const mockLogger = {
+  log: jest.fn(),
+  warn: jest.fn(),
+};
 
 describe('CcxtGateway', () => {
   let gateway: CcxtGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CcxtGateway],
+      providers: [
+        CcxtGateway,
+        { provide: CustomLogger, useValue: mockLogger },
+      ],
     }).compile();
 
     gateway = module.get<CcxtGateway>(CcxtGateway);

@@ -25,10 +25,8 @@ export class CcxtGateway {
     secret: string,
   ): Promise<ccxt.Exchange | null> {
     try {
-      let exchangeClass = ccxt.pro[name];
+      const exchangeClass = ccxt.pro[name] || ccxt[name];
       if (!exchangeClass) {
-        exchangeClass = ccxt[name];
-      } else if (!exchangeClass) {
         throw new Error(`Exchange class for ${name} not found`);
       }
       const exchange = new exchangeClass({
