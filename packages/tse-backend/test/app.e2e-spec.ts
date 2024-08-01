@@ -1,9 +1,5 @@
 import { Test } from '@nestjs/testing';
-import {
-  BadRequestException,
-  INestApplication,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { INestApplication, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -83,22 +79,6 @@ describe('ExchangeOperationService (e2e)', () => {
       expect(result.id).toBeDefined();
       expect(result.userId).toEqual(command.userId);
       expect(result.symbol).toEqual(command.symbol);
-    });
-
-    it('should throw BadRequestException for missing parameters', async () => {
-      const command = {
-        orderType: MarketOrderType.LIMIT_ORDER,
-        userId: 'user-1',
-        clientId: 'client-1',
-        exchangeName: 'exchange-1',
-        symbol: '',
-        side: '',
-        amount: null,
-      };
-
-      await expect(service.saveOrderData(command)).rejects.toThrow(
-        BadRequestException,
-      );
     });
 
     it('should throw InternalServerErrorException on failure', async () => {

@@ -1,15 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { ExchangeOperationService } from '../exchange-operation.service';
 import { ExchangeOperationRepository } from '../exchange-operation.repository';
 import { CustomLogger } from '../../logger/logger.service';
 import {
   CreateLimitOrderCommand,
   ExchangeOperationCommand,
-  OrderCommand,
 } from '../model/exchange-operation.model';
 import { Order } from '../../../common/entities/order.entity';
 import {
@@ -50,22 +46,6 @@ describe('ExchangeOperationService', () => {
   });
 
   describe('saveOrderData', () => {
-    it('should throw BadRequestException if required parameters are missing', async () => {
-      const command: OrderCommand = {
-        orderType: MarketOrderType.LIMIT_ORDER,
-        userId: 'user-id',
-        clientId: 'client-id',
-        exchangeName: 'exchange-name',
-        symbol: '',
-        side: '',
-        amount: null,
-      };
-
-      await expect(service.saveOrderData(command)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-
     it('should save order and return it', async () => {
       const command: CreateLimitOrderCommand = {
         orderType: MarketOrderType.LIMIT_ORDER,

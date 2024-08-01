@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   CreateLimitOrderCommand,
   ExchangeOperationCommand,
@@ -22,12 +18,6 @@ export class ExchangeOperationService {
   async saveOrderData(command: OrderCommand): Promise<Order> {
     const { orderType, userId, clientId, exchangeName, symbol, side, amount } =
       command;
-
-    if (!symbol || !side || !amount) {
-      throw new BadRequestException(
-        'Missing required parameters for market trade.',
-      );
-    }
 
     const price = (command as CreateLimitOrderCommand).price ?? null;
 
