@@ -1,6 +1,7 @@
 import {
   MarketOrderType,
   OrderStatus,
+  TradeSideType,
 } from '../../../common/enums/exchange-operation.enums';
 
 export class CreateMarketOrderCommand {
@@ -9,7 +10,7 @@ export class CreateMarketOrderCommand {
   clientId: string;
   exchangeName: string;
   symbol: string;
-  side: string;
+  side: TradeSideType;
   amount: number;
 }
 
@@ -20,7 +21,8 @@ export class CreateLimitOrderCommand extends CreateMarketOrderCommand {
 export type OrderCommand = CreateMarketOrderCommand | CreateLimitOrderCommand;
 
 export class ExchangeOperationCommand {
-  id: number;
+  orderEntityId: number;
   status: OrderStatus;
+  orderId?: string | undefined;
   details: Record<string, any>;
 }

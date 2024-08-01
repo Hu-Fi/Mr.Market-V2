@@ -5,10 +5,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeormTestConfig } from '../src/common/config/typeorm-test.config';
 import { ExchangeOperationService } from '../src/modules/exchange-operation/exchange-operation.service';
-import { ExchangeOperationRepository } from '../src/modules/exchange-operation/exchange-operation.repository';
+import { OrderRepository } from '../src/modules/exchange-operation/order.repository';
+import { OperationRepository } from '../src/modules/exchange-operation/operation.repository';
+import { OrderService } from '../src/modules/exchange-operation/order.service';
+import { OperationService } from '../src/modules/exchange-operation/operation.service';
 import {
   MarketOrderType,
   OrderStatus,
+  TradeSideType,
 } from '../src/common/enums/exchange-operation.enums';
 import { Order } from '../src/common/entities/order.entity';
 import { Operation } from '../src/common/entities/operation.entity';
@@ -16,7 +20,8 @@ import { Operation } from '../src/common/entities/operation.entity';
 describe('ExchangeOperationService (e2e)', () => {
   let app: INestApplication;
   let service: ExchangeOperationService;
-  let repository: ExchangeOperationRepository;
+  let orderRepository: OrderRepository;
+  let operationRepository: OperationRepository;
   let dataSource: DataSource;
 
   beforeAll(async () => {
@@ -43,14 +48,20 @@ describe('ExchangeOperationService (e2e)', () => {
         }),
         TypeOrmModule.forFeature([Order, Operation]),
       ],
-      providers: [ExchangeOperationService, ExchangeOperationRepository],
+      providers: [
+        ExchangeOperationService,
+        OrderService,
+        OperationService,
+        OrderRepository,
+        OperationRepository,
+      ],
     }).compile();
 
     app = moduleRef.createNestApplication();
     service = moduleRef.get<ExchangeOperationService>(ExchangeOperationService);
-    repository = moduleRef.get<ExchangeOperationRepository>(
-      ExchangeOperationRepository,
-    );
+    orderRepository = moduleRef.get<OrderRepository>(OrderRepository);
+    operationRepository =
+      moduleRef.get<OperationRepository>(OperationRepository);
     dataSource = moduleRef.get<DataSource>(DataSource);
     await app.init();
   });
@@ -68,7 +79,7 @@ describe('ExchangeOperationService (e2e)', () => {
         clientId: 'client-1',
         exchangeName: 'exchange-1',
         symbol: 'BTC/USD',
-        side: 'buy',
+        side: TradeSideType.BUY,
         amount: 1,
         price: 50000,
       };
@@ -83,7 +94,7 @@ describe('ExchangeOperationService (e2e)', () => {
 
     it('should throw InternalServerErrorException on failure', async () => {
       jest
-        .spyOn(repository, 'createOrder')
+        .spyOn(orderRepository, 'create')
         .mockRejectedValueOnce(new Error('Database error'));
 
       const command = {
@@ -92,7 +103,7 @@ describe('ExchangeOperationService (e2e)', () => {
         clientId: 'client-1',
         exchangeName: 'exchange-1',
         symbol: 'BTC/USD',
-        side: 'buy',
+        side: TradeSideType.BUY,
         amount: 1,
         price: 50000,
       };
@@ -111,31 +122,34 @@ describe('ExchangeOperationService (e2e)', () => {
         clientId: 'client-2',
         exchangeName: 'exchange-2',
         symbol: 'BTC/USD',
-        side: 'buy',
+        side: TradeSideType.BUY,
         amount: 1,
         price: 50000,
       });
 
       const operationCommand = {
-        id: newOrder.id,
+        orderEntityId: newOrder.id,
         status: OrderStatus.CANCELLED,
+        orderId: 'new-order-id',
         details: { info: 'Order details' },
       };
       await service.saveExchangeOperation(operationCommand);
 
-      const updatedOrder = await repository.findOrdersByUser('user-2');
+      const updatedOrder = await orderRepository.findById(newOrder.id);
 
-      expect(updatedOrder[0].status).toBe(OrderStatus.CANCELLED);
+      expect(updatedOrder.status).toBe(OrderStatus.CANCELLED);
+      expect(updatedOrder.orderId).toBe('new-order-id');
     });
 
     it('should throw InternalServerErrorException on failure', async () => {
       jest
-        .spyOn(repository, 'updateOrderStatus')
+        .spyOn(orderRepository, 'findById')
         .mockRejectedValueOnce(new Error('Database error'));
 
       const command = {
-        id: 1,
+        orderEntityId: 1,
         status: OrderStatus.EXECUTED,
+        orderId: 'order-id',
         details: { info: 'Order details' },
       };
 

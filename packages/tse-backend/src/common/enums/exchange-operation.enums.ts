@@ -8,3 +8,8 @@ export enum OrderStatus {
   EXECUTED = 'executed',
   CANCELLED = 'cancelled',
 }
+
+export enum TradeSideType {
+  BUY = 'buy',
+  SELL = 'sell',
+}

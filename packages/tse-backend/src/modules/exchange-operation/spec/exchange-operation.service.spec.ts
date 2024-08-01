@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException } from '@nestjs/common';
 import { ExchangeOperationService } from '../exchange-operation.service';
-import { ExchangeOperationRepository } from '../exchange-operation.repository';
+import { OrderService } from '../order.service';
 import { CustomLogger } from '../../logger/logger.service';
 import {
   CreateLimitOrderCommand,
@@ -11,11 +11,12 @@ import { Order } from '../../../common/entities/order.entity';
 import {
   MarketOrderType,
   OrderStatus,
+  TradeSideType,
 } from '../../../common/enums/exchange-operation.enums';
 
 describe('ExchangeOperationService', () => {
   let service: ExchangeOperationService;
-  let repository: ExchangeOperationRepository;
+  let orderService: OrderService;
   let logger: CustomLogger;
 
   beforeEach(async () => {
@@ -23,10 +24,10 @@ describe('ExchangeOperationService', () => {
       providers: [
         ExchangeOperationService,
         {
-          provide: ExchangeOperationRepository,
+          provide: OrderService,
           useValue: {
             createOrder: jest.fn(),
-            updateOrderStatus: jest.fn(),
+            persistOrderActivity: jest.fn(),
           },
         },
         {
@@ -39,9 +40,7 @@ describe('ExchangeOperationService', () => {
     }).compile();
 
     service = module.get<ExchangeOperationService>(ExchangeOperationService);
-    repository = module.get<ExchangeOperationRepository>(
-      ExchangeOperationRepository,
-    );
+    orderService = module.get<OrderService>(OrderService);
     logger = module.get<CustomLogger>(CustomLogger);
   });
 
@@ -53,18 +52,18 @@ describe('ExchangeOperationService', () => {
         clientId: 'client-id',
         exchangeName: 'exchange-name',
         symbol: 'BTC/USD',
-        side: 'buy',
+        side: TradeSideType.BUY,
         amount: 1,
         price: 10000,
       };
 
       const expectedOrder = new Order();
-      jest.spyOn(repository, 'createOrder').mockResolvedValue(expectedOrder);
+      jest.spyOn(orderService, 'createOrder').mockResolvedValue(expectedOrder);
 
       const result = await service.saveOrderData(command);
 
       expect(result).toEqual(expectedOrder);
-      expect(repository.createOrder).toHaveBeenCalledWith({
+      expect(orderService.createOrder).toHaveBeenCalledWith({
         userId: command.userId,
         clientId: command.clientId,
         exchangeName: command.exchangeName,
@@ -85,13 +84,13 @@ describe('ExchangeOperationService', () => {
         clientId: 'client-id',
         exchangeName: 'exchange-name',
         symbol: 'BTC/USD',
-        side: 'buy',
+        side: TradeSideType.BUY,
         amount: 1,
         price: 10000,
       };
 
       jest
-        .spyOn(repository, 'createOrder')
+        .spyOn(orderService, 'createOrder')
         .mockRejectedValue(new Error('Failed to save order'));
 
       await expect(service.saveOrderData(command)).rejects.toThrow(
@@ -103,31 +102,31 @@ describe('ExchangeOperationService', () => {
   describe('saveExchangeOperation', () => {
     it('should save exchange operation and update order status', async () => {
       const command: ExchangeOperationCommand = {
-        id: 1,
+        orderEntityId: 1,
         status: OrderStatus.EXECUTED,
-        details: { info: 'some details' },
-      };
-
-      jest.spyOn(repository, 'updateOrderStatus').mockResolvedValue(undefined);
-
-      await service.saveExchangeOperation(command);
-
-      expect(repository.updateOrderStatus).toHaveBeenCalledWith(
-        command.id,
-        command.status,
-        command.details,
-      );
-    });
-
-    it('should log an error and throw InternalServerErrorException on failure', async () => {
-      const command: ExchangeOperationCommand = {
-        id: 1,
-        status: OrderStatus.EXECUTED,
+        orderId: 'order-id',
         details: { info: 'some details' },
       };
 
       jest
-        .spyOn(repository, 'updateOrderStatus')
+        .spyOn(orderService, 'persistOrderActivity')
+        .mockResolvedValue(undefined);
+
+      await service.saveExchangeOperation(command);
+
+      expect(orderService.persistOrderActivity).toHaveBeenCalledWith(command);
+    });
+
+    it('should log an error and throw InternalServerErrorException on failure', async () => {
+      const command: ExchangeOperationCommand = {
+        orderEntityId: 1,
+        status: OrderStatus.EXECUTED,
+        orderId: 'order-id',
+        details: { info: 'some details' },
+      };
+
+      jest
+        .spyOn(orderService, 'persistOrderActivity')
         .mockRejectedValue(new Error('Failed to update order status'));
 
       await expect(service.saveExchangeOperation(command)).rejects.toThrow(
