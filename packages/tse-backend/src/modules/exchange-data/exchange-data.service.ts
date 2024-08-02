@@ -9,12 +9,12 @@ import {
   GetTickersCommand,
 } from './model/exchange-data.model';
 import { ExchangeDataSubscriptionManager } from './subscription-manager.ws.service';
-import { createCompositeKey } from '../../common/utils/subscriptionKey';
 import { MarketDataType } from '../../common/enums/exchange-data.enums';
 import {
   OHLCVResponse,
   TickerPriceResponse,
 } from '../../common/interfaces/exchange-data.interfaces';
+import { CompositeKeyContext } from '../../common/utils/composite-key/composite-key-context';
 
 @Injectable()
 export class ExchangeDataService {
@@ -197,8 +197,8 @@ export class ExchangeDataService {
   ): Promise<void> {
     const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
     const methodName = `watch${type}`;
-    const compositeKey = createCompositeKey(
-      type,
+    const context = new CompositeKeyContext(type);
+    const compositeKey = context.createCompositeKey(
       exchange,
       symbol,
       symbols,

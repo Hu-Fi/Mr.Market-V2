@@ -14,7 +14,7 @@ jest.mock('ccxt', () => {
     binance: mockBinance,
     pro: {
       binance: mockBinance,
-    }
+    },
   };
 });
 
@@ -28,10 +28,7 @@ describe('CcxtGateway', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CcxtGateway,
-        { provide: CustomLogger, useValue: mockLogger },
-      ],
+      providers: [CcxtGateway, { provide: CustomLogger, useValue: mockLogger }],
     }).compile();
 
     gateway = module.get<CcxtGateway>(CcxtGateway);
@@ -80,7 +77,11 @@ describe('CcxtGateway', () => {
 
   describe('initializeExchange', () => {
     it('should initialize and return the exchange instance', async () => {
-      const exchange = await gateway.initializeExchange('binance', 'testApiKey', 'testSecret');
+      const exchange = await gateway.initializeExchange(
+        'binance',
+        'testApiKey',
+        'testSecret',
+      );
       expect(exchange).toBeDefined();
       expect(exchange.apiKey).toBe('testApiKey');
       expect(exchange.secret).toBe('testSecret');
@@ -88,7 +89,11 @@ describe('CcxtGateway', () => {
     });
 
     it('should return null for a non-existing exchange', async () => {
-      const exchange = await gateway.initializeExchange('nonexistent', 'testApiKey', 'testSecret');
+      const exchange = await gateway.initializeExchange(
+        'nonexistent',
+        'testApiKey',
+        'testSecret',
+      );
       expect(exchange).toBeNull();
     });
 
@@ -97,7 +102,11 @@ describe('CcxtGateway', () => {
         throw new Error('Initialization error');
       });
 
-      const exchange = await gateway.initializeExchange('binance', 'testApiKey', 'testSecret');
+      const exchange = await gateway.initializeExchange(
+        'binance',
+        'testApiKey',
+        'testSecret',
+      );
       expect(exchange).toBeNull();
     });
   });
