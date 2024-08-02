@@ -88,26 +88,20 @@ describe('CcxtGateway', () => {
       expect(exchange.loadMarkets).toHaveBeenCalled();
     });
 
-    it('should return null for a non-existing exchange', async () => {
-      const exchange = await gateway.initializeExchange(
-        'nonexistent',
-        'testApiKey',
-        'testSecret',
-      );
-      expect(exchange).toBeNull();
+    it('should throw an error for a non-existing exchange', async () => {
+      await expect(
+        gateway.initializeExchange('nonexistent', 'testApiKey', 'testSecret'),
+      ).rejects.toThrow('Exchange class for nonexistent not found');
     });
 
-    it('should handle errors and return null', async () => {
+    it('should handle errors and throw an error', async () => {
       jest.spyOn(ccxt, 'binance').mockImplementationOnce(() => {
         throw new Error('Initialization error');
       });
 
-      const exchange = await gateway.initializeExchange(
-        'binance',
-        'testApiKey',
-        'testSecret',
-      );
-      expect(exchange).toBeNull();
+      await expect(
+        gateway.initializeExchange('binance', 'testApiKey', 'testSecret'),
+      ).rejects.toThrow('Failed to initialize binance: Initialization error');
     });
   });
 });
