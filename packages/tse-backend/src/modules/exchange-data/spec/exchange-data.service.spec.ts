@@ -246,7 +246,7 @@ describe('ExchangeDataService', () => {
     it('should fetch multiple ticker prices and return them', async () => {
       const command: GetMultipleTickerPricesCommand = {
         exchangeNames: ['mockExchange'],
-        symbols: ['ETH/USDT','BTC/USDT'],
+        symbols: ['ETH/USDT', 'BTC/USDT'],
       };
       const tickerPriceCommand1 = new GetTickerPriceCommand(
         'mockExchange',

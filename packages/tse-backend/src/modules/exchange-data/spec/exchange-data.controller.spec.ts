@@ -58,13 +58,13 @@ describe('ExchangeDataController', () => {
   };
 
   const getMultipleTickerPricesDtoFixture: GetMultipleTickerPricesDto = {
-    exchangeNames: ['binance','gate'],
-    symbols: ['ETH/USDT','BTC/USDT'],
+    exchangeNames: ['binance', 'gate'],
+    symbols: ['ETH/USDT', 'BTC/USDT'],
   };
   const getMultipleTickerPricesCommandFixture: GetMultipleTickerPricesCommand =
     {
-      exchangeNames: ['binance','gate'],
-      symbols: ['ETH/USDT','BTC/USDT'],
+      exchangeNames: ['binance', 'gate'],
+      symbols: ['ETH/USDT', 'BTC/USDT'],
     };
 
   const getSupportedSymbolsDtoFixture: GetSupportedSymbolsDto = {

@@ -104,9 +104,7 @@ export class ExchangeDataService {
         const tickers = await exchangeInstance.fetchTickers();
         pairs.push(...Object.keys(tickers));
       } catch (error) {
-        this.logger.error(
-          `Error fetching tickers from ${exchange}: ${error}`,
-        );
+        this.logger.error(`Error fetching tickers from ${exchange}: ${error}`);
       }
     }
   }
@@ -223,7 +221,6 @@ export class ExchangeDataService {
       this.logger.error(
         `Error watching ${type} for ${symbol || symbols} on ${exchange}: ${error.message}`,
       );
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Reconnect after a delay
     }
   }
 

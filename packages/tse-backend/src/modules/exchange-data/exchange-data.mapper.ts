@@ -33,7 +33,7 @@ export class ExchangeDataProfile extends AutomapperProfile {
         forMember(
           (destination) => destination.symbols,
           mapFrom((source) =>
-            source.symbols.map((symbol) => symbol.toUpperCase())
+            source.symbols.map((symbol) => symbol.toUpperCase()),
           ),
         ),
       );
@@ -70,13 +70,15 @@ export class ExchangeDataProfile extends AutomapperProfile {
         forMember(
           (destination) => destination.exchangeNames,
           mapFrom((source) =>
-            source.exchangeNames.map((exchangeName) => exchangeName.toLowerCase())
+            source.exchangeNames.map((exchangeName) =>
+              exchangeName.toLowerCase(),
+            ),
           ),
         ),
         forMember(
           (destination) => destination.symbols,
           mapFrom((source) =>
-            source.symbols.map((symbol) => symbol.toUpperCase())
+            source.symbols.map((symbol) => symbol.toUpperCase()),
           ),
         ),
       );
