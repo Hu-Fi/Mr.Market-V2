@@ -91,20 +91,23 @@ export class ExchangeDataService {
     );
 
     for (const exchange of exchangeInstances) {
-      const exchangeInstance =
-        this.exchangeRegistryService.getExchange(exchange);
-      if (exchangeInstance && exchangeInstance.has.fetchTickers) {
-        try {
-          const tickers = await exchangeInstance.fetchTickers();
-          pairs.push(...Object.keys(tickers));
-        } catch (error) {
-          this.logger.error(
-            `Error fetching tickers from ${exchange}: ${error}`,
-          );
-        }
-      }
+      await this.fetchPairsFromExchange(exchange, pairs);
     }
     return Array.from(new Set(pairs));
+  }
+
+  private async fetchPairsFromExchange(exchange: string, pairs: string[]) {
+    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    if (exchangeInstance && exchangeInstance.has.fetchTickers) {
+      try {
+        const tickers = await exchangeInstance.fetchTickers();
+        pairs.push(...Object.keys(tickers));
+      } catch (error) {
+        this.logger.error(
+          `Error fetching tickers from ${exchange}: ${error}`,
+        );
+      }
+    }
   }
 
   async getTickerPrice(command: GetTickerPriceCommand) {
