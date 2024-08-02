@@ -86,7 +86,7 @@ describe('ExchangeDataService', () => {
     it('should fetch tickers and return them', async () => {
       const command: GetTickersCommand = {
         exchange: 'mockExchange',
-        symbols: 'ETH/USDT',
+        symbols: ['ETH/USDT'],
       };
       mockExchangeRegistryService.getExchange.mockReturnValue(
         mockExchangeInstance,
@@ -109,7 +109,7 @@ describe('ExchangeDataService', () => {
     it('should throw an error if exchange does not support fetchTickers', async () => {
       const command: GetTickersCommand = {
         exchange: 'mockExchange',
-        symbols: 'ETH/USDT',
+        symbols: ['ETH/USDT'],
       };
       const exchangeInstance = {
         ...mockExchangeInstance,
@@ -245,8 +245,8 @@ describe('ExchangeDataService', () => {
   describe('getMultipleTickerPrices', () => {
     it('should fetch multiple ticker prices and return them', async () => {
       const command: GetMultipleTickerPricesCommand = {
-        exchangeNames: 'mockExchange',
-        symbols: 'ETH/USDT,BTC/USDT',
+        exchangeNames: ['mockExchange'],
+        symbols: ['ETH/USDT','BTC/USDT'],
       };
       const tickerPriceCommand1 = new GetTickerPriceCommand(
         'mockExchange',

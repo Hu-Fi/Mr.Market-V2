@@ -35,14 +35,12 @@ export class ExchangeDataService {
       );
     }
 
-    const symbolsArray = symbols.split(',');
-
     this.logger.log(
       `Fetching tickers from ${exchangeInstance.name} for ${symbols}`,
     );
 
     try {
-      return await exchangeInstance.fetchTickers(symbolsArray);
+      return await exchangeInstance.fetchTickers(symbols);
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -141,11 +139,8 @@ export class ExchangeDataService {
       [exchange: string]: { [symbol: string]: TickerPriceResponse };
     } = {};
 
-    const exchangeNamesArray = exchangeNames.split(',');
-    const symbolsArray = symbols.split(',');
-
-    exchangeNamesArray.forEach((exchangeName) => {
-      symbolsArray.forEach((symbol) => {
+    exchangeNames.forEach((exchangeName) => {
+      symbols.forEach((symbol) => {
         const tpCommand = new GetTickerPriceCommand(exchangeName, symbol);
         const fetchPromise = this.getTickerPrice(tpCommand)
           .then((price) => {
