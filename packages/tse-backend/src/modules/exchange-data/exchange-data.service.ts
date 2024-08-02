@@ -100,6 +100,7 @@ export class ExchangeDataService {
     const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
     if (exchangeInstance && exchangeInstance.has.fetchTickers) {
       try {
+        // TODO: cache the results of fetchTickers method
         const tickers = await exchangeInstance.fetchTickers();
         pairs.push(...Object.keys(tickers));
       } catch (error) {
@@ -176,6 +177,7 @@ export class ExchangeDataService {
     this.logger.log(`Fetching supported symbols from ${exchangeInstance.name}`);
 
     try {
+      // TODO: cache the results of loadMarkets method
       await exchangeInstance.loadMarkets();
       return Object.keys(exchangeInstance.markets);
     } catch (error) {
