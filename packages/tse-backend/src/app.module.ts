@@ -9,6 +9,7 @@ import { ExchangeDataModule } from './modules/exchange-data/exchange-data.module
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
+import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ExchangeOperationModule } from './modules/exchange-operation/exchange-o
     ExchangeRegistryModule,
     ExchangeDataModule,
     ExchangeOperationModule,
+    ExchangeTradeModule,
   ],
   controllers: [],
   providers: [

@@ -17,7 +17,9 @@ export class OrderService {
 
   async persistOrderActivity(command: ExchangeOperationCommand): Promise<void> {
     const { orderEntityId, status, orderId, details } = command;
-    const order = await this.repository.findById(orderEntityId);
+    const order = orderEntityId
+      ? await this.repository.findById(orderEntityId)
+      : await this.repository.findByOrderId(orderId);
 
     if (!order) {
       throw new Error('Order not found');
