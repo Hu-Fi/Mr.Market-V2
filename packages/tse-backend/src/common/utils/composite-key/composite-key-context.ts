@@ -1,8 +1,12 @@
 import { CompositeKeyStrategy } from './composite-key-strategy.interface';
 import { MarketDataType } from '../../enums/exchange-data.enums';
 import { CompositeKeyStrategyFactory } from './composite-key-strategy-factory';
-import { CompositeKey } from './composition-key.interfaces';
+import { CompositeKey } from './composite-key.interfaces';
 
+/*
+* This utility automatically creates and manages unique keys based on subscriber-defined data preferences,
+* simplifying subscription management and data routing in websocket
+* */
 export class CompositeKeyContext {
   private strategy: CompositeKeyStrategy;
 

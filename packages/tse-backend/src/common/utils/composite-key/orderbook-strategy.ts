@@ -1,6 +1,6 @@
 import { CompositeKeyStrategy } from './composite-key-strategy.interface';
 import { MarketDataType } from '../../enums/exchange-data.enums';
-import { CompositeKey } from './composition-key.interfaces';
+import { CompositeKey } from './composite-key.interfaces';
 
 export class OrderBookStrategy implements CompositeKeyStrategy {
   createKey(exchange: string, symbol?: string): string {

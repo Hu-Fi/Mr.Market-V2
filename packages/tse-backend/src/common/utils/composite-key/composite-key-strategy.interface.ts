@@ -1,4 +1,4 @@
-import { CompositeKey } from './composition-key.interfaces';
+import { CompositeKey } from './composite-key.interfaces';
 
 export interface CompositeKeyStrategy {
   createKey(

@@ -1,6 +1,6 @@
 import { MarketDataType } from '../../enums/exchange-data.enums';
 import { CompositeKeyStrategy } from './composite-key-strategy.interface';
-import { CompositeKey } from './composition-key.interfaces';
+import { CompositeKey } from './composite-key.interfaces';
 
 export class TickersStrategy implements CompositeKeyStrategy {
   createKey(exchange: string, _symbol?: string, symbols?: string[]): string {
