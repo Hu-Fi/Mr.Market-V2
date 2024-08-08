@@ -1,23 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as ccxt from 'ccxt';
 import { CcxtGateway } from './ccxt.gateway';
+import { CustomLogger } from '../modules/logger/logger.service';
 
 jest.mock('ccxt', () => {
+  const mockBinance = jest.fn().mockImplementation(({ apiKey, secret }) => ({
+    apiKey,
+    secret,
+    loadMarkets: jest.fn().mockResolvedValue(true),
+  }));
+
   return {
-    binance: jest.fn().mockImplementation(({ apiKey, secret }) => ({
-      apiKey,
-      secret,
-      loadMarkets: jest.fn().mockResolvedValue(true),
-    })),
+    binance: mockBinance,
+    pro: {
+      binance: mockBinance,
+    },
   };
 });
+
+const mockLogger = {
+  log: jest.fn(),
+  warn: jest.fn(),
+};
 
 describe('CcxtGateway', () => {
   let gateway: CcxtGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CcxtGateway],
+      providers: [CcxtGateway, { provide: CustomLogger, useValue: mockLogger }],
     }).compile();
 
     gateway = module.get<CcxtGateway>(CcxtGateway);
@@ -66,25 +77,31 @@ describe('CcxtGateway', () => {
 
   describe('initializeExchange', () => {
     it('should initialize and return the exchange instance', async () => {
-      const exchange = await gateway.initializeExchange('binance', 'testApiKey', 'testSecret');
+      const exchange = await gateway.initializeExchange(
+        'binance',
+        'testApiKey',
+        'testSecret',
+      );
       expect(exchange).toBeDefined();
       expect(exchange.apiKey).toBe('testApiKey');
       expect(exchange.secret).toBe('testSecret');
       expect(exchange.loadMarkets).toHaveBeenCalled();
     });
 
-    it('should return null for a non-existing exchange', async () => {
-      const exchange = await gateway.initializeExchange('nonexistent', 'testApiKey', 'testSecret');
-      expect(exchange).toBeNull();
+    it('should throw an error for a non-existing exchange', async () => {
+      await expect(
+        gateway.initializeExchange('nonexistent', 'testApiKey', 'testSecret'),
+      ).rejects.toThrow('Exchange class for nonexistent not found');
     });
 
-    it('should handle errors and return null', async () => {
+    it('should handle errors and throw an error', async () => {
       jest.spyOn(ccxt, 'binance').mockImplementationOnce(() => {
         throw new Error('Initialization error');
       });
 
-      const exchange = await gateway.initializeExchange('binance', 'testApiKey', 'testSecret');
-      expect(exchange).toBeNull();
+      await expect(
+        gateway.initializeExchange('binance', 'testApiKey', 'testSecret'),
+      ).rejects.toThrow('Failed to initialize binance: Initialization error');
     });
   });
 });

@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmConfigService } from './typeorm-config.service';
+import { TypeormConfig } from './typeorm.config';
+import { CustomAdapter } from './socket-io-adapter.config';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
-    providers: [TypeOrmConfigService],
-    exports: [TypeOrmConfigService],
+  providers: [TypeormConfig, CustomAdapter, ConfigService],
+  exports: [TypeormConfig, CustomAdapter],
 })
 export class ConfigModule {}
