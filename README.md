@@ -177,7 +177,6 @@ Mr.Market-V2/
 │ │ │ │   ├── module1.mapper.ts
 │ │ │ │   └── module1.module.ts
 │ │ │ ├── app.module.ts
-│ │ │ ├── app.service.ts
 │ │ │ └── main.ts
 │ │ ├── test/
 │ │ ├── .env.example

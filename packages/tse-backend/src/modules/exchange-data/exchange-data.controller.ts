@@ -33,6 +33,7 @@ export class ExchangeDataController {
 
   @Get('/tickers')
   @ApiOperation({ summary: 'Get tickers' })
+  @UsePipes(new ValidationPipe())
   async getTickers(@Query() query: GetTickersDto) {
     const command = this.mapper.map(query, GetTickersDto, GetTickersCommand);
     return this.exchangeDataService.getTickers(command);

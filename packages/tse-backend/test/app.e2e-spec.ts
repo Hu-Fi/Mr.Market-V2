@@ -130,6 +130,97 @@ describe('ExchangeOperationService (e2e)', () => {
       const operationCommand = {
         orderEntityId: newOrder.id,
         status: OrderStatus.CANCELLED,
+        orderId: 'new-order-id',
+        details: { info: 'Order details' },
+      };
+      await service.saveExchangeOperation(operationCommand);
+
+      const updatedOrder = await orderRepository.findById(newOrder.id);
+
+      expect(updatedOrder.status).toBe(OrderStatus.CANCELLED);
+      expect(updatedOrder.orderId).toBe('new-order-id');
+    });
+
+    it('should throw InternalServerErrorException on failure', async () => {
+      jest
+        .spyOn(orderRepository, 'findById')
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      const command = {
+        orderEntityId: 1,
+        status: OrderStatus.EXECUTED,
+        orderId: 'order-id',
+        details: { info: 'Order details' },
+      };
+
+      await expect(service.saveExchangeOperation(command)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  afterAll(async () => {
+    await dataSource.destroy();
+    await app.close();
+  });
+
+  describe('saveOrderData', () => {
+    it('should create a new order successfully', async () => {
+      const command = {
+        orderType: MarketOrderType.LIMIT_ORDER,
+        userId: 'user-1',
+        clientId: 'client-1',
+        exchangeName: 'exchange-1',
+        symbol: 'BTC/USD',
+        side: TradeSideType.BUY,
+        amount: 1,
+        price: 50000,
+      };
+
+      const result = await service.saveOrderData(command);
+
+      expect(result).toBeDefined();
+      expect(result.id).toBeDefined();
+      expect(result.userId).toEqual(command.userId);
+      expect(result.symbol).toEqual(command.symbol);
+    });
+
+    it('should throw InternalServerErrorException on failure', async () => {
+      jest
+        .spyOn(orderRepository, 'create')
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      const command = {
+        orderType: MarketOrderType.LIMIT_ORDER,
+        userId: 'user-1',
+        clientId: 'client-1',
+        exchangeName: 'exchange-1',
+        symbol: 'BTC/USD',
+        side: TradeSideType.BUY,
+        amount: 1,
+        price: 50000,
+      };
+
+      await expect(service.saveOrderData(command)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
+  describe('saveExchangeOperation', () => {
+    it('should update order status and create a new operation', async () => {
+      const newOrder = await service.saveOrderData({
+        orderType: MarketOrderType.LIMIT_ORDER,
+        userId: 'user-2',
+        clientId: 'client-2',
+        exchangeName: 'exchange-2',
+        symbol: 'BTC/USD',
+        side: TradeSideType.BUY,
+        amount: 1,
+        price: 50000,
+      });
+
+      const operationCommand = {
+        orderEntityId: newOrder.id,
+        status: OrderStatus.CANCELLED,
         orderExtId: 'new-order-id',
         details: { info: 'Order details' },
       };

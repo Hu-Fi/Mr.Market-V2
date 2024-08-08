@@ -1,6 +1,12 @@
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ArrayNotEmpty,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class GetTickersDto {
@@ -10,9 +16,12 @@ export class GetTickersDto {
   exchange: string;
 
   @AutoMap()
-  @ApiProperty({ example: 'ETH/USDT,BTC/USDT' })
-  @IsString()
-  symbols: string;
+  @ApiProperty({ example: ['ETH/USDT', 'BTC/USDT'], type: [String] })
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  symbols: string[];
 }
 
 export class GetOHLCVDto {
@@ -61,14 +70,20 @@ export class GetTickerPriceDto {
 
 export class GetMultipleTickerPricesDto {
   @AutoMap()
-  @ApiProperty({ example: 'binance,gate' })
-  @IsString()
-  exchangeNames: string;
+  @ApiProperty({ example: ['binance', 'gate'], type: [String] })
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  exchangeNames: string[];
 
   @AutoMap()
-  @ApiProperty({ example: 'ETH/USDT,BTC/USDT' })
-  @IsString()
-  symbols: string;
+  @ApiProperty({ example: ['ETH/USDT', 'BTC/USDT'], type: [String] })
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  symbols: string[];
 }
 
 export class GetSupportedSymbolsDto {
@@ -83,7 +98,7 @@ export class GetTickersCommand {
   exchange: string;
 
   @AutoMap()
-  symbols: string;
+  symbols: string[];
 }
 
 export class GetOHLCVCommand {
@@ -118,10 +133,10 @@ export class GetTickerPriceCommand {
 
 export class GetMultipleTickerPricesCommand {
   @AutoMap()
-  exchangeNames: string;
+  exchangeNames: string[];
 
   @AutoMap()
-  symbols: string;
+  symbols: string[];
 }
 
 export class GetSupportedSymbolsCommand {
