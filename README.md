@@ -84,6 +84,20 @@ This project contains configuration files (`vercel.json`) for each app (`mm-back
 4. Vercel will automatically use the `vercel.json` configuration file located in the specified directory.
 
 
+## Migrations
+
+```bash
+# generate a migration file with the name 'Name'
+$ pnpm run migration:generate ./migrations/Name
+
+# execute the migrations
+$ pnpm run migration:run
+
+# revert the most recent migration
+$ pnpm run migration:revert
+```
+
+
 ## Structure & Responsibilities
 
 This section outlines the general structure of the project. While not all components must be used,
