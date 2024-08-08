@@ -145,7 +145,7 @@ describe('ExchangeTradeService', () => {
       expect(
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
-        details: 'Trade failed',
+        details: new Error('Trade failed'),
         orderEntityId: 1,
         orderId: undefined,
         status: OrderStatus.FAILED,
@@ -232,7 +232,7 @@ describe('ExchangeTradeService', () => {
       expect(
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
-        details: 'Trade failed',
+        details: new Error('Trade failed'),
         orderEntityId: 1,
         orderId: undefined,
         status: OrderStatus.FAILED,
@@ -292,8 +292,8 @@ describe('ExchangeTradeService', () => {
       ).toHaveBeenCalledWith({
         orderEntityId: null,
         orderId: 'order123',
-        status: OrderStatus.CANCELLED,
-        details: { id: 'order123' },
+        status: OrderStatus.FAILED,
+        details: new Error('Cancel failed'),
       });
     });
   });

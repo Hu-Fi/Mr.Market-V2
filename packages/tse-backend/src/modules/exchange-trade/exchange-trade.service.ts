@@ -12,7 +12,10 @@ import {
   MarketOrderType,
   OrderStatus,
 } from '../../common/enums/exchange-operation.enums';
-import { OrderCommand } from '../exchange-operation/model/exchange-operation.model';
+import {
+  ExchangeOperationCommand,
+  OrderCommand,
+} from '../exchange-operation/model/exchange-operation.model';
 
 @Injectable()
 export class ExchangeTradeService {
@@ -39,12 +42,12 @@ export class ExchangeTradeService {
       this.logger.log(
         `Market trade executed successfully: ${JSON.stringify(result)}`,
       );
-      await this.saveExchangeOperation(
-        savedData.id,
-        OrderStatus.EXECUTED,
-        result.id,
-        result,
-      );
+      await this.saveExchangeOperation({
+        orderEntityId: savedData.id,
+        status: OrderStatus.EXECUTED,
+        orderId: result.id,
+        details: result,
+      } as ExchangeOperationCommand);
     } catch (error) {
       await this.handleOrderError(savedData.id, error);
     }
@@ -68,12 +71,12 @@ export class ExchangeTradeService {
       this.logger.log(
         `Limit trade executed successfully: ${JSON.stringify(result)}`,
       );
-      await this.saveExchangeOperation(
-        savedData.id,
-        OrderStatus.EXECUTED,
-        result.id,
-        result,
-      );
+      await this.saveExchangeOperation({
+        orderEntityId: savedData.id,
+        status: OrderStatus.EXECUTED,
+        orderId: result.id,
+        details: result,
+      } as ExchangeOperationCommand);
     } catch (error) {
       await this.handleOrderError(savedData.id, error);
     }
@@ -88,12 +91,12 @@ export class ExchangeTradeService {
         command.symbol,
       );
       this.logger.log(`Order ${command.orderId} cancelled successfully.`);
-      await this.saveExchangeOperation(
-        null,
-        OrderStatus.CANCELLED,
-        command.orderId,
-        result,
-      );
+      await this.saveExchangeOperation({
+        orderEntityId: null,
+        status: OrderStatus.CANCELLED,
+        orderId: command.orderId,
+        details: result,
+      } as ExchangeOperationCommand);
     } catch (error) {
       await this.handleOrderError(null, error, command.orderId);
     }
@@ -120,18 +123,8 @@ export class ExchangeTradeService {
     } as OrderCommand);
   }
 
-  private async saveExchangeOperation(
-    orderEntityId: number | null,
-    status: OrderStatus,
-    orderId: string,
-    details: any,
-  ) {
-    await this.exchangeOperationService.saveExchangeOperation({
-      orderEntityId,
-      status,
-      orderId,
-      details,
-    });
+  private async saveExchangeOperation(command: ExchangeOperationCommand) {
+    await this.exchangeOperationService.saveExchangeOperation(command);
   }
 
   private async handleOrderError(
@@ -140,12 +133,12 @@ export class ExchangeTradeService {
     orderId?: string,
   ) {
     this.logger.error(`Error: ${error.message}`);
-    await this.saveExchangeOperation(
+    await this.saveExchangeOperation({
       orderEntityId,
-      OrderStatus.FAILED,
+      status: OrderStatus.FAILED,
       orderId,
-      error.message,
-    );
+      details: error,
+    } as ExchangeOperationCommand);
     throw error;
   }
 }
