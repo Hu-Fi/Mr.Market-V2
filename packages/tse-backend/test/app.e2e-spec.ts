@@ -130,7 +130,7 @@ describe('ExchangeOperationService (e2e)', () => {
       const operationCommand = {
         orderEntityId: newOrder.id,
         status: OrderStatus.CANCELLED,
-        orderId: 'new-order-id',
+        orderExtId: 'new-order-id',
         details: { info: 'Order details' },
       };
       await service.saveExchangeOperation(operationCommand);
