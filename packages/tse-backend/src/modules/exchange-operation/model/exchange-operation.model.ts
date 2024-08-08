@@ -23,6 +23,6 @@ export type OrderCommand = CreateMarketOrderCommand | CreateLimitOrderCommand;
 export class ExchangeOperationCommand {
   orderEntityId?: number | undefined;
   status: OrderStatus;
-  orderId?: string | undefined;
+  orderExtId?: string | undefined;
   details: Record<string, any>;
 }

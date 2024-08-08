@@ -111,7 +111,7 @@ describe('ExchangeTradeService', () => {
       ).toHaveBeenCalledWith({
         orderEntityId: 1,
         status: OrderStatus.EXECUTED,
-        orderId: 'order123',
+        orderExtId: 'order123',
         details: { id: 'order123' },
       });
     });
@@ -147,7 +147,7 @@ describe('ExchangeTradeService', () => {
       ).toHaveBeenCalledWith({
         details: new Error('Trade failed'),
         orderEntityId: 1,
-        orderId: undefined,
+        orderExtId: undefined,
         status: OrderStatus.FAILED,
       });
     });
@@ -198,7 +198,7 @@ describe('ExchangeTradeService', () => {
       ).toHaveBeenCalledWith({
         details: { id: 'order123' },
         orderEntityId: 1,
-        orderId: 'order123',
+        orderExtId: 'order123',
         status: OrderStatus.EXECUTED,
       });
     });
@@ -234,7 +234,7 @@ describe('ExchangeTradeService', () => {
       ).toHaveBeenCalledWith({
         details: new Error('Trade failed'),
         orderEntityId: 1,
-        orderId: undefined,
+        orderExtId: undefined,
         status: OrderStatus.FAILED,
       });
     });
@@ -266,7 +266,7 @@ describe('ExchangeTradeService', () => {
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
         orderEntityId: null,
-        orderId: 'order123',
+        orderExtId: 'order123',
         status: OrderStatus.CANCELLED,
         details: { id: 'order123' },
       });
@@ -291,7 +291,7 @@ describe('ExchangeTradeService', () => {
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
         orderEntityId: null,
-        orderId: 'order123',
+        orderExtId: 'order123',
         status: OrderStatus.FAILED,
         details: new Error('Cancel failed'),
       });

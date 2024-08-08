@@ -41,7 +41,7 @@ export class Order {
   status: string;
 
   @Column({ nullable: true })
-  orderId: string | null;
+  orderExtId: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -45,7 +45,7 @@ export class ExchangeTradeService {
       await this.saveExchangeOperation({
         orderEntityId: savedData.id,
         status: OrderStatus.EXECUTED,
-        orderId: result.id,
+        orderExtId: result.id,
         details: result,
       } as ExchangeOperationCommand);
     } catch (error) {
@@ -74,7 +74,7 @@ export class ExchangeTradeService {
       await this.saveExchangeOperation({
         orderEntityId: savedData.id,
         status: OrderStatus.EXECUTED,
-        orderId: result.id,
+        orderExtId: result.id,
         details: result,
       } as ExchangeOperationCommand);
     } catch (error) {
@@ -94,7 +94,7 @@ export class ExchangeTradeService {
       await this.saveExchangeOperation({
         orderEntityId: null,
         status: OrderStatus.CANCELLED,
-        orderId: command.orderId,
+        orderExtId: command.orderId,
         details: result,
       } as ExchangeOperationCommand);
     } catch (error) {
@@ -130,13 +130,13 @@ export class ExchangeTradeService {
   private async handleOrderError(
     orderEntityId: number | null,
     error: Error,
-    orderId?: string,
+    orderExtId?: string,
   ) {
     this.logger.error(`Error: ${error.message}`);
     await this.saveExchangeOperation({
       orderEntityId,
       status: OrderStatus.FAILED,
-      orderId,
+      orderExtId,
       details: error,
     } as ExchangeOperationCommand);
     throw error;

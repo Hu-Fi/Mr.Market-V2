@@ -32,7 +32,7 @@ export class ExchangeOperationService {
         amount,
         status: OrderStatus.PENDING,
         price,
-        orderId: null,
+        orderExtId: null,
       });
     } catch (error) {
       this.logger.error(`Failed to save draft order: ${error.message}`);

@@ -138,7 +138,7 @@ describe('ExchangeOperationService (e2e)', () => {
       const updatedOrder = await orderRepository.findById(newOrder.id);
 
       expect(updatedOrder.status).toBe(OrderStatus.CANCELLED);
-      expect(updatedOrder.orderId).toBe('new-order-id');
+      expect(updatedOrder.orderExtId).toBe('new-order-id');
     });
 
     it('should throw InternalServerErrorException on failure', async () => {
