@@ -1,8 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CustomLogger } from '../logger/logger.service';
-import { createCompositeKey } from '../../common/utils/subscriptionKey';
 import { ExchangeDataService } from './exchange-data.service';
 import { MarketDataType } from '../../common/enums/exchange-data.enums';
+import { CompositeKeyContext } from '../../common/utils/composite-key/composite-key-context';
 
 @Injectable()
 export class ExchangeDataSubscriptionManager {
@@ -26,8 +26,8 @@ export class ExchangeDataSubscriptionManager {
     since: number | undefined,
     limit: number | undefined,
   ) {
-    const compositeKey = createCompositeKey(
-      type,
+    const context = new CompositeKeyContext(type);
+    const compositeKey = context.createCompositeKey(
       exchange,
       symbol,
       symbols,
@@ -141,8 +141,8 @@ export class ExchangeDataSubscriptionManager {
     callback: (data: any) => void,
   ): (data: any) => void {
     return (data: any) => {
-      const compositeKey = createCompositeKey(
-        type,
+      const context = new CompositeKeyContext(type);
+      const compositeKey = context.createCompositeKey(
         exchange,
         symbol,
         symbols,

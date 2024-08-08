@@ -10,9 +10,9 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { CustomLogger } from '../logger/logger.service';
-import { createCompositeKey } from '../../common/utils/subscriptionKey';
 import { ExchangeDataSubscriptionManager } from './subscription-manager.ws.service';
 import { MarketDataType } from '../../common/enums/exchange-data.enums';
+import { CompositeKeyContext } from '../../common/utils/composite-key/composite-key-context';
 
 @WebSocketGateway()
 export class ExchangeDataWsGateway
@@ -49,8 +49,8 @@ export class ExchangeDataWsGateway
       return;
     }
     try {
-      const compositeKey = createCompositeKey(
-        MarketDataType.ORDERBOOK,
+      const context = new CompositeKeyContext(MarketDataType.ORDERBOOK);
+      const compositeKey = context.createCompositeKey(
         data.exchange,
         data.symbol,
       );
@@ -62,24 +62,17 @@ export class ExchangeDataWsGateway
         undefined,
         undefined,
         (orderBookData) => {
-          this.broadcastToSubscribedClients(
-            createCompositeKey(
-              MarketDataType.ORDERBOOK,
-              data.exchange,
-              data.symbol,
-            ),
-            {
-              exchange: data.exchange,
-              symbol: data.symbol,
-              bids: orderBookData.bids.map(([price, amount]) => ({
-                price,
-                amount,
-              })),
-              asks: orderBookData.asks
-                .map(([price, amount]) => ({ price, amount }))
-                .reverse(),
-            },
-          );
+          this.broadcastToSubscribedClients(compositeKey, {
+            exchange: data.exchange,
+            symbol: data.symbol,
+            bids: orderBookData.bids.map(([price, amount]) => ({
+              price,
+              amount,
+            })),
+            asks: orderBookData.asks
+              .map(([price, amount]) => ({ price, amount }))
+              .reverse(),
+          });
         },
         undefined,
         undefined,
@@ -110,8 +103,8 @@ export class ExchangeDataWsGateway
       return;
     }
     try {
-      const compositeKey = createCompositeKey(
-        MarketDataType.OHLCV,
+      const context = new CompositeKeyContext(MarketDataType.OHLCV);
+      const compositeKey = context.createCompositeKey(
         data.exchange,
         data.symbol,
         undefined,
@@ -165,8 +158,8 @@ export class ExchangeDataWsGateway
       return;
     }
     try {
-      const compositeKey = createCompositeKey(
-        MarketDataType.TICKER,
+      const context = new CompositeKeyContext(MarketDataType.TICKER);
+      const compositeKey = context.createCompositeKey(
         data.exchange,
         data.symbol,
       );
@@ -215,8 +208,8 @@ export class ExchangeDataWsGateway
       return;
     }
     try {
-      const compositeKey = createCompositeKey(
-        MarketDataType.TICKERS,
+      const context = new CompositeKeyContext(MarketDataType.TICKERS);
+      const compositeKey = context.createCompositeKey(
         data.exchange,
         undefined,
         data.symbols,
@@ -281,8 +274,8 @@ export class ExchangeDataWsGateway
     @ConnectedSocket() client: Socket,
   ) {
     const { type, exchange, symbol, symbols, timeFrame } = data;
-    const compositeKey = createCompositeKey(
-      type,
+    const context = new CompositeKeyContext(type);
+    const compositeKey = context.createCompositeKey(
       exchange,
       symbol,
       symbols,

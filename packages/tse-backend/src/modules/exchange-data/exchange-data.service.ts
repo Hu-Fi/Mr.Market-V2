@@ -9,12 +9,12 @@ import {
   GetTickersCommand,
 } from './model/exchange-data.model';
 import { ExchangeDataSubscriptionManager } from './subscription-manager.ws.service';
-import { createCompositeKey } from '../../common/utils/subscriptionKey';
 import { MarketDataType } from '../../common/enums/exchange-data.enums';
 import {
   OHLCVResponse,
   TickerPriceResponse,
 } from '../../common/interfaces/exchange-data.interfaces';
+import { CompositeKeyContext } from '../../common/utils/composite-key/composite-key-context';
 
 @Injectable()
 export class ExchangeDataService {
@@ -35,14 +35,12 @@ export class ExchangeDataService {
       );
     }
 
-    const symbolsArray = symbols.split(',');
-
     this.logger.log(
       `Fetching tickers from ${exchangeInstance.name} for ${symbols}`,
     );
 
     try {
-      return await exchangeInstance.fetchTickers(symbolsArray);
+      return await exchangeInstance.fetchTickers(symbols);
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -93,20 +91,22 @@ export class ExchangeDataService {
     );
 
     for (const exchange of exchangeInstances) {
-      const exchangeInstance =
-        this.exchangeRegistryService.getExchange(exchange);
-      if (exchangeInstance && exchangeInstance.has.fetchTickers) {
-        try {
-          const tickers = await exchangeInstance.fetchTickers();
-          pairs.push(...Object.keys(tickers));
-        } catch (error) {
-          this.logger.error(
-            `Error fetching tickers from ${exchange}: ${error}`,
-          );
-        }
-      }
+      await this.fetchPairsFromExchange(exchange, pairs);
     }
     return Array.from(new Set(pairs));
+  }
+
+  private async fetchPairsFromExchange(exchange: string, pairs: string[]) {
+    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    if (exchangeInstance && exchangeInstance.has.fetchTickers) {
+      try {
+        // TODO: cache the results of fetchTickers method
+        const tickers = await exchangeInstance.fetchTickers();
+        pairs.push(...Object.keys(tickers));
+      } catch (error) {
+        this.logger.error(`Error fetching tickers from ${exchange}: ${error}`);
+      }
+    }
   }
 
   async getTickerPrice(command: GetTickerPriceCommand) {
@@ -141,11 +141,8 @@ export class ExchangeDataService {
       [exchange: string]: { [symbol: string]: TickerPriceResponse };
     } = {};
 
-    const exchangeNamesArray = exchangeNames.split(',');
-    const symbolsArray = symbols.split(',');
-
-    exchangeNamesArray.forEach((exchangeName) => {
-      symbolsArray.forEach((symbol) => {
+    exchangeNames.forEach((exchangeName) => {
+      symbols.forEach((symbol) => {
         const tpCommand = new GetTickerPriceCommand(exchangeName, symbol);
         const fetchPromise = this.getTickerPrice(tpCommand)
           .then((price) => {
@@ -178,6 +175,7 @@ export class ExchangeDataService {
     this.logger.log(`Fetching supported symbols from ${exchangeInstance.name}`);
 
     try {
+      // TODO: cache the results of loadMarkets method
       await exchangeInstance.loadMarkets();
       return Object.keys(exchangeInstance.markets);
     } catch (error) {
@@ -197,8 +195,8 @@ export class ExchangeDataService {
   ): Promise<void> {
     const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
     const methodName = `watch${type}`;
-    const compositeKey = createCompositeKey(
-      type,
+    const context = new CompositeKeyContext(type);
+    const compositeKey = context.createCompositeKey(
       exchange,
       symbol,
       symbols,
@@ -223,7 +221,6 @@ export class ExchangeDataService {
       this.logger.error(
         `Error watching ${type} for ${symbol || symbols} on ${exchange}: ${error.message}`,
       );
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Reconnect after a delay
     }
   }
 
