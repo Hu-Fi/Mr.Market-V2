@@ -1,6 +1,16 @@
 import { Strategy } from '../../strategy.interface';
 
-export class ArbitrageStrategyDto {
+interface ArbitrageStrategy {
+  userId: string;
+  clientId: string;
+  pair: string;
+  amountToTrade: number;
+  minProfitability: number;
+  exchangeAName: string;
+  exchangeBName: string;
+}
+
+export class ArbitrageStrategyFixtureDto implements ArbitrageStrategy {
   userId: string;
   clientId: string;
   pair: string;
@@ -29,9 +39,9 @@ export class ArbitrageStrategyDto {
 }
 
 export class MockArbitrageStrategy implements Strategy {
-  constructor(private strategyParamsDto: ArbitrageStrategyDto) {}
+  constructor(private strategyParamsDto: ArbitrageStrategy) {}
 
-  async start(params: ArbitrageStrategyDto): Promise<void> {}
+  async start(params: ArbitrageStrategy): Promise<void> {}
 
   async stop(): Promise<void> {}
 

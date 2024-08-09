@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TradingStrategyService } from './trading-strategy.service';
-import { ArbitrageStrategyDto, MockArbitrageStrategy } from './strategies/mock/arbitrageStrategy.fixture';
+import {
+  ArbitrageStrategyFixtureDto,
+  MockArbitrageStrategy,
+} from './strategies/mock/arbitrageStrategy.fixture';
 
 describe('TradingStrategyService', () => {
   let service: TradingStrategyService;
@@ -13,7 +16,7 @@ describe('TradingStrategyService', () => {
 
     service = module.get<TradingStrategyService>(TradingStrategyService);
 
-    const arbitrageParams = new ArbitrageStrategyDto();
+    const arbitrageParams = new ArbitrageStrategyFixtureDto();
     mockArbitrageStrategy = new MockArbitrageStrategy(arbitrageParams);
   });
 
