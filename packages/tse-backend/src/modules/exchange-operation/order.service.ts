@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from './order.repository';
 import { Order } from '../../common/entities/order.entity';
-import { ExchangeOperationCommand } from './model/exchange-operation.model';
+import {
+  CancelOperationCommand,
+  OperationCommand,
+} from './model/exchange-operation.model';
 import { OperationService } from './operation.service';
 
 @Injectable()
@@ -15,11 +18,12 @@ export class OrderService {
     return await this.repository.create(data);
   }
 
-  async persistOrderActivity(command: ExchangeOperationCommand): Promise<void> {
-    const { orderEntityId, status, orderExtId, details } = command;
-    const order = orderEntityId
-      ? await this.repository.findById(orderEntityId)
-      : await this.repository.findByOrderExtId(orderExtId);
+  async persistOrderActivity(command: OperationCommand): Promise<void> {
+    const { status, orderExtId, details } = command;
+    const order =
+      command instanceof CancelOperationCommand
+        ? await this.repository.findByOrderExtId(orderExtId)
+        : await this.repository.findById(command.orderEntityId);
 
     if (!order) {
       throw new Error('Order not found');

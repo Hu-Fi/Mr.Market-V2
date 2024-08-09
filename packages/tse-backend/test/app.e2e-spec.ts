@@ -16,6 +16,10 @@ import {
 } from '../src/common/enums/exchange-operation.enums';
 import { Order } from '../src/common/entities/order.entity';
 import { Operation } from '../src/common/entities/operation.entity';
+import {
+  CreateLimitOrderCommand,
+  OperationCommand,
+} from '../src/modules/exchange-operation/model/exchange-operation.model';
 
 describe('ExchangeOperationService (e2e)', () => {
   let app: INestApplication;
@@ -73,7 +77,7 @@ describe('ExchangeOperationService (e2e)', () => {
 
   describe('saveOrderData', () => {
     it('should create a new order successfully', async () => {
-      const command = {
+      const command: CreateLimitOrderCommand = {
         orderType: MarketOrderType.LIMIT_ORDER,
         userId: 'user-1',
         clientId: 'client-1',
@@ -97,7 +101,7 @@ describe('ExchangeOperationService (e2e)', () => {
         .spyOn(orderRepository, 'create')
         .mockRejectedValueOnce(new Error('Database error'));
 
-      const command = {
+      const command: CreateLimitOrderCommand = {
         orderType: MarketOrderType.LIMIT_ORDER,
         userId: 'user-1',
         clientId: 'client-1',
@@ -125,11 +129,11 @@ describe('ExchangeOperationService (e2e)', () => {
         side: TradeSideType.BUY,
         amount: 1,
         price: 50000,
-      });
+      } as CreateLimitOrderCommand);
 
-      const operationCommand = {
+      const operationCommand: OperationCommand = {
         orderEntityId: newOrder.id,
-        status: OrderStatus.CANCELLED,
+        status: OrderStatus.EXECUTED,
         orderExtId: 'new-order-id',
         details: { info: 'Order details' },
       };
@@ -137,7 +141,7 @@ describe('ExchangeOperationService (e2e)', () => {
 
       const updatedOrder = await orderRepository.findById(newOrder.id);
 
-      expect(updatedOrder.status).toBe(OrderStatus.CANCELLED);
+      expect(updatedOrder.status).toBe(OrderStatus.EXECUTED);
       expect(updatedOrder.orderExtId).toBe('new-order-id');
     });
 
@@ -146,10 +150,10 @@ describe('ExchangeOperationService (e2e)', () => {
         .spyOn(orderRepository, 'findById')
         .mockRejectedValueOnce(new Error('Database error'));
 
-      const command = {
+      const command: OperationCommand = {
         orderEntityId: 1,
         status: OrderStatus.EXECUTED,
-        orderId: 'order-id',
+        orderExtId: 'order-id',
         details: { info: 'Order details' },
       };
 

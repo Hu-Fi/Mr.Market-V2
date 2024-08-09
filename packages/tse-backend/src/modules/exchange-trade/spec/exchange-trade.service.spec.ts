@@ -12,6 +12,10 @@ import {
   MarketOrderType,
   OrderStatus,
 } from '../../../common/enums/exchange-operation.enums';
+import {
+  CancelOperationCommand,
+  OperationCommand,
+} from '../../exchange-operation/model/exchange-operation.model';
 
 describe('ExchangeTradeService', () => {
   let service: ExchangeTradeService;
@@ -113,7 +117,7 @@ describe('ExchangeTradeService', () => {
         status: OrderStatus.EXECUTED,
         orderExtId: 'order123',
         details: { id: 'order123' },
-      });
+      } as OperationCommand);
     });
 
     it('should handle market trade error', async () => {
@@ -149,7 +153,7 @@ describe('ExchangeTradeService', () => {
         orderEntityId: 1,
         orderExtId: undefined,
         status: OrderStatus.FAILED,
-      });
+      } as OperationCommand);
     });
   });
 
@@ -200,7 +204,7 @@ describe('ExchangeTradeService', () => {
         orderEntityId: 1,
         orderExtId: 'order123',
         status: OrderStatus.EXECUTED,
-      });
+      } as OperationCommand);
     });
 
     it('should handle limit trade error', async () => {
@@ -236,7 +240,7 @@ describe('ExchangeTradeService', () => {
         orderEntityId: 1,
         orderExtId: undefined,
         status: OrderStatus.FAILED,
-      });
+      } as OperationCommand);
     });
   });
 
@@ -265,11 +269,10 @@ describe('ExchangeTradeService', () => {
       expect(
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
-        orderEntityId: null,
         orderExtId: 'order123',
         status: OrderStatus.CANCELLED,
         details: { id: 'order123' },
-      });
+      } as CancelOperationCommand);
     });
 
     it('should handle cancel order error', async () => {
@@ -294,7 +297,7 @@ describe('ExchangeTradeService', () => {
         orderExtId: 'order123',
         status: OrderStatus.FAILED,
         details: new Error('Cancel failed'),
-      });
+      } as OperationCommand);
     });
   });
 });

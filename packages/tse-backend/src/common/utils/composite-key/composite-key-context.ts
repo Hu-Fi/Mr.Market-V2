@@ -4,9 +4,9 @@ import { CompositeKeyStrategyFactory } from './composite-key-strategy-factory';
 import { CompositeKey } from './composite-key.interfaces';
 
 /*
-* This utility automatically creates and manages unique keys based on subscriber-defined data preferences,
-* simplifying subscription management and data routing in websocket
-* */
+ * This utility automatically creates and manages unique keys based on subscriber-defined data preferences,
+ * simplifying subscription management and data routing in websocket
+ * */
 export class CompositeKeyContext {
   private strategy: CompositeKeyStrategy;
 

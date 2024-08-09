@@ -13,7 +13,9 @@ import {
   OrderStatus,
 } from '../../common/enums/exchange-operation.enums';
 import {
+  CancelOperationCommand,
   ExchangeOperationCommand,
+  OperationCommand,
   OrderCommand,
 } from '../exchange-operation/model/exchange-operation.model';
 
@@ -92,11 +94,10 @@ export class ExchangeTradeService {
       );
       this.logger.log(`Order ${command.orderId} cancelled successfully.`);
       await this.saveExchangeOperation({
-        orderEntityId: null,
         status: OrderStatus.CANCELLED,
         orderExtId: command.orderId,
         details: result,
-      } as ExchangeOperationCommand);
+      } as CancelOperationCommand);
     } catch (error) {
       await this.handleOrderError(null, error, command.orderId);
     }
@@ -123,7 +124,7 @@ export class ExchangeTradeService {
     } as OrderCommand);
   }
 
-  private async saveExchangeOperation(command: ExchangeOperationCommand) {
+  private async saveExchangeOperation(command: OperationCommand) {
     await this.exchangeOperationService.saveExchangeOperation(command);
   }
 
