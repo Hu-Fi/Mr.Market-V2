@@ -41,3 +41,4 @@ lerna-debug.log*
 /.env
 /packages/mm-backend/dist/
 /packages/tse-backend/dist/
+/packages/tse-backend/coverage/
