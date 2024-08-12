@@ -73,7 +73,7 @@ describe('ExchangeOperationService', () => {
         amount: command.amount,
         status: OrderStatus.PENDING,
         price: command.price,
-        orderId: null,
+        orderExtId: null,
       });
     });
 
@@ -104,7 +104,7 @@ describe('ExchangeOperationService', () => {
       const command: ExchangeOperationCommand = {
         orderEntityId: 1,
         status: OrderStatus.EXECUTED,
-        orderId: 'order-id',
+        orderExtId: 'order-id',
         details: { info: 'some details' },
       };
 
@@ -121,7 +121,7 @@ describe('ExchangeOperationService', () => {
       const command: ExchangeOperationCommand = {
         orderEntityId: 1,
         status: OrderStatus.EXECUTED,
-        orderId: 'order-id',
+        orderExtId: 'order-id',
         details: { info: 'some details' },
       };
 

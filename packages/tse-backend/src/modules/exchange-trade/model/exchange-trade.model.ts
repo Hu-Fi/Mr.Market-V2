@@ -38,7 +38,40 @@ export class MarketTradeDto {
   amount: number;
 }
 
-export class MarketLimitDto extends MarketTradeDto {
+export class MarketLimitDto {
+  @AutoMap()
+  @ApiProperty()
+  @IsString()
+  userId: string;
+
+  @AutoMap()
+  @ApiProperty()
+  @IsString()
+  clientId: string;
+
+  @AutoMap()
+  @ApiProperty()
+  @IsString()
+  exchange: string;
+
+  @AutoMap()
+  @ApiProperty({ example: 'BTC/USDT' })
+  @IsString()
+  symbol: string;
+
+  @AutoMap()
+  @ApiProperty({
+    example: 'buy',
+    enum: TradeSideType,
+  })
+  @IsEnum(TradeSideType)
+  side: TradeSideType;
+
+  @AutoMap()
+  @ApiProperty()
+  @IsNumber()
+  amount: number;
+
   @AutoMap()
   @ApiProperty()
   @IsNumber()
@@ -65,7 +98,25 @@ export class MarketTradeCommand {
   amount: number;
 }
 
-export class MarketLimitCommand extends MarketTradeCommand {
+export class MarketLimitCommand {
+  @AutoMap()
+  userId: string;
+
+  @AutoMap()
+  clientId: string;
+
+  @AutoMap()
+  exchange: string;
+
+  @AutoMap()
+  symbol: string;
+
+  @AutoMap()
+  side: string;
+
+  @AutoMap()
+  amount: number;
+
   @AutoMap()
   price: number;
 }

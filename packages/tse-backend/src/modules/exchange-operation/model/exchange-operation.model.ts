@@ -21,8 +21,18 @@ export class CreateLimitOrderCommand extends CreateMarketOrderCommand {
 export type OrderCommand = CreateMarketOrderCommand | CreateLimitOrderCommand;
 
 export class ExchangeOperationCommand {
-  orderEntityId?: number | undefined;
+  orderEntityId: number;
   status: OrderStatus;
-  orderId?: string | undefined;
+  orderExtId: string;
   details: Record<string, any>;
 }
+
+export class CancelOperationCommand {
+  status: OrderStatus;
+  orderExtId: string;
+  details: Record<string, any>;
+}
+
+export type OperationCommand =
+  | ExchangeOperationCommand
+  | CancelOperationCommand;

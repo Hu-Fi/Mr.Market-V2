@@ -32,7 +32,9 @@ export class ExchangeDataProfile extends AutomapperProfile {
         ),
         forMember(
           (destination) => destination.symbols,
-          mapFrom((source) => source.symbols.toUpperCase()),
+          mapFrom((source) =>
+            source.symbols.map((symbol) => symbol.toUpperCase()),
+          ),
         ),
       );
       createMap(
@@ -67,11 +69,17 @@ export class ExchangeDataProfile extends AutomapperProfile {
         GetMultipleTickerPricesCommand,
         forMember(
           (destination) => destination.exchangeNames,
-          mapFrom((source) => source.exchangeNames.toLowerCase()),
+          mapFrom((source) =>
+            source.exchangeNames.map((exchangeName) =>
+              exchangeName.toLowerCase(),
+            ),
+          ),
         ),
         forMember(
           (destination) => destination.symbols,
-          mapFrom((source) => source.symbols.toUpperCase()),
+          mapFrom((source) =>
+            source.symbols.map((symbol) => symbol.toUpperCase()),
+          ),
         ),
       );
       createMap(

@@ -4,8 +4,8 @@ import { ExchangeDataWsGateway } from '../exchange-data.ws.gateway';
 import { ExchangeDataSubscriptionManager } from '../subscription-manager.ws.service';
 import { CustomLogger } from '../../logger/logger.service';
 import { MarketDataType } from '../../../common/enums/exchange-data.enums';
-import { createCompositeKey } from '../../../common/utils/subscriptionKey';
 import { v4 as uuidv4 } from 'uuid';
+import { CompositeKeyContext } from '../../../common/utils/composite-key/composite-key-context';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -112,8 +112,8 @@ describe('ExchangeDataWsGateway', () => {
         symbols: undefined,
         timeFrame: undefined,
       };
-      const compositeKey = createCompositeKey(
-        data.type,
+      const context = new CompositeKeyContext(data.type);
+      const compositeKey = context.createCompositeKey(
         data.exchange,
         data.symbol,
         data.symbols,

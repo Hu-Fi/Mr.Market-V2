@@ -36,8 +36,7 @@ export class CcxtGateway {
       await exchange.loadMarkets();
       return exchange;
     } catch (error) {
-      this.logger.warn(`Failed to initialize ${name}: ${error.message}`);
-      return null;
+      throw new Error(`Failed to initialize ${name}: ${error.message}`);
     }
   }
 }

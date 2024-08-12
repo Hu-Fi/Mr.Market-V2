@@ -18,8 +18,8 @@ export class OrderRepository {
     return await this.repository.findOne({ where: { id } });
   }
 
-  async findByOrderId(orderId: string) {
-    return await this.repository.findOne({ where: { orderId } });
+  async findByOrderExtId(orderId: string) {
+    return await this.repository.findOne({ where: { orderExtId: orderId } });
   }
 
   async save(data: Partial<Order>) {
