@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   CreateLimitOrderCommand,
-  ExchangeOperationCommand,
+  OperationCommand,
   OrderCommand,
 } from './model/exchange-operation.model';
 import { CustomLogger } from '../logger/logger.service';
@@ -32,7 +32,7 @@ export class ExchangeOperationService {
         amount,
         status: OrderStatus.PENDING,
         price,
-        orderId: null,
+        orderExtId: null,
       });
     } catch (error) {
       this.logger.error(`Failed to save draft order: ${error.message}`);
@@ -42,7 +42,7 @@ export class ExchangeOperationService {
     }
   }
 
-  async saveExchangeOperation(command: ExchangeOperationCommand) {
+  async saveExchangeOperation(command: OperationCommand) {
     try {
       await this.orderService.persistOrderActivity(command);
     } catch (error) {
