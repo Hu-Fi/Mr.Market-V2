@@ -39,16 +39,16 @@ describe('GlobalExceptionFilter', () => {
     filter.catch(exception, host);
 
     expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(
-        host.switchToHttp().getRequest(),
+      host.switchToHttp().getRequest(),
     );
     expect(mockHttpAdapter.reply).toHaveBeenCalledWith(
-        host.switchToHttp().getResponse(),
-        {
-          statusCode: HttpStatus.FORBIDDEN,
-          timestamp: expect.any(String),
-          path: '/test-url',
-        },
-        HttpStatus.FORBIDDEN,
+      host.switchToHttp().getResponse(),
+      {
+        statusCode: HttpStatus.FORBIDDEN,
+        timestamp: expect.any(String),
+        path: '/test-url',
+      },
+      HttpStatus.FORBIDDEN,
     );
   });
 
@@ -64,16 +64,16 @@ describe('GlobalExceptionFilter', () => {
     filter.catch(exception, host);
 
     expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(
-        host.switchToHttp().getRequest(),
+      host.switchToHttp().getRequest(),
     );
     expect(mockHttpAdapter.reply).toHaveBeenCalledWith(
-        host.switchToHttp().getResponse(),
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          timestamp: expect.any(String),
-          path: '/test-url',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      host.switchToHttp().getResponse(),
+      {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        timestamp: expect.any(String),
+        path: '/test-url',
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   });
 });
