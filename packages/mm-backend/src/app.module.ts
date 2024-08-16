@@ -6,6 +6,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { SnapshotsModule } from './modules/mixin/snapshots/snapshots.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     EventEmitterModule.forRoot(),
     IntegrationsModule,
     SnapshotsModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
