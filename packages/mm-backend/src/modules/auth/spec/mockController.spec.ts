@@ -14,7 +14,7 @@ import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
 describe('RolesGuard', () => {
   let app: INestApplication;
   let authService: AuthService;
-  let token: string;
+  let adminToken: string;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -49,21 +49,29 @@ describe('RolesGuard', () => {
     await app.init();
 
     const authService = module.get<AuthService>(AuthService);
-    token = await authService.validateUser(
+    adminToken = await authService.validateUser(
       '73899d2adaad774417b0208da85162b61c8dbdf79bb0f7108c2686b93721d1f4',
     );
-  });
-
-  it('should deny access if no role is provided', () => {
-    return request(app.getHttpServer()).get('/test/admin').expect(401);
   });
 
   it('should allow access if admin role is provided', () => {
     return request(app.getHttpServer())
       .get('/test/admin')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect('This is the admin endpoint');
+  });
+
+  it('should allow access to user endpoint for admins', async () => {
+    return request(app.getHttpServer())
+      .get('/test/user')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200)
+      .expect('This is the user endpoint');
+  });
+
+  it('should deny access if no role is provided', () => {
+    return request(app.getHttpServer()).get('/test/admin').expect(401);
   });
 
   afterAll(async () => {

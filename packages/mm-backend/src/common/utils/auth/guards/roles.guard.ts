@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../roles.decorator';
-import { Role } from '../../../enums/role.enum';
+import { Role, ROLE_PRIORITIES } from '../../../enums/role.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -22,6 +22,13 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    return requiredRoles.some((role) => user.roles?.includes(role));
+    const userMaxRolePriority = Math.max(
+      ...user.roles.map(role => ROLE_PRIORITIES[role as Role])
+    );
+    const requiredRolePriority = Math.max(
+      ...requiredRoles.map(role => ROLE_PRIORITIES[role as Role])
+    );
+
+    return userMaxRolePriority >= requiredRolePriority;
   }
 }

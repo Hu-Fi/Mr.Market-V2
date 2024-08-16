@@ -5,12 +5,18 @@ import { Role } from '../../../common/enums/role.enum';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 
 @Controller('test')
+@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard)
 export class MockController {
   @Roles(Role.ADMIN)
-  @UseGuards(RolesGuard)
-  @UseGuards(JwtAuthGuard)
   @Get('admin')
   adminEndpoint() {
     return 'This is the admin endpoint';
+  }
+
+  @Roles(Role.USER)
+  @Get('user')
+  userEndpoint() {
+    return 'This is the user endpoint';
   }
 }
