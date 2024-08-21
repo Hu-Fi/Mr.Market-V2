@@ -54,7 +54,6 @@ export class ExchangeRegistryService {
     const exchange = this.ccxtGateway.getExchange(exchangeName);
     if (!exchange) {
       this.logger.error(`Exchange ${exchangeName} is not configured.`);
-      throw new InternalServerErrorException('Exchange configuration error.');
     }
     return exchange;
   }
