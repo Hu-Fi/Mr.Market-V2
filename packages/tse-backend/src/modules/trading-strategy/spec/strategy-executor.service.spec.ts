@@ -13,7 +13,16 @@ import {
   isExchangeSupported,
 } from '../../../common/utils/trading-strategy.utils';
 import { ArbitrageStrategy } from '../strategies/arbitrage/arbitrage.strategy';
-import { StrategyTypeEnums } from '../../../common/enums/strategy-type.enums';
+import {
+  AmountChangeType,
+  PriceSourceType,
+  StrategyTypeEnums,
+} from '../../../common/enums/strategy-type.enums';
+import {
+  MarketMakingStrategyActionCommand,
+  MarketMakingStrategyCommand,
+} from '../strategies/market-making/model/market-making.dto';
+import { MarketMakingStrategy } from '../strategies/market-making/market-making.strategy';
 
 jest.mock('../../../common/utils/trading-strategy.utils', () => ({
   createStrategyKey: jest.fn(),
@@ -139,6 +148,75 @@ describe('StrategyExecutorService', () => {
       (createStrategyKey as jest.Mock).mockReturnValue(strategyKey);
 
       await service.stopArbitrageStrategyForUser(command);
+
+      expect(tradingStrategyService.stopStrategy).toHaveBeenCalledWith(
+        strategyKey,
+      );
+    });
+  });
+
+  describe('startMarketMakingStrategyForUser', () => {
+    it('should start a market-making strategy', async () => {
+      const command: MarketMakingStrategyCommand = {
+        userId: 'user1',
+        clientId: 'client1',
+        pair: 'BTC/USDT',
+        exchangeName: 'binance',
+        bidSpread: 0.1,
+        askSpread: 0.1,
+        orderAmount: 1,
+        orderRefreshTime: 15000,
+        numberOfLayers: 1,
+        priceSourceType: PriceSourceType.MID_PRICE,
+        amountChangePerLayer: 1,
+        amountChangeType: AmountChangeType.PERCENTAGE,
+        strategyType: StrategyTypeEnums.MARKET_MAKING,
+      };
+
+      const strategyKey = 'some-key';
+      (createStrategyKey as jest.Mock).mockReturnValue(strategyKey);
+
+      await service.startMarketMakingStrategyForUser(command);
+
+      expect(tradingStrategyService.startStrategy).toHaveBeenCalledWith(
+        strategyKey,
+        expect.any(MarketMakingStrategy),
+        command,
+      );
+    });
+  });
+
+  describe('pauseMarketMakingStrategyForUser', () => {
+    it('should pause the market-making strategy', async () => {
+      const command: MarketMakingStrategyActionCommand = {
+        userId: 'user1',
+        clientId: 'client1',
+        strategyType: StrategyTypeEnums.MARKET_MAKING,
+      };
+
+      const strategyKey = 'some-key';
+      (createStrategyKey as jest.Mock).mockReturnValue(strategyKey);
+
+      await service.pauseMarketMakingStrategyForUser(command);
+
+      expect(tradingStrategyService.pauseStrategy).toHaveBeenCalledWith(
+        strategyKey,
+      );
+    });
+  });
+
+  describe('stopMarketMakingStrategyForUser', () => {
+    it('should stop the market-making strategy', async () => {
+      const command: MarketMakingStrategyActionCommand = {
+        userId: 'user1',
+        clientId: 'client1',
+        strategyType: StrategyTypeEnums.MARKET_MAKING,
+      };
+
+      const strategyKey = 'some-key';
+      (createStrategyKey as jest.Mock).mockReturnValue(strategyKey);
+
+      await service.stopMarketMakingStrategyForUser(command);
 
       expect(tradingStrategyService.stopStrategy).toHaveBeenCalledWith(
         strategyKey,

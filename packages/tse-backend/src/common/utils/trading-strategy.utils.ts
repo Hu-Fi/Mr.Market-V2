@@ -1,3 +1,9 @@
+import {
+  AmountChangeType,
+  PriceSourceType,
+} from '../enums/strategy-type.enums';
+import { OrderDetail } from '../interfaces/trading-strategy.interfaces';
+
 export const createStrategyKey = (key) => {
   return `${key.user_id}-${key.client_id}-${key.type}`;
 };
@@ -62,3 +68,122 @@ export const isExchangeSupported = (
 ) => {
   return supported.includes(exchangeName);
 };
+
+type PriceSourceFunction = (orderBook: any, ticker: any) => number;
+
+const priceSourceFunctions: Record<PriceSourceType, PriceSourceFunction> = {
+  [PriceSourceType.MID_PRICE]: (orderBook) =>
+    (orderBook.bids[0][0] + orderBook.asks[0][0]) / 2,
+  [PriceSourceType.BEST_ASK]: (orderBook) => orderBook.asks[0][0],
+  [PriceSourceType.BEST_BID]: (orderBook) => orderBook.bids[0][0],
+  [PriceSourceType.LAST_PRICE]: (_, ticker) => ticker.last,
+};
+
+export const getPriceSource = async (
+  exchange: any,
+  pair: string,
+  priceSourceType: PriceSourceType,
+) => {
+  const orderBook = await exchange.fetchOrderBook(pair);
+  const ticker =
+    priceSourceType === PriceSourceType.LAST_PRICE
+      ? await exchange.fetchTicker(pair)
+      : null;
+
+  const priceSourceFunction = priceSourceFunctions[priceSourceType];
+  if (!priceSourceFunction) {
+    throw new Error(`Invalid price source type: ${priceSourceType}`);
+  }
+
+  return priceSourceFunction(orderBook, ticker);
+};
+
+export function adjustOrderAmount(
+  initialOrderAmount: number,
+  layer: number,
+  amountChangeType: AmountChangeType,
+  amountChangePerLayer: number,
+): number {
+  if (layer > 1) {
+    if (amountChangeType === AmountChangeType.FIXED) {
+      return initialOrderAmount + (layer - 1) * amountChangePerLayer;
+    } else if (amountChangeType === AmountChangeType.PERCENTAGE) {
+      let adjustedAmount = initialOrderAmount;
+      for (let i = 1; i < layer; i++) {
+        adjustedAmount += adjustedAmount * (amountChangePerLayer / 100);
+      }
+      return adjustedAmount;
+    }
+  }
+  return initialOrderAmount;
+}
+
+export function calculatePrices(
+  priceSource: number,
+  bidSpread: number,
+  askSpread: number,
+  layer: number,
+): { buyPrice: number; sellPrice: number } {
+  const buyPrice = priceSource * (1 - bidSpread * layer);
+  const sellPrice = priceSource * (1 + askSpread * layer);
+  return { buyPrice, sellPrice };
+}
+
+export function shouldPlaceOrder(
+  priceSource: number,
+  ceilingPrice?: number,
+  floorPrice?: number,
+): { shouldBuy: boolean; shouldSell: boolean } {
+  const shouldBuy = !ceilingPrice || priceSource <= ceilingPrice;
+  const shouldSell = !floorPrice || priceSource >= floorPrice;
+  return { shouldBuy, shouldSell };
+}
+
+export function calculateOrderDetails(
+  initialOrderAmount: number,
+  numberOfLayers: number,
+  amountChangeType: AmountChangeType,
+  amountChangePerLayer: number,
+  bidSpread: number,
+  askSpread: number,
+  priceSource: number,
+  ceilingPrice?: number,
+  floorPrice?: number,
+): OrderDetail[] {
+  const orderDetails: OrderDetail[] = [];
+
+  for (let layer = 1; layer <= numberOfLayers; layer++) {
+    const currentOrderAmount = adjustOrderAmount(
+      initialOrderAmount,
+      layer,
+      amountChangeType,
+      amountChangePerLayer,
+    );
+
+    const { buyPrice, sellPrice } = calculatePrices(
+      priceSource,
+      bidSpread,
+      askSpread,
+      layer,
+    );
+
+    const { shouldBuy, shouldSell } = shouldPlaceOrder(
+      priceSource,
+      ceilingPrice,
+      floorPrice,
+    );
+
+    if (shouldBuy || shouldSell) {
+      orderDetails.push({
+        layer,
+        currentOrderAmount,
+        buyPrice,
+        sellPrice,
+        shouldBuy,
+        shouldSell,
+      });
+    }
+  }
+
+  return orderDetails;
+}

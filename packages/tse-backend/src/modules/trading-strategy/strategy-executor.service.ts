@@ -12,6 +12,11 @@ import { TradingStrategyService } from './trading-strategy.service';
 import { ArbitrageStrategy } from './strategies/arbitrage/arbitrage.strategy';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 import { ExchangeTradeService } from '../exchange-trade/exchange-trade.service';
+import {
+  MarketMakingStrategyActionCommand,
+  MarketMakingStrategyCommand,
+} from './strategies/market-making/model/market-making.dto';
+import { MarketMakingStrategy } from './strategies/market-making/market-making.strategy';
 
 @Injectable()
 export class StrategyExecutorService {
@@ -68,6 +73,49 @@ export class StrategyExecutorService {
   async stopArbitrageStrategyForUser(command: ArbitrageStrategyActionCommand) {
     const key = createStrategyKey({
       type: command.arbitrage,
+      user_id: command.userId,
+      client_id: command.clientId,
+    });
+
+    await this.strategyService.stopStrategy(key);
+  }
+
+  async startMarketMakingStrategyForUser(command: MarketMakingStrategyCommand) {
+    const key = createStrategyKey({
+      type: command.strategyType,
+      user_id: command.userId,
+      client_id: command.clientId,
+    });
+
+    const marketMakingStrategyInstance = new MarketMakingStrategy(
+      this.exchangeRegistryService,
+      this.tradeService,
+    );
+
+    await this.strategyService.startStrategy(
+      key,
+      marketMakingStrategyInstance,
+      command,
+    );
+  }
+
+  async pauseMarketMakingStrategyForUser(
+    command: MarketMakingStrategyActionCommand,
+  ) {
+    const key = createStrategyKey({
+      type: command.strategyType,
+      user_id: command.userId,
+      client_id: command.clientId,
+    });
+
+    await this.strategyService.pauseStrategy(key);
+  }
+
+  async stopMarketMakingStrategyForUser(
+    command: MarketMakingStrategyActionCommand,
+  ) {
+    const key = createStrategyKey({
+      type: command.strategyType,
       user_id: command.userId,
       client_id: command.clientId,
     });
