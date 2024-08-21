@@ -10,6 +10,7 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
 import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.module';
+import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.mod
     ExchangeDataModule,
     ExchangeOperationModule,
     ExchangeTradeModule,
+    TradingStrategyModule,
   ],
   controllers: [],
   providers: [
