@@ -11,6 +11,8 @@ import { classes } from '@automapper/classes';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
 import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.module';
 import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { StrategyExecutionModule } from './modules/strategy-execution/strategy-execution.module';
 
 @Module({
   imports: [
@@ -29,12 +31,14 @@ import { TradingStrategyModule } from './modules/trading-strategy/trading-strate
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
+    ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
     ExchangeDataModule,
     ExchangeOperationModule,
     ExchangeTradeModule,
     TradingStrategyModule,
+    StrategyExecutionModule
   ],
   controllers: [],
   providers: [
