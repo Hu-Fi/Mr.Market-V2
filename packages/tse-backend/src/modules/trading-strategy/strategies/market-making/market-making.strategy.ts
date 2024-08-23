@@ -128,7 +128,7 @@ export class MarketMakingStrategy implements Strategy {
   }
 
   async start(strategies: MarketMakingStrategyData[]): Promise<void> {
-    this.logger.debug('Starting market making strategy');
+    this.logger.debug(`Amount of active market making strategies: ${strategies.length}`);
 
     for (const strategy of strategies) {
       if (!this.strategies.get(strategy.id)) {
