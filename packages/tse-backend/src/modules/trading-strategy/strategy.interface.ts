@@ -1,5 +1,5 @@
 export interface Strategy {
-  start(params: any): Promise<NodeJS.Timeout>;
-  stop(intervalId: NodeJS.Timeout): Promise<void>;
-  pause(intervalId: NodeJS.Timeout): Promise<void>;
+  start(params: any): Promise<void>;
+  stop(params: any): Promise<void>;
+  pause(params: any): Promise<void>;
 }

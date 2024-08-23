@@ -1,56 +1,169 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Strategy } from '../../strategy.interface';
 import { ExchangeRegistryService } from '../../../exchange-registry/exchange-registry.service';
 import { ExchangeTradeService } from '../../../exchange-trade/exchange-trade.service';
-import { ArbitrageStrategyCommand } from './model/arbitrage.dto';
+import {
+  ArbitrageStrategyActionCommand,
+  ArbitrageStrategyCommand,
+  ArbitrageStrategyData,
+} from './model/arbitrage.dto';
 import {
   calculateProfitLoss,
   calculateVWAPForAmount,
+  createStrategyKey,
   getFee,
   isArbitrageOpportunityBuyOnA,
   isArbitrageOpportunityBuyOnB,
+  isExchangeSupported,
 } from '../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
-import { ArbitrageTradeParams } from '../../../../common/interfaces/trading-strategy.interfaces';
+import {
+  ArbitrageTradeParams,
+  StrategyConfig,
+} from '../../../../common/interfaces/trading-strategy.interfaces';
+import {
+  StrategyInstanceStatus,
+  StrategyTypeEnums,
+} from '../../../../common/enums/strategy-type.enums';
+import { ArbitrageService } from './arbitrage.service';
 
 @Injectable()
 export class ArbitrageStrategy implements Strategy {
   private logger = new Logger(ArbitrageStrategy.name);
+  private strategies: Map<number, StrategyConfig> = new Map();
 
   constructor(
     private readonly exchangeRegistryService: ExchangeRegistryService,
     private readonly tradeService: ExchangeTradeService,
+    private readonly arbitrageService: ArbitrageService,
   ) {}
 
-  async start(command: ArbitrageStrategyCommand): Promise<NodeJS.Timeout> {
+  async create(command: ArbitrageStrategyCommand): Promise<void> {
+    const isExchangeAValid = isExchangeSupported(
+      command.exchangeAName,
+      this.exchangeRegistryService.getSupportedExchanges(),
+    );
+    const isExchangeBValid = isExchangeSupported(
+      command.exchangeBName,
+      this.exchangeRegistryService.getSupportedExchanges(),
+    );
+
+    if (!isExchangeAValid || !isExchangeBValid) {
+      throw new BadRequestException('Provided exchange is not supported');
+    }
+
+    await this.arbitrageService.createStrategy({
+      userId: command.userId,
+      clientId: command.clientId,
+      pair: command.pair,
+      amountToTrade: command.amountToTrade,
+      minProfitability: command.minProfitability,
+      exchangeAName: command.exchangeAName,
+      exchangeBName: command.exchangeBName,
+      checkIntervalSeconds: command.checkIntervalSeconds,
+      maxOpenOrders: command.maxOpenOrders,
+      status: StrategyInstanceStatus.CREATED,
+    });
+  }
+
+  async pause(command: ArbitrageStrategyActionCommand): Promise<void> {
+    const strategyEntity: ArbitrageStrategyData =
+      await this.arbitrageService.findLatestStrategyByUserId(command.userId);
+    if (!strategyEntity) {
+      throw new BadRequestException('Arbitrage strategy not found');
+    }
+
+    await this.arbitrageService.updateStrategyStatusById(
+      strategyEntity.id,
+      StrategyInstanceStatus.PAUSED,
+    );
+    const strategy = this.strategies.get(strategyEntity.id);
+    if (strategy) {
+      clearInterval(strategy.intervalId);
+    }
+
+    this.logger.debug('Paused arbitrage strategy');
+  }
+
+  async stop(command: ArbitrageStrategyActionCommand): Promise<void> {
+    const strategyEntity: ArbitrageStrategyData =
+      await this.arbitrageService.findLatestStrategyByUserId(command.userId);
+    if (!strategyEntity) {
+      throw new BadRequestException('Arbitrage strategy not found');
+    }
+
+    await this.arbitrageService.updateStrategyStatusById(
+      strategyEntity.id,
+      StrategyInstanceStatus.STOPPED,
+    );
+
+    const strategy = this.strategies.get(strategyEntity.id);
+    if (strategy) {
+      clearInterval(strategy.intervalId);
+    }
+
+    await this.cancelActiveOrders();
+
+    this.logger.debug(
+      'Stopped arbitrage strategy, not filled orders have been canceled',
+    );
+  }
+
+  async delete(command: ArbitrageStrategyActionCommand) {
+    const strategyEntity: ArbitrageStrategyData =
+      await this.arbitrageService.findLatestStrategyByUserId(command.userId);
+    if (!strategyEntity) {
+      throw new BadRequestException('Arbitrage strategy not found');
+    }
+    if (
+      strategyEntity &&
+      strategyEntity.status !== StrategyInstanceStatus.STOPPED
+    ) {
+      throw new BadRequestException(
+        'Arbitrage strategy is not stopped or was deleted',
+      );
+    }
+
+    await this.arbitrageService.updateStrategyStatusById(
+      strategyEntity.id,
+      StrategyInstanceStatus.DELETED,
+    );
+
+    const strategy = this.strategies.get(strategyEntity.id);
+    if (strategy) {
+      clearInterval(strategy.intervalId);
+      this.strategies.delete(strategyEntity.id);
+    }
+
+    this.logger.debug('Soft deleted arbitrage strategy');
+  }
+
+  async start(strategies: ArbitrageStrategyData[]): Promise<void> {
     this.logger.debug('Starting arbitrage strategy');
 
-    return setInterval(async () => {
-      this.logger.debug('Evaluating arbitrage opportunity...');
-      await this.evaluateArbitrage(command);
-    }, 1000);
-  }
+    for (const strategy of strategies) {
+      if (!this.strategies.get(strategy.id)) {
+        const intervalId = setInterval(async () => {
+          // TODO: control opened orders
+          //  quantity not filled orders yet get from redis cache cannot be more than strategy.maxOpenOrders
+          await this.evaluateArbitrage(strategy);
+        }, strategy.checkIntervalSeconds * 1000);
 
-  async stop(intervalId: NodeJS.Timeout): Promise<void> {
-    if (intervalId) {
-      clearInterval(intervalId);
-      this.logger.debug(
-        'Stopped arbitrage strategy, not filled orders have been canceled',
-      );
-      await this.cancelActiveOrders();
+        const configuration: StrategyConfig = {
+          strategyKey: createStrategyKey({
+            type: StrategyTypeEnums.ARBITRAGE,
+            user_id: strategy.userId,
+            client_id: strategy.clientId,
+          }),
+          intervalId,
+          status: StrategyInstanceStatus.RUNNING,
+        };
+        this.strategies.set(strategy.id, configuration);
+      }
     }
   }
 
-  async pause(intervalId: NodeJS.Timeout): Promise<void> {
-    if (intervalId) {
-      clearInterval(intervalId);
-      this.logger.debug('Paused arbitrage strategy');
-    }
-  }
-
-  private async evaluateArbitrage(
-    command: ArbitrageStrategyCommand,
-  ): Promise<void> {
+  async evaluateArbitrage(command: ArbitrageStrategyCommand): Promise<void> {
     //TODO: get from redis cache last trade and check if it filled, if not then return
     const {
       userId,
@@ -114,7 +227,6 @@ export class ArbitrageStrategy implements Strategy {
       return;
     }
 
-    //TODO: persist data to database - arbitrage history
     //TODO: persist data to redis cache - to check last trade is filled
   }
 

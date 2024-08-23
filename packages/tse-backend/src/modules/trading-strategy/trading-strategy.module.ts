@@ -1,23 +1,29 @@
 import { Module } from '@nestjs/common';
-import { TradingStrategyService } from './trading-strategy.service';
-import { ArbitrageStrategy } from './strategies/arbitrage/arbitrage.strategy';
-import { TradingStrategyController } from './trading-strategy.controller';
-import { StrategyExecutorService } from './strategy-executor.service';
 import { ExchangeRegistryModule } from '../exchange-registry/exchange-registry.module';
 import { ExchangeTradeService } from '../exchange-trade/exchange-trade.service';
 import { ExchangeOperationModule } from '../exchange-operation/exchange-operation.module';
-import { TradingStrategyProfile } from './trading-strategy.mapper';
+import { ArbitrageController } from './strategies/arbitrage/arbitrage.controller';
+import { ArbitrageStrategyProfile } from './strategies/arbitrage/arbitrage.mapper';
+import { ArbitrageStrategyRepository } from './strategies/arbitrage/arbitrage.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Arbitrage } from '../../common/entities/arbitrage.entity';
+import { ArbitrageService } from './strategies/arbitrage/arbitrage.service';
+import { ArbitrageStrategy } from './strategies/arbitrage/arbitrage.strategy';
 
 @Module({
-  imports: [ExchangeRegistryModule, ExchangeOperationModule],
-  providers: [
-    TradingStrategyService,
-    StrategyExecutorService,
-    ArbitrageStrategy,
-    ExchangeTradeService,
-    TradingStrategyProfile,
+  imports: [
+    TypeOrmModule.forFeature([Arbitrage]),
+    ExchangeRegistryModule,
+    ExchangeOperationModule,
   ],
-  exports: [TradingStrategyService],
-  controllers: [TradingStrategyController],
+  providers: [
+    ArbitrageStrategy,
+    ArbitrageService,
+    ExchangeTradeService,
+    ArbitrageStrategyRepository,
+    ArbitrageStrategyProfile,
+  ],
+  exports: [ArbitrageStrategy],
+  controllers: [ArbitrageController],
 })
 export class TradingStrategyModule {}
