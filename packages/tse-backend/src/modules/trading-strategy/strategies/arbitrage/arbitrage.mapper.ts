@@ -2,14 +2,14 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
-  ArbitrageStrategyCommand,
-  ArbitrageStrategyDto,
   ArbitrageStrategyActionCommand,
   ArbitrageStrategyActionDto,
-} from './strategies/arbitrage/model/arbitrage.dto';
+  ArbitrageStrategyCommand,
+  ArbitrageStrategyDto,
+} from './model/arbitrage.dto';
 
 @Injectable()
-export class TradingStrategyProfile extends AutomapperProfile {
+export class ArbitrageStrategyProfile extends AutomapperProfile {
   constructor(@InjectMapper() mapper: Mapper) {
     super(mapper);
   }

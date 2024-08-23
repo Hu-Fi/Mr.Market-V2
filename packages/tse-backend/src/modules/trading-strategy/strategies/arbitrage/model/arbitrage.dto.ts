@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { StrategyTypeEnums } from '../../../../../common/enums/strategy-type.enums';
+import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 
 export class ArbitrageStrategyDto {
   @AutoMap()
@@ -49,6 +49,14 @@ export class ArbitrageStrategyDto {
   @AutoMap()
   @ApiProperty({ example: 'mexc', description: 'Name of the second exchange.' })
   exchangeBName: string;
+
+  @AutoMap()
+  @ApiProperty({ example: 10, description: 'interval to run arbitrage scan' })
+  checkIntervalSeconds: number;
+
+  @AutoMap()
+  @ApiProperty({ example: 1, description: 'Max number of orders' })
+  maxOpenOrders?: number;
 }
 
 export class ArbitrageStrategyCommand {
@@ -66,13 +74,32 @@ export class ArbitrageStrategyCommand {
   exchangeAName: string;
   @AutoMap()
   exchangeBName: string;
+  @AutoMap()
+  checkIntervalSeconds: number;
+  @AutoMap()
+  maxOpenOrders?: number;
+}
+
+export class ArbitrageStrategyData {
+  id: number;
+  userId: string;
+  clientId: string;
+  pair: string;
+  amountToTrade: number;
+  minProfitability: number;
+  exchangeAName: string;
+  exchangeBName: string;
+  checkIntervalSeconds: number;
+  maxOpenOrders?: number;
+  status: StrategyInstanceStatus;
 }
 
 export class ArbitrageStrategyActionDto {
   @AutoMap()
   @ApiProperty({
     example: '123',
-    description: 'User ID for whom the strategy is being paused/stopped.',
+    description:
+      'User ID for whom the strategy is being paused/stopped/deleted.',
   })
   userId: string;
   @AutoMap()
@@ -88,6 +115,4 @@ export class ArbitrageStrategyActionCommand {
   userId: string;
   @AutoMap()
   clientId: string;
-
-  arbitrage: StrategyTypeEnums;
 }

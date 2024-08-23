@@ -1,32 +1,31 @@
 import { Body, Controller, Post, Query } from '@nestjs/common';
-import { StrategyExecutorService } from './strategy-executor.service';
-import {
-  ArbitrageStrategyCommand,
-  ArbitrageStrategyDto,
-  ArbitrageStrategyActionCommand,
-  ArbitrageStrategyActionDto,
-} from './strategies/arbitrage/model/arbitrage.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { StrategyTypeEnums } from '../../common/enums/strategy-type.enums';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { ArbitrageStrategy } from './arbitrage.strategy';
+import {
+  ArbitrageStrategyActionCommand,
+  ArbitrageStrategyActionDto,
+  ArbitrageStrategyCommand,
+  ArbitrageStrategyDto,
+} from './model/arbitrage.dto';
 
-@ApiTags('strategy')
+@ApiTags('arbitrage')
 @Controller('trading-strategy')
-export class TradingStrategyController {
+export class ArbitrageController {
   constructor(
-    private readonly strategyExecutor: StrategyExecutorService,
+    private readonly service: ArbitrageStrategy,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/execute-arbitrage')
-  async executeArbitrage(@Body() dto: ArbitrageStrategyDto) {
+  @Post('/create-arbitrage')
+  async createArbitrage(@Body() dto: ArbitrageStrategyDto) {
     const command = this.mapper.map(
       dto,
       ArbitrageStrategyDto,
       ArbitrageStrategyCommand,
     );
-    return this.strategyExecutor.startArbitrageStrategyForUser(command);
+    return this.service.create(command);
   }
 
   @Post('/pause-arbitrage')
@@ -36,8 +35,7 @@ export class TradingStrategyController {
       ArbitrageStrategyActionDto,
       ArbitrageStrategyActionCommand,
     );
-    command.arbitrage = StrategyTypeEnums.ARBITRAGE;
-    return this.strategyExecutor.pauseArbitrageStrategyForUser(command);
+    return this.service.pause(command);
   }
 
   @Post('/stop-arbitrage')
@@ -47,7 +45,16 @@ export class TradingStrategyController {
       ArbitrageStrategyActionDto,
       ArbitrageStrategyActionCommand,
     );
-    command.arbitrage = StrategyTypeEnums.ARBITRAGE;
-    return this.strategyExecutor.stopArbitrageStrategyForUser(command);
+    return this.service.stop(command);
+  }
+
+  @Post('/delete-arbitrage')
+  async deleteArbitrage(@Query() dto: ArbitrageStrategyActionDto) {
+    const command = this.mapper.map(
+      dto,
+      ArbitrageStrategyActionDto,
+      ArbitrageStrategyActionCommand,
+    );
+    return this.service.delete(command);
   }
 }
