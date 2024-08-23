@@ -9,21 +9,31 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Arbitrage } from '../../common/entities/arbitrage.entity';
 import { ArbitrageService } from './strategies/arbitrage/arbitrage.service';
 import { ArbitrageStrategy } from './strategies/arbitrage/arbitrage.strategy';
+import { MarketMaking } from '../../common/entities/market-making.entity';
+import { MarketMakingStrategy } from './strategies/market-making/market-making.strategy';
+import { MarketMakingService } from './strategies/market-making/market-making.service';
+import { MarketMakingRepository } from './strategies/market-making/market-making.repository';
+import { MarketMakingStrategyProfile } from './strategies/market-making/market-making.mapper';
+import { MarketMakingController } from './strategies/market-making/market-making.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Arbitrage]),
+    TypeOrmModule.forFeature([Arbitrage, MarketMaking]),
     ExchangeRegistryModule,
     ExchangeOperationModule,
   ],
   providers: [
     ArbitrageStrategy,
+    MarketMakingStrategy,
     ArbitrageService,
-    ExchangeTradeService,
+    MarketMakingService,
     ArbitrageStrategyRepository,
+    MarketMakingRepository,
+    ExchangeTradeService,
+    MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
   ],
-  exports: [ArbitrageStrategy],
-  controllers: [ArbitrageController],
+  exports: [],
+  controllers: [ArbitrageController, MarketMakingController],
 })
 export class TradingStrategyModule {}
