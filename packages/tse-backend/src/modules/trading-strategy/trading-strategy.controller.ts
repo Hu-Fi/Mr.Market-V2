@@ -1,21 +1,15 @@
 import { Body, Controller, Post, Query } from '@nestjs/common';
 import { StrategyExecutorService } from './strategy-executor.service';
 import {
-  ArbitrageStrategyActionCommand,
-  ArbitrageStrategyActionDto,
   ArbitrageStrategyCommand,
   ArbitrageStrategyDto,
+  ArbitrageStrategyActionCommand,
+  ArbitrageStrategyActionDto,
 } from './strategies/arbitrage/model/arbitrage.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { StrategyTypeEnums } from '../../common/enums/strategy-type.enums';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import {
-  MarketMakingStrategyActionCommand,
-  MarketMakingStrategyActionDto,
-  MarketMakingStrategyCommand,
-  MarketMakingStrategyDto,
-} from './strategies/market-making/model/market-making.dto';
 
 @ApiTags('strategy')
 @Controller('trading-strategy')
@@ -55,38 +49,5 @@ export class TradingStrategyController {
     );
     command.arbitrage = StrategyTypeEnums.ARBITRAGE;
     return this.strategyExecutor.stopArbitrageStrategyForUser(command);
-  }
-
-  @Post('/execute-market-making')
-  async executeMarketMaking(@Body() dto: MarketMakingStrategyDto) {
-    const command = this.mapper.map(
-      dto,
-      MarketMakingStrategyDto,
-      MarketMakingStrategyCommand,
-    );
-    command.strategyType = StrategyTypeEnums.MARKET_MAKING;
-    return this.strategyExecutor.startMarketMakingStrategyForUser(command);
-  }
-
-  @Post('/pause-market-making')
-  async pauseMarketMaking(@Query() dto: MarketMakingStrategyActionDto) {
-    const command = this.mapper.map(
-      dto,
-      MarketMakingStrategyActionDto,
-      MarketMakingStrategyActionCommand,
-    );
-    command.strategyType = StrategyTypeEnums.MARKET_MAKING;
-    return this.strategyExecutor.pauseMarketMakingStrategyForUser(command);
-  }
-
-  @Post('/stop-market-making')
-  async stopMarketMaking(@Query() dto: MarketMakingStrategyActionDto) {
-    const command = this.mapper.map(
-      dto,
-      MarketMakingStrategyActionDto,
-      MarketMakingStrategyActionCommand,
-    );
-    command.strategyType = StrategyTypeEnums.MARKET_MAKING;
-    return this.strategyExecutor.stopMarketMakingStrategyForUser(command);
   }
 }

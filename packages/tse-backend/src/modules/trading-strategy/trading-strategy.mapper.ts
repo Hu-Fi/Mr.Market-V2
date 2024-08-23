@@ -7,12 +7,6 @@ import {
   ArbitrageStrategyActionCommand,
   ArbitrageStrategyActionDto,
 } from './strategies/arbitrage/model/arbitrage.dto';
-import {
-  MarketMakingStrategyActionCommand,
-  MarketMakingStrategyActionDto,
-  MarketMakingStrategyCommand,
-  MarketMakingStrategyDto,
-} from './strategies/market-making/model/market-making.dto';
 
 @Injectable()
 export class TradingStrategyProfile extends AutomapperProfile {
@@ -43,24 +37,6 @@ export class TradingStrategyProfile extends AutomapperProfile {
         mapper,
         ArbitrageStrategyActionDto,
         ArbitrageStrategyActionCommand,
-      );
-      createMap(
-        mapper,
-        MarketMakingStrategyDto,
-        MarketMakingStrategyCommand,
-        forMember(
-          (destination) => destination.exchangeName,
-          mapFrom((source) => source.exchangeName.toLowerCase()),
-        ),
-        forMember(
-          (destination) => destination.pair,
-          mapFrom((source) => source.pair.toUpperCase()),
-        ),
-      );
-      createMap(
-        mapper,
-        MarketMakingStrategyActionDto,
-        MarketMakingStrategyActionCommand,
       );
     };
   }
