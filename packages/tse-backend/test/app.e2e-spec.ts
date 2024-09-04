@@ -1,9 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeormTestConfig } from '../src/common/config/typeorm-test.config';
 import { ExchangeOperationService } from '../src/modules/exchange-operation/exchange-operation.service';
 import { OrderRepository } from '../src/modules/exchange-operation/order.repository';
 import { OperationRepository } from '../src/modules/exchange-operation/operation.repository';
@@ -20,6 +19,7 @@ import {
   CreateLimitOrderCommand,
   OperationCommand,
 } from '../src/modules/exchange-operation/model/exchange-operation.model';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 
 describe('ExchangeOperationService (e2e)', () => {
   let app: INestApplication;
@@ -27,28 +27,26 @@ describe('ExchangeOperationService (e2e)', () => {
   let orderRepository: OrderRepository;
   let operationRepository: OperationRepository;
   let dataSource: DataSource;
+  let postgresContainer: StartedPostgreSqlContainer;
 
   beforeAll(async () => {
+    postgresContainer = await new PostgreSqlContainer().start();
+
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
           envFilePath: '.env',
         }),
-        TypeOrmModule.forRootAsync({
-          imports: [ConfigModule],
-          inject: [ConfigService],
-          useFactory: async (configService: ConfigService) => {
-            const typeOrmTestConfigService = new TypeormTestConfig(
-              configService,
-            );
-            const typeOrmConfig =
-              typeOrmTestConfigService.getTypeOrmTestConfig();
-            return {
-              ...typeOrmConfig,
-              entities: [Order, Operation],
-            };
-          },
+        TypeOrmModule.forRoot({
+          host: postgresContainer.getHost(),
+          port: postgresContainer.getPort(),
+          username: postgresContainer.getUsername(),
+          password: postgresContainer.getPassword(),
+          database: postgresContainer.getDatabase(),
+          type: 'postgres',
+          entities: [Order, Operation],
+          synchronize: true,
         }),
         TypeOrmModule.forFeature([Order, Operation]),
       ],
@@ -73,6 +71,7 @@ describe('ExchangeOperationService (e2e)', () => {
   afterAll(async () => {
     await dataSource.destroy();
     await app.close();
+    await postgresContainer.stop();
   });
 
   describe('saveOrderData', () => {

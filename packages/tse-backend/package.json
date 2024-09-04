@@ -36,6 +36,8 @@
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.2.10",
+    "@testcontainers/postgresql": "^10.13.0",
+    "@types/pg": "^8.11.8",
     "@types/uuid": "^10.0.0",
     "axios": "^1.7.2",
     "ccxt": "^4.3.66",
@@ -46,6 +48,7 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.3",
     "socket.io-client": "^4.7.4",
+    "testcontainers": "^10.13.0",
     "typeorm": "^0.3.20",
     "uuid": "^9.0.1"
   },
