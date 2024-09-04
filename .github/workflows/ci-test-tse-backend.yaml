@@ -45,8 +45,6 @@ jobs:
       - name: Install dependencies
         working-directory: packages/tse-backend
         run: pnpm install
-      - name: Install Docker
-        uses: docker/setup-buildx-action@v3
       - name: Run e2e tests
         working-directory: packages/tse-backend
         run: pnpm test:e2e
