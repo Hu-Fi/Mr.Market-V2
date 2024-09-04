@@ -40,7 +40,7 @@ describe('ExchangeOperationService (e2e)', () => {
         }),
         TypeOrmModule.forRoot({
           host: postgresContainer.getHost(),
-          port: postgresContainer.getPort(),
+          port: postgresContainer.getMappedPort(5432),
           username: postgresContainer.getUsername(),
           password: postgresContainer.getPassword(),
           database: postgresContainer.getDatabase(),
