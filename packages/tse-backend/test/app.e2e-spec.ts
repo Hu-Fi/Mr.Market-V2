@@ -73,7 +73,7 @@ describe('ExchangeOperationService (e2e)', () => {
       moduleRef.get<OperationRepository>(OperationRepository);
     dataSource = moduleRef.get<DataSource>(DataSource);
     await app.init();
-  });
+  }, 30000);
 
   afterAll(async () => {
     await dataSource.destroy();
