@@ -30,7 +30,10 @@ describe('ExchangeOperationService (e2e)', () => {
   let postgresContainer: StartedPostgreSqlContainer;
 
   beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer().start();
+    postgresContainer = await new PostgreSqlContainer()
+      .withName('testcontainer')
+      .withDatabase('testcontainer')
+      .start();
 
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -38,15 +41,19 @@ describe('ExchangeOperationService (e2e)', () => {
           isGlobal: true,
           envFilePath: '.env',
         }),
-        TypeOrmModule.forRoot({
-          host: postgresContainer.getHost(),
-          port: postgresContainer.getMappedPort(5432),
-          username: postgresContainer.getUsername(),
-          password: postgresContainer.getPassword(),
-          database: postgresContainer.getDatabase(),
-          type: 'postgres',
-          entities: [Order, Operation],
-          synchronize: true,
+        TypeOrmModule.forRootAsync({
+          useFactory: () => {
+            return {
+              type: 'postgres',
+              host: postgresContainer.getHost(),
+              port: postgresContainer.getPort(),
+              username: postgresContainer.getUsername(),
+              password: postgresContainer.getPassword(),
+              database: postgresContainer.getDatabase(),
+              entities: [Order, Operation],
+              synchronize: true,
+            }
+          }
         }),
         TypeOrmModule.forFeature([Order, Operation]),
       ],
