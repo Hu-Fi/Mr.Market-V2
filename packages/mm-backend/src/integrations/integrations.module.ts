@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { MixinGateway } from './mixin.gateway';
 
 @Module({
-  providers: [MixinGateway],
-  exports: [MixinGateway],
+  providers: [],
+  exports: []
 })
 export class IntegrationsModule {}

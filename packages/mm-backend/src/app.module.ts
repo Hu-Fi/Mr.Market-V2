@@ -3,10 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './common/config/typeorm-config.service';
 import { IntegrationsModule } from './integrations/integrations.module';
-import { SnapshotsModule } from './modules/mixin/snapshots/snapshots.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -22,11 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
         return typeOrmConfigService.getTypeOrmConfig();
       },
     }),
-    ScheduleModule.forRoot(),
-    EventEmitterModule.forRoot(),
     IntegrationsModule,
-    SnapshotsModule,
-    AuthModule,
   ],
   controllers: [],
   providers: [],
