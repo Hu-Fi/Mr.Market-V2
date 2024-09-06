@@ -8,6 +8,13 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
+import {
+  adminLoginCommandFixture,
+  adminLoginResponseFixture,
+  mixinOAuthCommandFixture,
+  mixinOAuthResponseFixture,
+} from './auth.fixtures';
+import { createHash } from 'crypto';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -61,25 +68,25 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return a JWT token if the password is valid', async () => {
-      const password =
-        '4d62e3a5d2be2c0320dddf7e0723d4cc23b0579085da8d9e27bef5d996aabc60';
-      const token = 'jwt_token';
-      jest.spyOn(jwtService, 'sign').mockReturnValue(token);
+      const command = adminLoginCommandFixture;
+      const response = adminLoginResponseFixture;
+      jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
 
-      const result = await service.validateUser(password);
+      const result = await service.validateUser(command);
 
       expect(jwtService.sign).toHaveBeenCalledWith({
         username: 'admin',
         roles: ['Admin'],
         sub: 'admin_id',
       });
-      expect(result).toBe(token);
+      expect(result).toStrictEqual(response);
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {
-      const password = 'invalid_password';
+      const command = adminLoginCommandFixture;
+      command.password = 'invalidPassword';
 
-      await expect(service.validateUser(password)).rejects.toThrow(
+      await expect(service.validateUser(command)).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -87,20 +94,21 @@ describe('AuthService', () => {
 
   describe('mixinOauthHandler', () => {
     it('should call mixinGateway.oauthHandler if code length is valid', async () => {
-      const code = 'a'.repeat(64);
-      const authId = 'authorization_id';
-      jest.spyOn(mixinGateway, 'oauthHandler').mockResolvedValue(authId);
+      const command = mixinOAuthCommandFixture;
+      const response = mixinOAuthResponseFixture;
+      jest.spyOn(mixinGateway, 'oauthHandler').mockResolvedValue(response);
 
-      const result = await service.mixinOauthHandler(code);
+      const result = await service.mixinOauthHandler(command);
 
-      expect(mixinGateway.oauthHandler).toHaveBeenCalledWith(code);
-      expect(result).toBe(authId);
+      expect(mixinGateway.oauthHandler).toHaveBeenCalledWith(command.code);
+      expect(result).toBe(response);
     });
 
     it('should throw HttpException if code length is invalid', async () => {
-      const code = 'short_code';
+      const command = mixinOAuthCommandFixture;
+      command.code = 'short_code';
 
-      await expect(service.mixinOauthHandler(code)).rejects.toThrow(
+      await expect(service.mixinOauthHandler(command)).rejects.toThrow(
         new HttpException('Invalid code length', HttpStatus.BAD_REQUEST),
       );
     });

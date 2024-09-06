@@ -1,6 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import {
+  adminLoginCommandFixture,
+  adminLoginDtoFixture,
+  adminLoginResponseFixture, mixinOAuthCommandFixture,
+  mixinOAuthDtoFixture, mixinOAuthResponseFixture,
+} from './auth.fixtures';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
+import { AuthProfile } from '../auth.mapper';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -9,6 +18,11 @@ describe('AuthController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
+      imports: [
+        AutomapperModule.forRoot({
+          strategyInitializer: classes(),
+        }),
+      ],
       providers: [
         {
           provide: AuthService,
@@ -17,6 +31,7 @@ describe('AuthController', () => {
             mixinOauthHandler: jest.fn(),
           },
         },
+        AuthProfile,
       ],
     }).compile();
 
@@ -30,27 +45,29 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should return a JWT token if the password is correct', async () => {
-      const password = 'valid_password';
-      const token = 'jwt_token';
-      jest.spyOn(authService, 'validateUser').mockResolvedValue(token);
+      const dto = adminLoginDtoFixture;
+      const command = adminLoginCommandFixture;
+      const response = adminLoginResponseFixture;
+      jest.spyOn(authService, 'validateUser').mockResolvedValue(response);
 
-      const result = await controller.login(password);
+      const result = await controller.login(dto);
 
-      expect(authService.validateUser).toHaveBeenCalledWith(password);
-      expect(result).toBe(token);
+      expect(authService.validateUser).toHaveBeenCalledWith(command);
+      expect(result).toBe(response);
     });
   });
 
   describe('oauth', () => {
     it('should handle OAuth and return an authorization ID', async () => {
-      const code = 'valid_code';
-      const authId = 'authorization_id';
-      jest.spyOn(authService, 'mixinOauthHandler').mockResolvedValue(authId);
+      const dto = mixinOAuthDtoFixture;
+      const command = mixinOAuthCommandFixture;
+      const response = mixinOAuthResponseFixture;
+      jest.spyOn(authService, 'mixinOauthHandler').mockResolvedValue(response);
 
-      const result = await controller.oauth(code);
+      const result = await controller.oauth(dto);
 
-      expect(authService.mixinOauthHandler).toHaveBeenCalledWith(code);
-      expect(result).toBe(authId);
+      expect(authService.mixinOauthHandler).toHaveBeenCalledWith(command);
+      expect(result).toBe(response);
     });
   });
 });

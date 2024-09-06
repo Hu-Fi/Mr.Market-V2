@@ -5,23 +5,24 @@ import { Reflector } from '@nestjs/core';
 import { MockController } from './mockController';
 import { RolesGuard } from '../../../common/utils/auth/guards/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
+import { adminLoginCommandFixture } from './auth.fixtures';
+import { AdminLoginResponse } from '../model/auth.model';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
   let authService: AuthService;
-  let adminToken: string;
+  let adminLoginResponse: AdminLoginResponse;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          load: [() => ({ JWT_SECRET: 'secret', ADMIN_PASSWORD: 'pass' })],
         }),
         JwtModule.register({
           secret: 'secret',
@@ -42,6 +43,21 @@ describe('RolesGuard', () => {
           provide: MixinGateway,
           useValue: {},
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockImplementation((key: string) => {
+              switch (key) {
+                case 'ADMIN_PASSWORD':
+                  return 'admin_password';
+                case 'JWT_SECRET':
+                  return 'secret';
+                default:
+                  return null;
+              }
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -49,15 +65,14 @@ describe('RolesGuard', () => {
     await app.init();
 
     const authService = module.get<AuthService>(AuthService);
-    adminToken = await authService.validateUser(
-      '73899d2adaad774417b0208da85162b61c8dbdf79bb0f7108c2686b93721d1f4',
-    );
+    const command = adminLoginCommandFixture;
+    adminLoginResponse = await authService.validateUser(command);
   });
 
   it('should allow access if admin role is provided', () => {
     return request(app.getHttpServer())
       .get('/test/admin')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${adminLoginResponse.accessToken}`)
       .expect(200)
       .expect('This is the admin endpoint');
   });
@@ -65,7 +80,7 @@ describe('RolesGuard', () => {
   it('should allow access to user endpoint for admins', async () => {
     return request(app.getHttpServer())
       .get('/test/user')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${adminLoginResponse.accessToken}`)
       .expect(200)
       .expect('This is the user endpoint');
   });
