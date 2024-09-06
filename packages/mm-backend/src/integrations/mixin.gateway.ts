@@ -7,15 +7,12 @@ import {
   MixinApi,
 } from '@mixin.dev/mixin-node-sdk';
 import { ConfigService } from '@nestjs/config';
-import { CustomLogger } from '../modules/logger/logger.service';
 
 @Injectable()
 export class MixinGateway {
   private readonly keystore: Keystore;
-  private readonly _spendKey: string;
   private readonly _clientSecret: string;
   private _client: KeystoreClientReturnType;
-  private readonly logger = new CustomLogger(MixinGateway.name);
 
   constructor(private configService: ConfigService) {
     this.keystore = {
@@ -28,7 +25,6 @@ export class MixinGateway {
         'MIXIN_SESSION_PRIVATE_KEY',
       ),
     };
-    this._spendKey = this.configService.get<string>('MIXIN_SPEND_PRIVATE_KEY');
     this._clientSecret = this.configService.get<string>('MIXIN_OAUTH_SECRET');
     this._client = MixinApi({
       keystore: this.keystore,
@@ -44,13 +40,5 @@ export class MixinGateway {
       client_secret: this._clientSecret,
     });
     return authorization_id;
-  }
-
-  async fetchSafeSnapshots() {
-    try {
-      return await this._client.safe.fetchSafeSnapshots({});
-    } catch (error) {
-      this.logger.error(error);
-    }
   }
 }

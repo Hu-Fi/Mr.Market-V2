@@ -24,6 +24,9 @@
     "migration:revert": "pnpm typeorm -- migration:revert"
   },
   "dependencies": {
+    "@automapper/classes": "^8.8.1",
+    "@automapper/core": "^8.8.1",
+    "@automapper/nestjs": "^8.8.1",
     "@mixin.dev/mixin-node-sdk": "^7.0.10",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.0.0",

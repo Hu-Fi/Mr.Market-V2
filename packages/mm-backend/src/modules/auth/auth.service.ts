@@ -1,13 +1,9 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { AdminLoginCommand, AdminLoginResponse, MixinOAuthCommand } from './model/auth.model';
 
 @Injectable()
 export class AuthService {
@@ -17,10 +13,11 @@ export class AuthService {
     private configService: ConfigService,
     private jwtService: JwtService,
   ) {
-    this.adminPassword = configService.get<string>('ADMIN_PASSWORD');
+    this.adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
   }
 
-  async validateUser(password: string): Promise<string> {
+  async validateUser(command: AdminLoginCommand): Promise<AdminLoginResponse> {
+    const { password } = command;
     if (!this.adminPassword || !password) {
       throw new UnauthorizedException('Password is required');
     }
@@ -34,10 +31,11 @@ export class AuthService {
     }
 
     const payload = { username: 'admin', roles: ['Admin'], sub: 'admin_id' };
-    return this.jwtService.sign(payload);
+    return { accessToken:  this.jwtService.sign(payload) };
   }
 
-  async mixinOauthHandler(code: string) {
+  async mixinOauthHandler(command: MixinOAuthCommand) {
+    const { code } = command;
     if (code.length !== 64) {
       throw new HttpException('Invalid code length', HttpStatus.BAD_REQUEST);
     }

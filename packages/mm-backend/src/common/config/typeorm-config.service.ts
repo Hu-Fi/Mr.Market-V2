@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
-import { Snapshot } from '../entities/snapshots.entity';
 
 @Injectable()
 export class TypeOrmConfigService {
@@ -27,7 +26,7 @@ export class TypeOrmConfigService {
       username: this.configService.get<string>('DATABASE_USERNAME', 'postgres'),
       password: this.configService.get<string>('DATABASE_PASSWORD', 'postgres'),
       database: this.configService.get<string>('DATABASE_NAME', 'mr_market_v2'),
-      entities: [Snapshot],
+      entities: [],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:

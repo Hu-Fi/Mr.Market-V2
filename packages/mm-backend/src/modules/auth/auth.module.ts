@@ -6,6 +6,7 @@ import { JwtStrategy } from '../../common/utils/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthProfile } from './auth.mapper';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     ConfigModule,
   ],
-  providers: [AuthService, MixinGateway, JwtStrategy],
+  providers: [AuthService, MixinGateway, JwtStrategy, AuthProfile],
   controllers: [AuthController],
 })
 export class AuthModule {}

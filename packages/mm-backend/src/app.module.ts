@@ -3,6 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './common/config/typeorm-config.service';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
 
 @Module({
   imports: [
@@ -18,7 +21,11 @@ import { IntegrationsModule } from './integrations/integrations.module';
         return typeOrmConfigService.getTypeOrmConfig();
       },
     }),
+    AutomapperModule.forRoot({
+      strategyInitializer: classes(),
+    }),
     IntegrationsModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],
