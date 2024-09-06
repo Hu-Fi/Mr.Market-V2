@@ -3,7 +3,7 @@ import { MixinGateway } from '../../integrations/mixin.gateway';
 import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { AdminLoginCommand, AdminLoginResponse, MixinOAuthCommand } from './model/auth.model';
+import { AdminLoginCommand, AdminLoginResponse, MixinOAuthCommand, MixinOAuthResponse } from './model/auth.model';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +34,7 @@ export class AuthService {
     return { accessToken:  this.jwtService.sign(payload) };
   }
 
-  async mixinOauthHandler(command: MixinOAuthCommand) {
+  async mixinOauthHandler(command: MixinOAuthCommand): Promise<MixinOAuthResponse> {
     const { code } = command;
     if (code.length !== 64) {
       throw new HttpException('Invalid code length', HttpStatus.BAD_REQUEST);

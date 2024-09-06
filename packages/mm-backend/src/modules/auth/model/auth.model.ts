@@ -29,3 +29,9 @@ export class MixinOAuthCommand {
 export interface AdminLoginResponse {
   accessToken: string;
 }
+
+export interface MixinOAuthResponse {
+  ed25519: string;
+  authorization_id: string;
+  scope: string;
+}

@@ -4,6 +4,12 @@ This repository provides an API service built using NestJS for retrieving and ma
 
 ## Controllers
 
+### AuthController
+
+- **Endpoints:**
+  - `POST /admin/login`: Pass sha3-256 hashed password to log in with the access token
+  - `POST /mixin/oauth`: Pass OAuth token to get authorization code ([go to mixin docs](https://developers.mixin.one/docs/api/oauth#post-oauthtoken))
+
 ### ExchangeDataController
 
 Handles requests related to market data, such as tickers, OHLCV data, and supported symbols.

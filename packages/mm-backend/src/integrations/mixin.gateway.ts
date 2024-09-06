@@ -33,12 +33,11 @@ export class MixinGateway {
 
   async oauthHandler(code: string) {
     const { publicKey } = getED25519KeyPair();
-    const { authorization_id } = await this._client.oauth.getToken({
+    return await this._client.oauth.getToken({
       client_id: this.keystore.app_id,
       code: code,
       ed25519: base64RawURLEncode(publicKey),
       client_secret: this._clientSecret,
     });
-    return authorization_id;
   }
 }

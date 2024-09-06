@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
@@ -27,7 +27,7 @@ export class AuthController {
   }
 
   @Post('mixin/oauth')
-  @ApiOperation({ summary: 'Pass OAuth authorization code' })
+  @ApiOperation({ summary: 'Pass OAuth code' })
   async oauth(@Body() dto: MixinOAuthDto) {
     const command = this.mapper.map(dto, MixinOAuthDto, MixinOAuthCommand);
     return this.authService.mixinOauthHandler(command);
