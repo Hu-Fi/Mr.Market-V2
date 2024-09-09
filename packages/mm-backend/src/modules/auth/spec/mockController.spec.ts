@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { MockController } from './mockController';
@@ -10,13 +10,14 @@ import { AuthService } from '../auth.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
-import { adminLoginCommandFixture } from './auth.fixtures';
+import { adminLoginCommandFixture, mixinOAuthCommandFixture, mixinOAuthResponseFixture } from './auth.fixtures';
 import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
   let authService: AuthService;
   let adminLoginResponse: JwtResponse;
+  let userLoginResponse: JwtResponse;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,7 +42,11 @@ describe('RolesGuard', () => {
         RolesGuard,
         {
           provide: MixinGateway,
-          useValue: {},
+          useValue: {
+            oauthHandler: jest.fn().mockReturnValue({
+              clientId: 'clientId'
+            }),
+          },
         },
         {
           provide: ConfigService,
@@ -65,8 +70,8 @@ describe('RolesGuard', () => {
     await app.init();
 
     const authService = module.get<AuthService>(AuthService);
-    const command = adminLoginCommandFixture;
-    adminLoginResponse = await authService.validateUser(command);
+    adminLoginResponse = await authService.validateUser(adminLoginCommandFixture);
+    userLoginResponse = await authService.mixinOauthHandler(mixinOAuthCommandFixture);
   });
 
   it('should allow access if admin role is provided', () => {
@@ -81,6 +86,21 @@ describe('RolesGuard', () => {
     return request(app.getHttpServer())
       .get('/test/user')
       .set('Authorization', `Bearer ${adminLoginResponse.accessToken}`)
+      .expect(200)
+      .expect('This is the user endpoint');
+  });
+
+  it('should deny access if user without admin role tries to access admin endpoint', () => {
+    return request(app.getHttpServer())
+      .get('/test/admin')
+      .set('Authorization', `Bearer ${userLoginResponse.accessToken}`)
+      .expect(403)
+  });
+
+  it('should allow access to user endpoint for regular users', () => {
+    return request(app.getHttpServer())
+      .get('/test/user')
+      .set('Authorization', `Bearer ${userLoginResponse.accessToken}`)
       .expect(200)
       .expect('This is the user endpoint');
   });
