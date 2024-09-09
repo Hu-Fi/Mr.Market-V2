@@ -39,7 +39,8 @@ export class MarketMakingStrategy implements Strategy {
     await this.marketMakingService.createStrategy({
       userId: command.userId,
       clientId: command.clientId,
-      pair: command.pair,
+      sideA: command.sideA,
+      sideB: command.sideB,
       exchangeName: command.exchangeName,
       bidSpread: command.bidSpread,
       askSpread: command.askSpread,
@@ -104,14 +105,6 @@ export class MarketMakingStrategy implements Strategy {
     if (!strategyEntity) {
       throw new BadRequestException('MarketMaking strategy not found');
     }
-    if (
-      strategyEntity &&
-      strategyEntity.status !== StrategyInstanceStatus.STOPPED
-    ) {
-      throw new BadRequestException(
-        'MarketMaking strategy is not stopped or was deleted',
-      );
-    }
 
     await this.marketMakingService.updateStrategyStatusById(
       strategyEntity.id,
@@ -154,7 +147,8 @@ export class MarketMakingStrategy implements Strategy {
     const {
       userId,
       clientId,
-      pair,
+      sideA,
+      sideB,
       exchangeName,
       bidSpread,
       askSpread,
@@ -171,6 +165,7 @@ export class MarketMakingStrategy implements Strategy {
 
     const exchange = this.exchangeRegistryService.getExchange(exchangeName);
 
+    const pair = `${sideA}/${sideB}`;
     const priceSource = await getPriceSource(exchange, pair, priceSourceType);
 
     const orderDetails: OrderDetail[] = calculateOrderDetails(

@@ -8,11 +8,7 @@ import {
   MarketMakingStrategyActionCommand,
   MarketMakingStrategyCommand,
 } from '../model/market-making.dto';
-import {
-  AmountChangeType,
-  PriceSourceType,
-  StrategyInstanceStatus,
-} from '../../../../../common/enums/strategy-type.enums';
+import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import {
   calculateOrderDetails,
   getPriceSource,
@@ -20,6 +16,7 @@ import {
 import { TradeSideType } from '../../../../../common/enums/exchange-operation.enums';
 import { PlaceOrderParams } from '../../../../../common/interfaces/trading-strategy.interfaces';
 import { MarketMaking } from '../../../../../common/entities/market-making.entity';
+import { MarketMakingCommandFixture, MarketMakingDataFixture } from './market-making.fixtures';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateOrderDetails: jest.fn(),
@@ -70,22 +67,7 @@ describe('MarketMakingStrategy', () => {
 
   describe('create', () => {
     it('should create a market making strategy', async () => {
-      const command: MarketMakingStrategyCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        exchangeName: 'ExchangeA',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1.0,
-        checkIntervalSeconds: 5,
-        numberOfLayers: 3,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 0.05,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 2000,
-        floorPrice: 1500,
-      };
+      const command: MarketMakingStrategyCommand = MarketMakingCommandFixture;
 
       await strategy.create(command);
 
@@ -103,26 +85,7 @@ describe('MarketMakingStrategy', () => {
         clientId: 'client1',
       };
 
-      const strategyData: MarketMaking = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        exchangeName: 'ExchangeA',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1.0,
-        checkIntervalSeconds: 5,
-        numberOfLayers: 3,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 0.05,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 2000,
-        floorPrice: 1500,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const strategyData: MarketMaking = MarketMakingDataFixture;
 
       jest
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
@@ -159,26 +122,7 @@ describe('MarketMakingStrategy', () => {
         clientId: 'client1',
       };
 
-      const strategyData: MarketMaking = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        exchangeName: 'ExchangeA',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1.0,
-        checkIntervalSeconds: 5,
-        numberOfLayers: 3,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 0.05,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 2000,
-        floorPrice: 1500,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const strategyData: MarketMaking = MarketMakingDataFixture;
 
       jest
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
@@ -215,26 +159,7 @@ describe('MarketMakingStrategy', () => {
         clientId: 'client1',
       };
 
-      const strategyData: MarketMaking = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        exchangeName: 'ExchangeA',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1.0,
-        checkIntervalSeconds: 5,
-        numberOfLayers: 3,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 0.05,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 2000,
-        floorPrice: 1500,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.STOPPED,
-      };
+      const strategyData: MarketMaking = MarketMakingDataFixture;
 
       jest
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
@@ -248,59 +173,9 @@ describe('MarketMakingStrategy', () => {
       );
     });
 
-    it('should throw BadRequestException if strategy is not stopped', async () => {
-      const command: MarketMakingStrategyActionCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-      };
-
-      const strategyData: MarketMaking = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        exchangeName: 'ExchangeA',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1.0,
-        checkIntervalSeconds: 5,
-        numberOfLayers: 3,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 0.05,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 2000,
-        floorPrice: 1500,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
-
-      jest
-        .spyOn(marketMakingService, 'findLatestStrategyByUserId')
-        .mockResolvedValue(strategyData);
-
-      await expect(strategy.delete(command)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
     describe('evaluateMarketMaking', () => {
       it('should place buy and sell orders based on market conditions', async () => {
-        const command: MarketMakingStrategyCommand = {
-          checkIntervalSeconds: 1000,
-          userId: 'user1',
-          clientId: 'client1',
-          pair: 'BTC/USDT',
-          exchangeName: 'binance',
-          bidSpread: 0.1,
-          askSpread: 0.1,
-          orderAmount: 1,
-          numberOfLayers: 1,
-          priceSourceType: PriceSourceType.MID_PRICE,
-          amountChangePerLayer: 0,
-          amountChangeType: AmountChangeType.FIXED,
-          ceilingPrice: 52000,
-          floorPrice: 48000,
-        };
+        const command: MarketMakingStrategyCommand = MarketMakingCommandFixture;
 
         const exchange = {
           amountToPrecision: jest.fn().mockReturnValue('1'),
@@ -339,8 +214,8 @@ describe('MarketMakingStrategy', () => {
           expect.objectContaining({
             userId: 'user1',
             clientId: 'client1',
-            exchangeName: 'binance',
-            pair: 'BTC/USDT',
+            exchangeName: 'exchangea',
+            pair: 'ETH/USDT',
             side: TradeSideType.BUY,
             amount: 1,
             price: 49000,
@@ -351,8 +226,8 @@ describe('MarketMakingStrategy', () => {
           expect.objectContaining({
             userId: 'user1',
             clientId: 'client1',
-            exchangeName: 'binance',
-            pair: 'BTC/USDT',
+            exchangeName: 'exchangea',
+            pair: 'ETH/USDT',
             side: TradeSideType.SELL,
             amount: 1,
             price: 51000,
@@ -366,8 +241,8 @@ describe('MarketMakingStrategy', () => {
         const params: PlaceOrderParams = {
           userId: 'user1',
           clientId: 'client1',
-          exchangeName: 'binance',
-          pair: 'BTC/USDT',
+          exchangeName: 'exchangea',
+          pair: 'ETH/USDT',
           side: TradeSideType.BUY,
           amount: 1,
           price: 49000,

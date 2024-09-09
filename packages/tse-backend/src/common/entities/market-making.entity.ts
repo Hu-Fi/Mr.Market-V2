@@ -23,7 +23,10 @@ export class MarketMaking {
   clientId: string;
 
   @Column()
-  pair: string;
+  sideA: string;
+
+  @Column()
+  sideB: string;
 
   @Column()
   exchangeName: string;

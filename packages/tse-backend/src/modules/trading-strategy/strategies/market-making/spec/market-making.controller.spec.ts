@@ -7,13 +7,9 @@ import { MarketMakingStrategyProfile } from '../market-making.mapper';
 import {
   MarketMakingStrategyActionCommand,
   MarketMakingStrategyActionDto,
-  MarketMakingStrategyCommand,
   MarketMakingStrategyDto,
 } from '../model/market-making.dto';
-import {
-  AmountChangeType,
-  PriceSourceType,
-} from '../../../../../common/enums/strategy-type.enums';
+import { MarketMakingCommandFixture, MarketMakingDtoFixture } from './market-making.fixtures';
 
 describe('MarketMakingController', () => {
   let controller: MarketMakingController;
@@ -46,23 +42,8 @@ describe('MarketMakingController', () => {
 
   describe('createMarketMaking', () => {
     it('should call service.create with the mapped command', async () => {
-      const dto: MarketMakingStrategyDto = {
-        userId: '123',
-        clientId: '456',
-        pair: 'BTC/USDT',
-        exchangeName: 'binance',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1,
-        checkIntervalSeconds: 10,
-        numberOfLayers: 1,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 1,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 50000,
-        floorPrice: 20000,
-      };
-      const command = dto as MarketMakingStrategyCommand;
+      const dto: MarketMakingStrategyDto = MarketMakingDtoFixture;
+      const command = MarketMakingCommandFixture;
       jest.spyOn(service, 'create').mockImplementation(async () => {});
 
       await controller.createMarketMakingStrategy(dto);
