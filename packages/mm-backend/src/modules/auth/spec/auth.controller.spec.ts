@@ -4,8 +4,10 @@ import { AuthService } from '../auth.service';
 import {
   adminLoginCommandFixture,
   adminLoginDtoFixture,
-  adminLoginResponseFixture, mixinOAuthCommandFixture,
-  mixinOAuthDtoFixture, mixinOAuthResponseFixture,
+  adminLoginResponseFixture,
+  mixinOAuthCommandFixture,
+  mixinOAuthDtoFixture,
+  mixinOAuthResponseFixture,
 } from './auth.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';

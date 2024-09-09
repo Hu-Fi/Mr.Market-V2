@@ -1,9 +1,15 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { AdminLoginCommand, AdminLoginResponse, MixinOAuthCommand, MixinOAuthResponse } from './model/auth.model';
+import { AdminLoginCommand, MixinOAuthCommand } from './model/auth.model';
+import { JwtResponse } from '../../common/interfaces/auth.interfaces';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +22,7 @@ export class AuthService {
     this.adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
   }
 
-  async validateUser(command: AdminLoginCommand): Promise<AdminLoginResponse> {
+  async validateUser(command: AdminLoginCommand): Promise<JwtResponse> {
     const { password } = command;
     if (!this.adminPassword || !password) {
       throw new UnauthorizedException('Password is required');
@@ -30,15 +36,21 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
-    const payload = { username: 'admin', roles: ['Admin'], sub: 'admin_id' };
-    return { accessToken:  this.jwtService.sign(payload) };
+    const payload = { sub: 'admin', roles: ['Admin'] };
+    return { accessToken: this.jwtService.sign(payload) };
   }
 
-  async mixinOauthHandler(command: MixinOAuthCommand): Promise<MixinOAuthResponse> {
+  async mixinOauthHandler(command: MixinOAuthCommand): Promise<JwtResponse> {
     const { code } = command;
     if (code.length !== 64) {
       throw new HttpException('Invalid code length', HttpStatus.BAD_REQUEST);
     }
-    return this.mixinGateway.oauthHandler(code);
+
+    const clientData: any = await this.mixinGateway.oauthHandler(code);
+
+    //TODO: Save the user to the database, if not already there.
+
+    const payload = { sub: clientData.clientId, roles: ['User'] };
+    return { accessToken: this.jwtService.sign(payload) };
   }
 }

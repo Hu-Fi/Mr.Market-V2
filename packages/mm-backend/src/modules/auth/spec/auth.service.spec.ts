@@ -14,7 +14,6 @@ import {
   mixinOAuthCommandFixture,
   mixinOAuthResponseFixture,
 } from './auth.fixtures';
-import { createHash } from 'crypto';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -75,9 +74,8 @@ describe('AuthService', () => {
       const result = await service.validateUser(command);
 
       expect(jwtService.sign).toHaveBeenCalledWith({
-        username: 'admin',
         roles: ['Admin'],
-        sub: 'admin_id',
+        sub: 'admin',
       });
       expect(result).toStrictEqual(response);
     });
@@ -96,12 +94,20 @@ describe('AuthService', () => {
     it('should call mixinGateway.oauthHandler if code length is valid', async () => {
       const command = mixinOAuthCommandFixture;
       const response = mixinOAuthResponseFixture;
-      jest.spyOn(mixinGateway, 'oauthHandler').mockResolvedValue(response);
+      jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
+      jest
+        .spyOn(mixinGateway, 'oauthHandler')
+        .mockResolvedValue({
+          clientId: "clientId"
+        });
 
       const result = await service.mixinOauthHandler(command);
 
-      expect(mixinGateway.oauthHandler).toHaveBeenCalledWith(command.code);
-      expect(result).toBe(response);
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        roles: ['User'],
+        sub: 'clientId',
+      });
+      expect(result).toStrictEqual(response);
     });
 
     it('should throw HttpException if code length is invalid', async () => {

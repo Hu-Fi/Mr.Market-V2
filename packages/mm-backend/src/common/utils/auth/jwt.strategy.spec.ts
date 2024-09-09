@@ -24,11 +24,10 @@ describe('JwtStrategy', () => {
   });
 
   it('should validate the payload and return user data', async () => {
-    const payload = { username: 'admin', roles: ['Admin'], sub: 'admin_id' };
+    const payload = { sub: 'admin', roles: ['Admin'] };
     const result = await strategy.validate(payload);
     expect(result).toEqual({
-      userId: 'admin_id',
-      username: 'admin',
+      userId: 'admin',
       roles: ['Admin'],
     });
   });

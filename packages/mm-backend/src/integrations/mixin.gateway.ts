@@ -7,6 +7,7 @@ import {
   MixinApi,
 } from '@mixin.dev/mixin-node-sdk';
 import { ConfigService } from '@nestjs/config';
+import { AuthorizationResponse } from '../common/interfaces/auth.interfaces';
 
 @Injectable()
 export class MixinGateway {
@@ -33,11 +34,20 @@ export class MixinGateway {
 
   async oauthHandler(code: string) {
     const { publicKey } = getED25519KeyPair();
-    return await this._client.oauth.getToken({
+    const tokenResponse = await this._client.oauth.getToken({
       client_id: this.keystore.app_id,
       code: code,
       ed25519: base64RawURLEncode(publicKey),
       client_secret: this._clientSecret,
     });
+
+    const authorization = (await this._client.oauth.authorize({
+      authorization_id: tokenResponse.authorization_id,
+      scopes: ['PROFILE:READ'],
+    })) as unknown as AuthorizationResponse;
+
+    return {
+      clientId: authorization.user.user_id,
+    };
   }
 }

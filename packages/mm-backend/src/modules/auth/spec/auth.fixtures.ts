@@ -1,11 +1,11 @@
 import {
   AdminLoginCommand,
   AdminLoginDto,
-  AdminLoginResponse,
   MixinOAuthCommand,
-  MixinOAuthDto, MixinOAuthResponse,
+  MixinOAuthDto,
 } from '../model/auth.model';
 import { createHash } from 'crypto';
+import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 
 const OAUTH_CODE = 'a'.repeat(64);
 const HASHED_ADMIN_PASSWORD = createHash('sha3-256')
@@ -28,12 +28,10 @@ export const mixinOAuthCommandFixture: MixinOAuthCommand = {
   code: OAUTH_CODE,
 };
 
-export const adminLoginResponseFixture: AdminLoginResponse = {
+export const adminLoginResponseFixture: JwtResponse = {
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
 };
 
-export const mixinOAuthResponseFixture: MixinOAuthResponse = {
-  ed25519: 'some-ed25519-key',
-  authorization_id: 'auth-1234',
-  scope: 'read:profile write:messages',
+export const mixinOAuthResponseFixture: JwtResponse = {
+  accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
 };

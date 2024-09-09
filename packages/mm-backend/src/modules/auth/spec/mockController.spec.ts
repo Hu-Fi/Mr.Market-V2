@@ -11,12 +11,12 @@ import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
 import { adminLoginCommandFixture } from './auth.fixtures';
-import { AdminLoginResponse } from '../model/auth.model';
+import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
   let authService: AuthService;
-  let adminLoginResponse: AdminLoginResponse;
+  let adminLoginResponse: JwtResponse;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
