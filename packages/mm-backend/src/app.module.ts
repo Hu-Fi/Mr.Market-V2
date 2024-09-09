@@ -6,12 +6,16 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
+import Joi from 'joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: Joi.object({
+        ADMIN_PASSWORD: Joi.string().required(),
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

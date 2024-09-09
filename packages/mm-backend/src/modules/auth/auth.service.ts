@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -24,8 +25,8 @@ export class AuthService {
 
   async validateUser(command: AdminLoginCommand): Promise<JwtResponse> {
     const { password } = command;
-    if (!this.adminPassword || !password) {
-      throw new UnauthorizedException('Password is required');
+    if (!password) {
+      throw new BadRequestException('Password is required');
     }
 
     const hashedAdminPassword = createHash('sha3-256')
@@ -43,7 +44,7 @@ export class AuthService {
   async mixinOauthHandler(command: MixinOAuthCommand): Promise<JwtResponse> {
     const { code } = command;
     if (code.length !== 64) {
-      throw new HttpException('Invalid code length', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('Invalid code length');
     }
 
     const clientData: any = await this.mixinGateway.oauthHandler(code);
