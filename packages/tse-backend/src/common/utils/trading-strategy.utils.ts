@@ -79,6 +79,25 @@ const priceSourceFunctions: Record<PriceSourceType, PriceSourceFunction> = {
   [PriceSourceType.LAST_PRICE]: (_, ticker) => ticker.last,
 };
 
+/**
+ * This util defines a mechanism for fetching a price from an exchange, based on different price sources.
+ *
+ * 1. `PriceSourceFunction`: A type alias for a function that takes an `orderBook` and a `ticker`,
+ *    and returns a number (the price).
+ *
+ * 2. `priceSourceFunctions`: An object that maps `PriceSourceType` (such as MID_PRICE, BEST_ASK, BEST_BID, and LAST_PRICE)
+ *    to specific functions. Each function calculates a price based on either the order book or the ticker:
+ *      - `MID_PRICE`: Returns the midpoint between the best bid and best ask.
+ *      - `BEST_ASK`: Returns the lowest ask price.
+ *      - `BEST_BID`: Returns the highest bid price.
+ *      - `LAST_PRICE`: Returns the last traded price from the ticker.
+ *
+ * 3. `getPriceSource`: An asynchronous function that:
+ *      - Fetches the order book for a given trading pair from the exchange.
+ *      - Fetches the ticker only if the `PriceSourceType` is `LAST_PRICE`.
+ *      - Uses the appropriate function from `priceSourceFunctions` to calculate and return the price based on the `priceSourceType`.
+ *      - Throws an error if an invalid `PriceSourceType` is provided.
+ */
 export const getPriceSource = async (
   exchange: any,
   pair: string,
