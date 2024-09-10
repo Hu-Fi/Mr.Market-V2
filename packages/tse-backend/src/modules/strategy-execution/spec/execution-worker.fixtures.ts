@@ -1,6 +1,8 @@
 import { AmountChangeType, PriceSourceType, StrategyInstanceStatus } from '../../../common/enums/strategy-type.enums';
+import { Arbitrage } from '../../../common/entities/arbitrage.entity';
+import { MarketMaking } from '../../../common/entities/market-making.entity';
 
-export const arbitrageStrategiesDataFixture = [
+export const arbitrageStrategiesDataFixture: Arbitrage[] = [
   {
     id: 1,
     userId: 'user1',
@@ -32,7 +34,7 @@ export const arbitrageStrategiesDataFixture = [
   },
 ]
 
-export const marketMakingStrategiesDataFixture = [
+export const marketMakingStrategiesDataFixture: MarketMaking[] = [
   {
     id: 1,
     userId: 'user1',
