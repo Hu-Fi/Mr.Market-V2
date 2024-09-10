@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
+import { Matches } from 'class-validator';
 
 export class ArbitrageStrategyDto {
   @AutoMap()
@@ -22,6 +23,7 @@ export class ArbitrageStrategyDto {
     example: 'ETH/USDT',
     description: 'The trading pair to monitor for arbitrage opportunities.',
   })
+  @Matches(/^[^/]+\/[^/]+$/)
   pair: string;
 
   @AutoMap()
@@ -64,8 +66,8 @@ export class ArbitrageStrategyCommand {
   userId: string;
   @AutoMap()
   clientId: string;
-  @AutoMap()
-  pair: string;
+  sideA: string;
+  sideB: string;
   @AutoMap()
   amountToTrade: number;
   @AutoMap()
@@ -84,7 +86,8 @@ export class ArbitrageStrategyData {
   id: number;
   userId: string;
   clientId: string;
-  pair: string;
+  sideA: string;
+  sideB: string;
   amountToTrade: number;
   minProfitability: number;
   exchangeAName: string;

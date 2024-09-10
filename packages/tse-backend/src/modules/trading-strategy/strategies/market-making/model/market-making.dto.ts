@@ -5,6 +5,7 @@ import {
   PriceSourceType,
   StrategyInstanceStatus,
 } from '../../../../../common/enums/strategy-type.enums';
+import { Matches } from 'class-validator';
 
 export class MarketMakingStrategyDto {
   @AutoMap()
@@ -17,6 +18,7 @@ export class MarketMakingStrategyDto {
 
   @AutoMap()
   @ApiProperty({ description: 'Trading pair', example: 'BTC/USDT' })
+  @Matches(/^[^/]+\/[^/]+$/)
   pair: string;
 
   @AutoMap()
@@ -93,8 +95,8 @@ export class MarketMakingStrategyCommand {
   userId: string;
   @AutoMap()
   clientId: string;
-  @AutoMap()
-  pair: string;
+  sideA: string;
+  sideB: string;
   @AutoMap()
   exchangeName: string;
   @AutoMap()
@@ -123,7 +125,8 @@ export class MarketMakingStrategyData {
   id: number;
   userId: string;
   clientId: string;
-  pair: string;
+  sideA: string;
+  sideB: string;
   exchangeName: string;
   bidSpread: number;
   askSpread: number;

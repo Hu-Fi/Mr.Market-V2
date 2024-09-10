@@ -22,3 +22,7 @@ export enum AmountChangeType {
   PERCENTAGE = 'percentage',
   FIXED = 'fixed',
 }
+
+export enum TimeUnit {
+  MILLISECONDS = 1000,
+}

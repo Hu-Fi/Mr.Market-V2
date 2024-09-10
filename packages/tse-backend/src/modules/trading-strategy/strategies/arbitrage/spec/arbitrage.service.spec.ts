@@ -4,6 +4,7 @@ import { ArbitrageService } from '../arbitrage.service';
 import { ArbitrageStrategyRepository } from '../arbitrage.repository';
 import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
+import { ArbitrageDataFixture } from './arbitrage.fixtures';
 
 describe('ArbitrageService', () => {
   let service: ArbitrageService;
@@ -37,20 +38,7 @@ describe('ArbitrageService', () => {
         userId: 'user1',
         amountToTrade: 10,
       };
-      const result: Arbitrage = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USD',
-        amountToTrade: 10,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const result: Arbitrage = ArbitrageDataFixture;
 
       jest.spyOn(repository, 'createStrategy').mockResolvedValue(result);
 
@@ -107,22 +95,7 @@ describe('ArbitrageService', () => {
 
   describe('findRunningStrategies', () => {
     it('should return a list of running strategies', async () => {
-      const strategies: Arbitrage[] = [
-        {
-          id: 1,
-          userId: 'user1',
-          clientId: 'client1',
-          pair: 'ETH/USD',
-          amountToTrade: 10,
-          minProfitability: 0.01,
-          exchangeAName: 'ExchangeA',
-          exchangeBName: 'ExchangeB',
-          checkIntervalSeconds: 10,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: StrategyInstanceStatus.RUNNING,
-        },
-      ];
+      const strategies: Arbitrage[] = [ArbitrageDataFixture];
 
       jest
         .spyOn(repository, 'findRunningStrategies')
@@ -143,20 +116,7 @@ describe('ArbitrageService', () => {
   describe('findLatestStrategyByUserId', () => {
     it('should return the latest strategy for the given user ID', async () => {
       const userId = 'user1';
-      const strategy: Arbitrage = {
-        id: 1,
-        userId,
-        clientId: 'client1',
-        pair: 'ETH/USD',
-        amountToTrade: 10,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const strategy: Arbitrage = ArbitrageDataFixture;
 
       jest
         .spyOn(repository, 'findLatestStrategyByUserId')

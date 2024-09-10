@@ -10,6 +10,7 @@ import {
 import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { ArbitrageStrategyProfile } from '../arbitrage.mapper';
+import { ArbitrageCommandFixture, ArbitrageDtoFixture } from './arbitrage.fixtures';
 
 describe('ArbitrageController', () => {
   let controller: ArbitrageController;
@@ -42,18 +43,8 @@ describe('ArbitrageController', () => {
 
   describe('createArbitrage', () => {
     it('should call service.create with the mapped command', async () => {
-      const dto: ArbitrageStrategyDto = {
-        userId: '123',
-        clientId: '456',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'binance',
-        exchangeBName: 'mexc',
-        checkIntervalSeconds: 10,
-        maxOpenOrders: 1,
-      };
-      const command = dto as ArbitrageStrategyCommand;
+      const dto: ArbitrageStrategyDto = ArbitrageDtoFixture;
+      const command: ArbitrageStrategyCommand = ArbitrageCommandFixture;
       jest.spyOn(service, 'create').mockImplementation(async () => {});
 
       await controller.createArbitrage(dto);

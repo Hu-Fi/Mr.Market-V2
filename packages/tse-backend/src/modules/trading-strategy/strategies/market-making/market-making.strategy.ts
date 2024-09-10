@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Strategy } from '../../strategy.interface';
 import {
   OrderDetail,
@@ -15,7 +15,7 @@ import {
 } from './model/market-making.dto';
 import {
   StrategyInstanceStatus,
-  StrategyTypeEnums,
+  StrategyTypeEnums, TimeUnit,
 } from '../../../../common/enums/strategy-type.enums';
 import {
   calculateOrderDetails,
@@ -39,7 +39,8 @@ export class MarketMakingStrategy implements Strategy {
     await this.marketMakingService.createStrategy({
       userId: command.userId,
       clientId: command.clientId,
-      pair: command.pair,
+      sideA: command.sideA,
+      sideB: command.sideB,
       exchangeName: command.exchangeName,
       bidSpread: command.bidSpread,
       askSpread: command.askSpread,
@@ -59,7 +60,7 @@ export class MarketMakingStrategy implements Strategy {
     const strategyEntity: MarketMakingStrategyData =
       await this.marketMakingService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('MarketMaking strategy not found');
+      throw new NotFoundException('MarketMaking strategy not found');
     }
 
     await this.marketMakingService.updateStrategyStatusById(
@@ -78,7 +79,7 @@ export class MarketMakingStrategy implements Strategy {
     const strategyEntity: MarketMakingStrategyData =
       await this.marketMakingService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('MarketMaking strategy not found');
+      throw new NotFoundException('MarketMaking strategy not found');
     }
 
     await this.marketMakingService.updateStrategyStatusById(
@@ -102,15 +103,7 @@ export class MarketMakingStrategy implements Strategy {
     const strategyEntity: MarketMakingStrategyData =
       await this.marketMakingService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('MarketMaking strategy not found');
-    }
-    if (
-      strategyEntity &&
-      strategyEntity.status !== StrategyInstanceStatus.STOPPED
-    ) {
-      throw new BadRequestException(
-        'MarketMaking strategy is not stopped or was deleted',
-      );
+      throw new NotFoundException('MarketMaking strategy not found');
     }
 
     await this.marketMakingService.updateStrategyStatusById(
@@ -134,7 +127,7 @@ export class MarketMakingStrategy implements Strategy {
       if (!this.strategies.get(strategy.id)) {
         const intervalId = setInterval(async () => {
           await this.evaluateMarketMaking(strategy);
-        }, strategy.checkIntervalSeconds * 1000);
+        }, strategy.checkIntervalSeconds * TimeUnit.MILLISECONDS);
 
         const configuration: StrategyConfig = {
           strategyKey: createStrategyKey({
@@ -154,7 +147,8 @@ export class MarketMakingStrategy implements Strategy {
     const {
       userId,
       clientId,
-      pair,
+      sideA,
+      sideB,
       exchangeName,
       bidSpread,
       askSpread,
@@ -171,6 +165,7 @@ export class MarketMakingStrategy implements Strategy {
 
     const exchange = this.exchangeRegistryService.getExchange(exchangeName);
 
+    const pair = `${sideA}/${sideB}`;
     const priceSource = await getPriceSource(exchange, pair, priceSourceType);
 
     const orderDetails: OrderDetail[] = calculateOrderDetails(
@@ -186,53 +181,73 @@ export class MarketMakingStrategy implements Strategy {
     );
 
     for (const detail of orderDetails) {
-      const { currentOrderAmount, buyPrice, sellPrice, shouldBuy, shouldSell } =
-        detail;
-
-      if (shouldBuy) {
-        const adjustedAmount = exchange.amountToPrecision(
-          pair,
-          currentOrderAmount,
-        );
-        const adjustedPrice = exchange.priceToPrecision(pair, buyPrice);
-        await this.placeOrder({
-          userId,
-          clientId,
-          exchangeName,
-          pair,
-          side: TradeSideType.BUY,
-          amount: parseFloat(adjustedAmount),
-          price: parseFloat(adjustedPrice),
-        });
-      } else {
-        this.logger.debug(
-          `Skipping buy order for ${pair} as price source ${priceSource} is above the ceiling price ${ceilingPrice}.`,
-        );
-      }
-
-      if (shouldSell) {
-        const adjustedAmount = exchange.amountToPrecision(
-          pair,
-          currentOrderAmount,
-        );
-        const adjustedPrice = exchange.priceToPrecision(pair, sellPrice);
-        await this.placeOrder({
-          userId,
-          clientId,
-          exchangeName,
-          pair,
-          side: TradeSideType.SELL,
-          amount: parseFloat(adjustedAmount),
-          price: parseFloat(adjustedPrice),
-        });
-      } else {
-        this.logger.debug(
-          `Skipping sell order for ${pair} as price source ${priceSource} is below the floor price ${floorPrice}.`,
-        );
-      }
+      await this.handleBuyOrder(detail, exchange, pair, priceSource, userId, clientId, exchangeName, ceilingPrice);
+      await this.handleSellOrder(detail, exchange, pair, priceSource, userId, clientId, exchangeName, floorPrice);
     }
 
     //TODO: persist data to redis cache - to check last trade is filled
+  }
+
+  private async handleBuyOrder(
+    detail: OrderDetail,
+    exchange,
+    pair: string,
+    priceSource: number,
+    userId: string,
+    clientId: string,
+    exchangeName: string,
+    ceilingPrice: number,
+  ) {
+    const { currentOrderAmount, buyPrice, shouldBuy } = detail;
+
+    if (shouldBuy) {
+      const adjustedAmount = exchange.amountToPrecision(pair, currentOrderAmount);
+      const adjustedPrice = exchange.priceToPrecision(pair, buyPrice);
+      await this.placeOrder({
+        userId,
+        clientId,
+        exchangeName,
+        pair,
+        side: TradeSideType.BUY,
+        amount: parseFloat(adjustedAmount),
+        price: parseFloat(adjustedPrice),
+      });
+    } else {
+      this.logger.debug(
+        `Skipping buy order for ${pair} as price source ${priceSource} is above the ceiling price ${ceilingPrice}.`,
+      );
+    }
+  }
+
+  private async handleSellOrder(
+    detail: OrderDetail,
+    exchange,
+    pair: string,
+    priceSource: number,
+    userId: string,
+    clientId: string,
+    exchangeName: string,
+    floorPrice: number,
+  ) {
+    const { currentOrderAmount, sellPrice, shouldSell } = detail;
+
+    if (shouldSell) {
+      const adjustedAmount = exchange.amountToPrecision(pair, currentOrderAmount);
+      const adjustedPrice = exchange.priceToPrecision(pair, sellPrice);
+      await this.placeOrder({
+        userId,
+        clientId,
+        exchangeName,
+        pair,
+        side: TradeSideType.SELL,
+        amount: parseFloat(adjustedAmount),
+        price: parseFloat(adjustedPrice),
+      });
+    } else {
+      this.logger.debug(
+        `Skipping sell order for ${pair} as price source ${priceSource} is below the floor price ${floorPrice}.`,
+      );
+    }
   }
 
   async placeOrder(params: PlaceOrderParams) {

@@ -2,11 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MarketMakingService } from '../market-making.service';
 import { MarketMakingRepository } from '../market-making.repository';
 import { MarketMaking } from '../../../../../common/entities/market-making.entity';
-import {
-  AmountChangeType,
-  PriceSourceType,
-  StrategyInstanceStatus,
-} from '../../../../../common/enums/strategy-type.enums';
+import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
+import { MarketMakingDataFixture, MarketMakingPartialDataFixture } from './market-making.fixtures';
 
 describe('MarketMakingService', () => {
   let service: MarketMakingService;
@@ -34,42 +31,8 @@ describe('MarketMakingService', () => {
 
   describe('createStrategy', () => {
     it('should create a strategy and return it', async () => {
-      const strategy: Partial<MarketMaking> = {
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USD',
-        exchangeName: 'Binance',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1,
-        checkIntervalSeconds: 10,
-        numberOfLayers: 1,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 1,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 50000,
-        floorPrice: 20000,
-      };
-      const result: MarketMaking = {
-        id: 1,
-        userId: strategy.userId,
-        clientId: strategy.clientId,
-        pair: strategy.pair,
-        exchangeName: strategy.exchangeName,
-        bidSpread: strategy.bidSpread,
-        askSpread: strategy.askSpread,
-        orderAmount: strategy.orderAmount,
-        checkIntervalSeconds: strategy.checkIntervalSeconds,
-        numberOfLayers: strategy.numberOfLayers,
-        priceSourceType: strategy.priceSourceType,
-        amountChangePerLayer: strategy.amountChangePerLayer,
-        amountChangeType: strategy.amountChangeType,
-        ceilingPrice: strategy.ceilingPrice,
-        floorPrice: strategy.floorPrice,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.CREATED,
-      };
+      const strategy: Partial<MarketMaking> = MarketMakingPartialDataFixture;
+      const result: MarketMaking = MarketMakingDataFixture;
 
       jest.spyOn(repository, 'createStrategy').mockResolvedValue(result);
 
@@ -115,28 +78,7 @@ describe('MarketMakingService', () => {
 
   describe('findRunningStrategies', () => {
     it('should return a list of running strategies', async () => {
-      const strategies: MarketMaking[] = [
-        {
-          id: 1,
-          userId: 'user1',
-          clientId: 'client1',
-          pair: 'ETH/USD',
-          exchangeName: 'Binance',
-          bidSpread: 0.1,
-          askSpread: 0.1,
-          orderAmount: 1,
-          checkIntervalSeconds: 10,
-          numberOfLayers: 1,
-          priceSourceType: PriceSourceType.MID_PRICE,
-          amountChangePerLayer: 1,
-          amountChangeType: AmountChangeType.PERCENTAGE,
-          ceilingPrice: 50000,
-          floorPrice: 20000,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: StrategyInstanceStatus.RUNNING,
-        },
-      ];
+      const strategies: MarketMaking[] = [MarketMakingDataFixture];
 
       jest
         .spyOn(repository, 'findRunningStrategies')
@@ -155,26 +97,7 @@ describe('MarketMakingService', () => {
   describe('findLatestStrategyByUserId', () => {
     it('should return the latest strategy for the given user ID', async () => {
       const userId = 'user1';
-      const strategy: MarketMaking = {
-        id: 1,
-        userId,
-        clientId: 'client1',
-        pair: 'ETH/USD',
-        exchangeName: 'Binance',
-        bidSpread: 0.1,
-        askSpread: 0.1,
-        orderAmount: 1,
-        checkIntervalSeconds: 10,
-        numberOfLayers: 1,
-        priceSourceType: PriceSourceType.MID_PRICE,
-        amountChangePerLayer: 1,
-        amountChangeType: AmountChangeType.PERCENTAGE,
-        ceilingPrice: 50000,
-        floorPrice: 20000,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const strategy: MarketMaking = MarketMakingDataFixture;
 
       jest
         .spyOn(repository, 'findLatestStrategyByUserId')

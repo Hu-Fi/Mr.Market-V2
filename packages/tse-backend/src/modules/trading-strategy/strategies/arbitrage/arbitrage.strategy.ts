@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Strategy } from '../../strategy.interface';
 import { ExchangeRegistryService } from '../../../exchange-registry/exchange-registry.service';
 import { ExchangeTradeService } from '../../../exchange-trade/exchange-trade.service';
@@ -23,7 +23,7 @@ import {
 } from '../../../../common/interfaces/trading-strategy.interfaces';
 import {
   StrategyInstanceStatus,
-  StrategyTypeEnums,
+  StrategyTypeEnums, TimeUnit,
 } from '../../../../common/enums/strategy-type.enums';
 import { ArbitrageService } from './arbitrage.service';
 
@@ -49,13 +49,14 @@ export class ArbitrageStrategy implements Strategy {
     );
 
     if (!isExchangeAValid || !isExchangeBValid) {
-      throw new BadRequestException('Provided exchange is not supported');
+      throw new NotFoundException('Provided exchange is not supported');
     }
 
     await this.arbitrageService.createStrategy({
       userId: command.userId,
       clientId: command.clientId,
-      pair: command.pair,
+      sideA: command.sideA,
+      sideB: command.sideB,
       amountToTrade: command.amountToTrade,
       minProfitability: command.minProfitability,
       exchangeAName: command.exchangeAName,
@@ -70,7 +71,7 @@ export class ArbitrageStrategy implements Strategy {
     const strategyEntity: ArbitrageStrategyData =
       await this.arbitrageService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('Arbitrage strategy not found');
+      throw new NotFoundException('Arbitrage strategy not found');
     }
 
     await this.arbitrageService.updateStrategyStatusById(
@@ -89,7 +90,7 @@ export class ArbitrageStrategy implements Strategy {
     const strategyEntity: ArbitrageStrategyData =
       await this.arbitrageService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('Arbitrage strategy not found');
+      throw new NotFoundException('Arbitrage strategy not found');
     }
 
     await this.arbitrageService.updateStrategyStatusById(
@@ -113,15 +114,7 @@ export class ArbitrageStrategy implements Strategy {
     const strategyEntity: ArbitrageStrategyData =
       await this.arbitrageService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('Arbitrage strategy not found');
-    }
-    if (
-      strategyEntity &&
-      strategyEntity.status !== StrategyInstanceStatus.STOPPED
-    ) {
-      throw new BadRequestException(
-        'Arbitrage strategy is not stopped or was deleted',
-      );
+      throw new NotFoundException('Arbitrage strategy not found');
     }
 
     await this.arbitrageService.updateStrategyStatusById(
@@ -147,7 +140,7 @@ export class ArbitrageStrategy implements Strategy {
           // TODO: control opened orders
           //  quantity not filled orders yet get from redis cache cannot be more than strategy.maxOpenOrders
           await this.evaluateArbitrage(strategy);
-        }, strategy.checkIntervalSeconds * 1000);
+        }, strategy.checkIntervalSeconds * TimeUnit.MILLISECONDS);
 
         const configuration: StrategyConfig = {
           strategyKey: createStrategyKey({
@@ -168,7 +161,8 @@ export class ArbitrageStrategy implements Strategy {
     const {
       userId,
       clientId,
-      pair,
+      sideA,
+      sideB,
       amountToTrade,
       minProfitability,
       exchangeAName,
@@ -177,6 +171,8 @@ export class ArbitrageStrategy implements Strategy {
 
     const exchangeA = this.exchangeRegistryService.getExchange(exchangeAName);
     const exchangeB = this.exchangeRegistryService.getExchange(exchangeBName);
+
+    const pair = `${sideA}/${sideB}`;
 
     const orderBookA = await exchangeA.fetchOrderBook(pair);
     const orderBookB = await exchangeB.fetchOrderBook(pair);

@@ -1,5 +1,5 @@
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post, Put, Query } from '@nestjs/common';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
@@ -11,7 +11,7 @@ import {
 import { MarketMakingStrategy } from './market-making.strategy';
 
 @ApiTags('trading-strategy')
-@Controller('arbitrage')
+@Controller('market-making')
 export class MarketMakingController {
   constructor(
     private readonly service: MarketMakingStrategy,
@@ -28,7 +28,7 @@ export class MarketMakingController {
     return await this.service.create(command);
   }
 
-  @Post('/pause-market-making')
+  @Put('/pause-market-making')
   async pauseMarketMakingStrategy(@Query() dto: MarketMakingStrategyActionDto) {
     const command = this.mapper.map(
       dto,
@@ -38,7 +38,7 @@ export class MarketMakingController {
     return await this.service.pause(command);
   }
 
-  @Post('/stop-market-making')
+  @Put('/stop-market-making')
   async stopMarketMakingStrategy(@Query() dto: MarketMakingStrategyActionDto) {
     const command = this.mapper.map(
       dto,
@@ -48,7 +48,7 @@ export class MarketMakingController {
     return await this.service.stop(command);
   }
 
-  @Post('/delete-market-making')
+  @Put('/delete-market-making')
   async deleteMarketMakingStrategy(
     @Query() dto: MarketMakingStrategyActionDto,
   ) {
