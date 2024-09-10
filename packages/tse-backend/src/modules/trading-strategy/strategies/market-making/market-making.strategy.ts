@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Strategy } from '../../strategy.interface';
 import {
   OrderDetail,
@@ -60,7 +60,7 @@ export class MarketMakingStrategy implements Strategy {
     const strategyEntity: MarketMakingStrategyData =
       await this.marketMakingService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('MarketMaking strategy not found');
+      throw new NotFoundException('MarketMaking strategy not found');
     }
 
     await this.marketMakingService.updateStrategyStatusById(
@@ -79,7 +79,7 @@ export class MarketMakingStrategy implements Strategy {
     const strategyEntity: MarketMakingStrategyData =
       await this.marketMakingService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('MarketMaking strategy not found');
+      throw new NotFoundException('MarketMaking strategy not found');
     }
 
     await this.marketMakingService.updateStrategyStatusById(
@@ -103,7 +103,7 @@ export class MarketMakingStrategy implements Strategy {
     const strategyEntity: MarketMakingStrategyData =
       await this.marketMakingService.findLatestStrategyByUserId(command.userId);
     if (!strategyEntity) {
-      throw new BadRequestException('MarketMaking strategy not found');
+      throw new NotFoundException('MarketMaking strategy not found');
     }
 
     await this.marketMakingService.updateStrategyStatusById(
