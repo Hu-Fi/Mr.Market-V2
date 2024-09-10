@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger, BadRequestException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { MarketMakingStrategy } from '../market-making.strategy';
 import { ExchangeRegistryService } from '../../../../exchange-registry/exchange-registry.service';
 import { ExchangeTradeService } from '../../../../exchange-trade/exchange-trade.service';
@@ -99,7 +99,7 @@ describe('MarketMakingStrategy', () => {
       );
     });
 
-    it('should throw BadRequestException if strategy not found', async () => {
+    it('should throw NotFoundException if strategy not found', async () => {
       const command: MarketMakingStrategyActionCommand = {
         userId: 'user1',
         clientId: 'client1',
@@ -110,7 +110,7 @@ describe('MarketMakingStrategy', () => {
         .mockResolvedValue(null);
 
       await expect(strategy.pause(command)).rejects.toThrow(
-        BadRequestException,
+        NotFoundException,
       );
     });
   });
@@ -138,7 +138,7 @@ describe('MarketMakingStrategy', () => {
       expect(strategy.cancelActiveOrders).toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException if strategy not found', async () => {
+    it('should throw NotFoundException if strategy not found', async () => {
       const command: MarketMakingStrategyActionCommand = {
         userId: 'user1',
         clientId: 'client1',
@@ -148,7 +148,7 @@ describe('MarketMakingStrategy', () => {
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
         .mockResolvedValue(null);
 
-      await expect(strategy.stop(command)).rejects.toThrow(BadRequestException);
+      await expect(strategy.stop(command)).rejects.toThrow(NotFoundException);
     });
   });
 
