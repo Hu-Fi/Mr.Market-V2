@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Strategy } from '../../strategy.interface';
 import {
   OrderDetail,
@@ -15,7 +15,7 @@ import {
 } from './model/market-making.dto';
 import {
   StrategyInstanceStatus,
-  StrategyTypeEnums,
+  StrategyTypeEnums, TimeUnit,
 } from '../../../../common/enums/strategy-type.enums';
 import {
   calculateOrderDetails,
@@ -127,7 +127,7 @@ export class MarketMakingStrategy implements Strategy {
       if (!this.strategies.get(strategy.id)) {
         const intervalId = setInterval(async () => {
           await this.evaluateMarketMaking(strategy);
-        }, strategy.checkIntervalSeconds * 1000);
+        }, strategy.checkIntervalSeconds * TimeUnit.MILLISECONDS);
 
         const configuration: StrategyConfig = {
           strategyKey: createStrategyKey({
