@@ -123,18 +123,18 @@ export function adjustOrderAmount(
   amountChangeType: AmountChangeType,
   amountChangePerLayer: number,
 ): number {
-  if (layer > 1) {
-    if (amountChangeType === AmountChangeType.FIXED) {
-      return initialOrderAmount + (layer - 1) * amountChangePerLayer;
-    } else if (amountChangeType === AmountChangeType.PERCENTAGE) {
-      let adjustedAmount = initialOrderAmount;
-      for (let i = 1; i < layer; i++) {
-        adjustedAmount += adjustedAmount * (amountChangePerLayer / 100);
-      }
-      return adjustedAmount;
-    }
+  if (layer <= 1) return initialOrderAmount;
+
+  if (amountChangeType === AmountChangeType.FIXED) {
+    return initialOrderAmount + (layer - 1) * amountChangePerLayer;
   }
-  return initialOrderAmount;
+
+  let adjustedAmount = initialOrderAmount;
+  for (let i = 1; i < layer; i++) {
+    adjustedAmount += adjustedAmount * (amountChangePerLayer / 100);
+  }
+
+  return adjustedAmount;
 }
 
 export function calculatePrices(
