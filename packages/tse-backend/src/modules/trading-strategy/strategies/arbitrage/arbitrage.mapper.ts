@@ -29,8 +29,12 @@ export class ArbitrageStrategyProfile extends AutomapperProfile {
           mapFrom((source) => source.exchangeBName.toLowerCase()),
         ),
         forMember(
-          (destination) => destination.pair,
-          mapFrom((source) => source.pair.toUpperCase()),
+          (destination) => destination.sideA,
+          mapFrom((source) => source.pair.split('/')[0].toUpperCase()),
+        ),
+        forMember(
+          (destination) => destination.sideB,
+          mapFrom((source) => source.pair.split('/')[1].toUpperCase()),
         ),
       );
       createMap(

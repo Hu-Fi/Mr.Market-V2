@@ -19,7 +19,10 @@ export class Arbitrage {
   clientId: string;
 
   @Column()
-  pair: string;
+  sideA: string;
+
+  @Column()
+  sideB: string
 
   @Column('decimal', { precision: 10, scale: 2 })
   amountToTrade: number;

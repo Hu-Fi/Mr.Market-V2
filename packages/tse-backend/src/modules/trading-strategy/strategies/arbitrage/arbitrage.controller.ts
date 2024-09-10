@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -28,7 +28,7 @@ export class ArbitrageController {
     return this.service.create(command);
   }
 
-  @Post('/pause-arbitrage')
+  @Put('/pause-arbitrage')
   async pauseArbitrage(@Query() dto: ArbitrageStrategyActionDto) {
     const command = this.mapper.map(
       dto,
@@ -38,7 +38,7 @@ export class ArbitrageController {
     return this.service.pause(command);
   }
 
-  @Post('/stop-arbitrage')
+  @Put('/stop-arbitrage')
   async stopArbitrage(@Query() dto: ArbitrageStrategyActionDto) {
     const command = this.mapper.map(
       dto,
@@ -48,7 +48,7 @@ export class ArbitrageController {
     return this.service.stop(command);
   }
 
-  @Post('/delete-arbitrage')
+  @Put('/delete-arbitrage')
   async deleteArbitrage(@Query() dto: ArbitrageStrategyActionDto) {
     const command = this.mapper.map(
       dto,

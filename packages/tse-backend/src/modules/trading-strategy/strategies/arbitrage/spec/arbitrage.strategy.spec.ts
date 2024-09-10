@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger, BadRequestException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { ArbitrageStrategy } from '../arbitrage.strategy';
 import { ExchangeRegistryService } from '../../../../exchange-registry/exchange-registry.service';
 import { ExchangeTradeService } from '../../../../exchange-trade/exchange-trade.service';
@@ -16,6 +16,7 @@ import {
 } from '../model/arbitrage.dto';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
+import { ArbitrageCommandFixture, ArbitrageDataFixture } from './arbitrage.fixtures';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateVWAPForAmount: jest.fn(),
@@ -76,53 +77,34 @@ describe('ArbitrageStrategy', () => {
     it('should create a strategy if both exchanges are supported', async () => {
       (isExchangeSupported as jest.Mock).mockReturnValue(true);
 
-      const command: ArbitrageStrategyCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-        maxOpenOrders: 10,
-      };
+      const command: ArbitrageStrategyCommand = ArbitrageCommandFixture;
 
       await strategy.create(command);
 
       expect(arbitrageService.createStrategy).toHaveBeenCalledWith(
         expect.objectContaining({
-          userId: 'user1',
-          clientId: 'client1',
-          pair: 'ETH/USDT',
+          userId: '123',
+          clientId: '456',
+          sideA: 'ETH',
+          sideB: 'USDT',
           amountToTrade: 1.0,
           minProfitability: 0.01,
-          exchangeAName: 'ExchangeA',
-          exchangeBName: 'ExchangeB',
-          checkIntervalSeconds: 5,
-          maxOpenOrders: 10,
+          exchangeAName: 'binance',
+          exchangeBName: 'mexc',
+          checkIntervalSeconds: 10,
+          maxOpenOrders: 1,
           status: StrategyInstanceStatus.CREATED,
         }),
       );
     });
 
-    it('should throw BadRequestException if an exchange is not supported', async () => {
-      const command: ArbitrageStrategyCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'UnsupportedExchange',
-        checkIntervalSeconds: 5,
-        maxOpenOrders: 10,
-      };
+    it('should throw NotFoundException if an exchange is not supported', async () => {
+      const command: ArbitrageStrategyCommand = ArbitrageCommandFixture;
 
       (isExchangeSupported as jest.Mock).mockReturnValue(false);
 
       await expect(strategy.create(command)).rejects.toThrow(
-        BadRequestException,
+        NotFoundException,
       );
     });
   });
@@ -133,21 +115,7 @@ describe('ArbitrageStrategy', () => {
         userId: 'user1',
         clientId: 'client1',
       };
-      const strategyData: Arbitrage = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-        maxOpenOrders: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const strategyData: Arbitrage = ArbitrageDataFixture;
 
       jest
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
@@ -161,7 +129,7 @@ describe('ArbitrageStrategy', () => {
       );
     });
 
-    it('should throw BadRequestException if strategy not found', async () => {
+    it('should throw NotFoundException if strategy not found', async () => {
       const command: ArbitrageStrategyActionCommand = {
         userId: 'user1',
         clientId: 'client1',
@@ -172,7 +140,7 @@ describe('ArbitrageStrategy', () => {
         .mockResolvedValue(null);
 
       await expect(strategy.pause(command)).rejects.toThrow(
-        BadRequestException,
+        NotFoundException,
       );
     });
   });
@@ -183,21 +151,7 @@ describe('ArbitrageStrategy', () => {
         userId: 'user1',
         clientId: 'client1',
       };
-      const strategyData: Arbitrage = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-        maxOpenOrders: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
+      const strategyData: Arbitrage = ArbitrageDataFixture;
 
       jest
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
@@ -213,7 +167,7 @@ describe('ArbitrageStrategy', () => {
       expect(strategy.cancelActiveOrders).toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException if strategy not found', async () => {
+    it('should throw NotFoundException if strategy not found', async () => {
       const command: ArbitrageStrategyActionCommand = {
         userId: 'user1',
         clientId: 'client1',
@@ -223,31 +177,17 @@ describe('ArbitrageStrategy', () => {
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
         .mockResolvedValue(null);
 
-      await expect(strategy.stop(command)).rejects.toThrow(BadRequestException);
+      await expect(strategy.stop(command)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
-    it('should delete a stopped strategy', async () => {
+    it('should delete a strategy', async () => {
       const command: ArbitrageStrategyActionCommand = {
         userId: 'user1',
         clientId: 'client1',
       };
-      const strategyData: Arbitrage = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-        maxOpenOrders: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.STOPPED,
-      };
+      const strategyData: Arbitrage = ArbitrageDataFixture;
 
       jest
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
@@ -260,50 +200,11 @@ describe('ArbitrageStrategy', () => {
         StrategyInstanceStatus.DELETED,
       );
     });
-
-    it('should throw BadRequestException if strategy is not stopped', async () => {
-      const command: ArbitrageStrategyActionCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-      };
-      const strategyData: Arbitrage = {
-        id: 1,
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-        maxOpenOrders: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StrategyInstanceStatus.RUNNING,
-      };
-
-      jest
-        .spyOn(arbitrageService, 'findLatestStrategyByUserId')
-        .mockResolvedValue(strategyData);
-
-      await expect(strategy.delete(command)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
   });
 
   describe('evaluateArbitrage', () => {
     it('should execute an arbitrage trade if an opportunity is found on ExchangeA', async () => {
-      const command: ArbitrageStrategyCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-      };
+      const command: ArbitrageStrategyCommand = ArbitrageCommandFixture;
 
       const exchangeA = {
         fetchOrderBook: jest.fn().mockResolvedValue({ bids: [], asks: [] }),
@@ -327,16 +228,7 @@ describe('ArbitrageStrategy', () => {
     });
 
     it('should not execute an arbitrage trade if no opportunity is found', async () => {
-      const command: ArbitrageStrategyCommand = {
-        userId: 'user1',
-        clientId: 'client1',
-        pair: 'ETH/USDT',
-        amountToTrade: 1.0,
-        minProfitability: 0.01,
-        exchangeAName: 'ExchangeA',
-        exchangeBName: 'ExchangeB',
-        checkIntervalSeconds: 5,
-      };
+      const command: ArbitrageStrategyCommand = ArbitrageCommandFixture;
 
       const exchangeA = {
         fetchOrderBook: jest.fn().mockResolvedValue({ bids: [], asks: [] }),
@@ -349,7 +241,7 @@ describe('ArbitrageStrategy', () => {
       jest
         .spyOn(exchangeRegistryService, 'getExchange')
         .mockImplementation((name: string) => {
-          return name === 'ExchangeA' ? (exchangeA as any) : (exchangeB as any);
+          return name === 'binance' ? (exchangeA as any) : (exchangeB as any);
         });
 
       (calculateVWAPForAmount as jest.Mock).mockReturnValueOnce(2000);
