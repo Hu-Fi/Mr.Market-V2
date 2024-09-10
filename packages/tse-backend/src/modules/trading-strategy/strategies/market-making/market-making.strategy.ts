@@ -181,53 +181,73 @@ export class MarketMakingStrategy implements Strategy {
     );
 
     for (const detail of orderDetails) {
-      const { currentOrderAmount, buyPrice, sellPrice, shouldBuy, shouldSell } =
-        detail;
-
-      if (shouldBuy) {
-        const adjustedAmount = exchange.amountToPrecision(
-          pair,
-          currentOrderAmount,
-        );
-        const adjustedPrice = exchange.priceToPrecision(pair, buyPrice);
-        await this.placeOrder({
-          userId,
-          clientId,
-          exchangeName,
-          pair,
-          side: TradeSideType.BUY,
-          amount: parseFloat(adjustedAmount),
-          price: parseFloat(adjustedPrice),
-        });
-      } else {
-        this.logger.debug(
-          `Skipping buy order for ${pair} as price source ${priceSource} is above the ceiling price ${ceilingPrice}.`,
-        );
-      }
-
-      if (shouldSell) {
-        const adjustedAmount = exchange.amountToPrecision(
-          pair,
-          currentOrderAmount,
-        );
-        const adjustedPrice = exchange.priceToPrecision(pair, sellPrice);
-        await this.placeOrder({
-          userId,
-          clientId,
-          exchangeName,
-          pair,
-          side: TradeSideType.SELL,
-          amount: parseFloat(adjustedAmount),
-          price: parseFloat(adjustedPrice),
-        });
-      } else {
-        this.logger.debug(
-          `Skipping sell order for ${pair} as price source ${priceSource} is below the floor price ${floorPrice}.`,
-        );
-      }
+      await this.handleBuyOrder(detail, exchange, pair, priceSource, userId, clientId, exchangeName, ceilingPrice);
+      await this.handleSellOrder(detail, exchange, pair, priceSource, userId, clientId, exchangeName, floorPrice);
     }
 
     //TODO: persist data to redis cache - to check last trade is filled
+  }
+
+  private async handleBuyOrder(
+    detail: OrderDetail,
+    exchange,
+    pair: string,
+    priceSource: number,
+    userId: string,
+    clientId: string,
+    exchangeName: string,
+    ceilingPrice: number,
+  ) {
+    const { currentOrderAmount, buyPrice, shouldBuy } = detail;
+
+    if (shouldBuy) {
+      const adjustedAmount = exchange.amountToPrecision(pair, currentOrderAmount);
+      const adjustedPrice = exchange.priceToPrecision(pair, buyPrice);
+      await this.placeOrder({
+        userId,
+        clientId,
+        exchangeName,
+        pair,
+        side: TradeSideType.BUY,
+        amount: parseFloat(adjustedAmount),
+        price: parseFloat(adjustedPrice),
+      });
+    } else {
+      this.logger.debug(
+        `Skipping buy order for ${pair} as price source ${priceSource} is above the ceiling price ${ceilingPrice}.`,
+      );
+    }
+  }
+
+  private async handleSellOrder(
+    detail: OrderDetail,
+    exchange,
+    pair: string,
+    priceSource: number,
+    userId: string,
+    clientId: string,
+    exchangeName: string,
+    floorPrice: number,
+  ) {
+    const { currentOrderAmount, sellPrice, shouldSell } = detail;
+
+    if (shouldSell) {
+      const adjustedAmount = exchange.amountToPrecision(pair, currentOrderAmount);
+      const adjustedPrice = exchange.priceToPrecision(pair, sellPrice);
+      await this.placeOrder({
+        userId,
+        clientId,
+        exchangeName,
+        pair,
+        side: TradeSideType.SELL,
+        amount: parseFloat(adjustedAmount),
+        price: parseFloat(adjustedPrice),
+      });
+    } else {
+      this.logger.debug(
+        `Skipping sell order for ${pair} as price source ${priceSource} is below the floor price ${floorPrice}.`,
+      );
+    }
   }
 
   async placeOrder(params: PlaceOrderParams) {
