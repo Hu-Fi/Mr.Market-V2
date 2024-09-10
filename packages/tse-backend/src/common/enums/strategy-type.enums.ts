@@ -9,3 +9,7 @@ export enum StrategyInstanceStatus {
   STOPPED = 'stopped',
   DELETED = 'deleted',
 }
+
+export enum TimeUnit {
+  MILLISECONDS = 1000,
+}
