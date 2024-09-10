@@ -13,6 +13,7 @@ export class HealthService {
     return {
       db: await this.dbHealthService.checkDbHealth(),
       exchanges: await this.exchangesHealthService.checkExchanges(),
+      // TODO: Add number of strategies running
     };
   }
 }
