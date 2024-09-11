@@ -19,4 +19,4 @@ RUN pnpm build
 
 # Start the server using the production build
 WORKDIR /usr/src/app
-CMD [ "node", "packages/tse-backend/dist/main.js" ]
+CMD [ "node", "dist/main.js" ]
