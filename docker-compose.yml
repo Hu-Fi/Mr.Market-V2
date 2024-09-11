@@ -42,3 +42,11 @@ services:
       DATABASE_LOGGING_LEVEL: ${DATABASE_LOGGING_LEVEL}
       DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
       DATABASE_AUTO_RUN_MIGRATIONS: ${DATABASE_AUTO_RUN_MIGRATIONS}
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
