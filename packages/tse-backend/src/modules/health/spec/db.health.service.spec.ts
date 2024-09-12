@@ -1,67 +1,54 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DbHealthService } from '../db.health.service';
-import { getEntityManagerToken } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
 import { CustomLogger } from '../../logger/logger.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 describe('DbHealthService', () => {
   let dbHealthService: DbHealthService;
-  let mockEntityManager: jest.Mocked<EntityManager>;
-  let mockDataSource: jest.Mocked<DataSource>;
+  let cacheManager: Cache & { get: jest.Mock; set: jest.Mock };
 
   beforeEach(async () => {
-    mockEntityManager = {
-      query: jest.fn(),
-    } as unknown as jest.Mocked<EntityManager>;
-
-    mockDataSource = {
-      entityMetadatas: [
-        { tableName: 'table1' },
-        { tableName: 'table2' },
-      ] as unknown as any[],
-    } as jest.Mocked<DataSource>;
+    const cacheManagerMock = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DbHealthService,
-        { provide: getEntityManagerToken(), useValue: mockEntityManager },
-        { provide: DataSource, useValue: mockDataSource },
+        {
+          provide: CACHE_MANAGER,
+          useValue: cacheManagerMock,
+        },
         CustomLogger,
       ],
     }).compile();
 
     dbHealthService = module.get<DbHealthService>(DbHealthService);
+    cacheManager = module.get(CACHE_MANAGER);
   });
 
   describe('checkDbHealth', () => {
-    it('should return UP when all expected tables exist', async () => {
-      mockEntityManager.query.mockResolvedValue([
-        { table_name: 'table1' },
-        { table_name: 'table2' },
-        { table_name: 'migrations' },
-      ]);
+    it('should return the last database read, write, and change timestamps', async () => {
+      const mockRead = '1726155035';
+      const mockWrite = '1726155035';
+      const mockChange = '1726155035';
+
+      cacheManager.get.mockResolvedValueOnce(mockRead);
+      cacheManager.get.mockResolvedValueOnce(mockWrite);
+      cacheManager.get.mockResolvedValueOnce(mockChange);
 
       const result = await dbHealthService.checkDbHealth();
-      expect(result).toEqual({ status: 'UP', details: {} });
-    });
 
-    it('should return DOWN with missing tables when some tables are missing', async () => {
-      mockEntityManager.query.mockResolvedValue([{ table_name: 'table1' }]);
+      expect(cacheManager.get).toHaveBeenCalledWith('SELECT');
+      expect(cacheManager.get).toHaveBeenCalledWith('INSERT');
+      expect(cacheManager.get).toHaveBeenCalledWith('UPDATE');
 
-      const result = await dbHealthService.checkDbHealth();
       expect(result).toEqual({
-        status: 'DOWN',
-        details: { missingTables: ['table2', 'migrations'] },
-      });
-    });
-
-    it('should return DOWN with error details when there is an exception', async () => {
-      mockEntityManager.query.mockRejectedValue(new Error('Database error'));
-
-      const result = await dbHealthService.checkDbHealth();
-      expect(result).toEqual({
-        status: 'DOWN',
-        details: { error: 'Database error' },
+        'last database read': mockRead,
+        'last database write': mockWrite,
+        'last database change': mockChange,
       });
     });
   });

@@ -34,16 +34,21 @@ describe('HealthService', () => {
 
   describe('geHealthStatuses', () => {
     it('should return combined health statuses', async () => {
+      const checkDbHealthFixture = {
+        'last database read': Date.now,
+        'last database write': Date.now,
+        'last database change': Date.now
+      }
       jest
         .spyOn(dbHealthService, 'checkDbHealth')
-        .mockResolvedValue({ status: 'UP', details: {} });
+        .mockResolvedValue(checkDbHealthFixture);
       jest
         .spyOn(exchangesHealthService, 'checkExchanges')
         .mockResolvedValue({ status: 'UP', details: {} });
 
       const result = await healthService.geHealthStatuses();
       expect(result).toEqual({
-        db: { status: 'UP', details: {} },
+        db: checkDbHealthFixture,
         exchanges: { status: 'UP', details: {} },
       });
     });

@@ -11,6 +11,8 @@ import { classes } from '@automapper/classes';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
 import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.module';
 import { HealthModule } from './modules/health/health.module';
+import { CacheFactoryConfig } from './common/config/cache-factory.config';
+import { CacheModule } from '@nestjs/common/cache';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { HealthModule } from './modules/health/health.module';
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
+    CacheModule.registerAsync(CacheFactoryConfig),
     IntegrationsModule,
     ExchangeRegistryModule,
     ExchangeDataModule,

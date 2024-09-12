@@ -42,11 +42,22 @@ services:
       DATABASE_LOGGING_LEVEL: ${DATABASE_LOGGING_LEVEL}
       DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
       DATABASE_AUTO_RUN_MIGRATIONS: ${DATABASE_AUTO_RUN_MIGRATIONS}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    depends_on:
+      - db
+      - redis
   db:
     image: postgres
     ports:
-      - "5432:5432"
+      - '${DATABASE_PORT}:5432'
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+  redis:
+    image: redis:latest
+    ports:
+      - '${REDIS_PORT}:6379'
+    volumes:
+      - ./redis_data:/data
