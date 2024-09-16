@@ -33,7 +33,11 @@ export class DatabaseCacheUtil implements Aspect {
     );
 
     if (strategy) {
-      await this.strategies[strategy].execute(this.cacheManager);
+      return this.strategies[strategy].execute(this.cacheManager)
+        .then(() => this.logger.debug(`Cache strategy "${strategy}" executed successfully for method "${ctx.methodName}"`))
+        .catch((error) => {
+          this.logger.error(`Error executing ${ctx.methodName}: ${error.message}`, error.stack);
+        });
     } else {
       this.logger.error(`No cache aspect strategy found for ${ctx.methodName}`);
     }
