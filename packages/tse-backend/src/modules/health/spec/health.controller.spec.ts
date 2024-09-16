@@ -4,7 +4,6 @@ import { HealthService } from '../health.service';
 
 describe('HealthController', () => {
   let controller: HealthController;
-  let healthService: HealthService;
 
   const mockHealthService = {
     geHealthStatuses: jest.fn(),
@@ -22,7 +21,6 @@ describe('HealthController', () => {
     }).compile();
 
     controller = module.get<HealthController>(HealthController);
-    healthService = module.get<HealthService>(HealthService);
   });
 
   it('should be defined', () => {

@@ -10,12 +10,11 @@ import { AuthService } from '../auth.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
-import { adminLoginCommandFixture, mixinOAuthCommandFixture, mixinOAuthResponseFixture } from './auth.fixtures';
+import { adminLoginCommandFixture, mixinOAuthCommandFixture } from './auth.fixtures';
 import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
-  let authService: AuthService;
   let adminLoginResponse: JwtResponse;
   let userLoginResponse: JwtResponse;
 

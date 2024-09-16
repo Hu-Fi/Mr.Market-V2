@@ -25,7 +25,6 @@ describe('ExchangeOperationService (e2e)', () => {
   let app: INestApplication;
   let service: ExchangeOperationService;
   let orderRepository: OrderRepository;
-  let operationRepository: OperationRepository;
   let dataSource: DataSource;
   let postgresContainer: StartedPostgreSqlContainer;
 
@@ -69,8 +68,6 @@ describe('ExchangeOperationService (e2e)', () => {
     app = moduleRef.createNestApplication();
     service = moduleRef.get<ExchangeOperationService>(ExchangeOperationService);
     orderRepository = moduleRef.get<OrderRepository>(OrderRepository);
-    operationRepository =
-      moduleRef.get<OperationRepository>(OperationRepository);
     dataSource = moduleRef.get<DataSource>(DataSource);
     await app.init();
   }, 30000);

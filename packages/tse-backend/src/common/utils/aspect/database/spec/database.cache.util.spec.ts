@@ -6,7 +6,6 @@ import { DatabaseCacheUtil } from '../database.cache.util';
 import { SelectStrategy } from '../strategies/select.strategy';
 import { InsertStrategy } from '../strategies/insert.strategy';
 import { UpdateStrategy } from '../strategies/update.strategy';
-import { CustomLogger } from '../../../../../modules/logger/logger.service';
 
 jest.mock('@nestjs/common', () => ({
   ...jest.requireActual('@nestjs/common'),
@@ -22,7 +21,6 @@ describe('DatabaseCacheUtil', () => {
   let selectStrategy: SelectStrategy;
   let insertStrategy: InsertStrategy;
   let updateStrategy: UpdateStrategy;
-  let logger: CustomLogger;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,7 +38,6 @@ describe('DatabaseCacheUtil', () => {
     selectStrategy = module.get<SelectStrategy>(SelectStrategy);
     insertStrategy = module.get<InsertStrategy>(InsertStrategy);
     updateStrategy = module.get<UpdateStrategy>(UpdateStrategy);
-    logger = new CustomLogger();
   });
 
   it('should execute the correct strategy for a find method', async () => {
