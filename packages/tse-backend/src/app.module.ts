@@ -13,6 +13,7 @@ import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.mod
 import { HealthModule } from './modules/health/health.module';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CacheModule } from '@nestjs/common/cache';
+import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CacheModule } from '@nestjs/common/cache';
     ExchangeOperationModule,
     ExchangeTradeModule,
     HealthModule,
+    TradingStrategyModule,
   ],
   controllers: [],
   providers: [

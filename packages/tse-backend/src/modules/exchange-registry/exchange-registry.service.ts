@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtGateway } from '../../integrations/ccxt.gateway';
@@ -44,7 +44,6 @@ export class ExchangeRegistryService {
     const exchange = this.ccxtGateway.getExchange(exchangeName);
     if (!exchange) {
       this.logger.error(`Exchange ${exchangeName} is not configured.`);
-      throw new InternalServerErrorException('Exchange configuration error.');
     }
     return exchange;
   }

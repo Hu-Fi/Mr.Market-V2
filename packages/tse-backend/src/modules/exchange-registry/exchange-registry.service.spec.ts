@@ -96,10 +96,4 @@ describe('ExchangeRegistryService', () => {
       secret: 'test_binance_secret',
     });
   });
-
-  it('should throw an error if exchange is not configured', () => {
-    expect(() => service.getExchange('nonexistent')).toThrowError(
-      'Exchange configuration error.',
-    );
-  });
 });
