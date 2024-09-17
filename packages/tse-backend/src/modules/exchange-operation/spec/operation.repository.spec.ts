@@ -43,7 +43,7 @@ describe('OperationRepository', () => {
         .spyOn(operationRepository, 'save')
         .mockResolvedValue(expectedOperation);
 
-      const operation = await repository.save({
+      const operation = await repository.create({
         status,
         details,
         order,

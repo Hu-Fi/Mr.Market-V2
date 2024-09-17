@@ -17,7 +17,6 @@ import {
 describe('ExchangeOperationService', () => {
   let service: ExchangeOperationService;
   let orderService: OrderService;
-  let logger: CustomLogger;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,7 +40,6 @@ describe('ExchangeOperationService', () => {
 
     service = module.get<ExchangeOperationService>(ExchangeOperationService);
     orderService = module.get<OrderService>(OrderService);
-    logger = module.get<CustomLogger>(CustomLogger);
   });
 
   describe('saveOrderData', () => {
