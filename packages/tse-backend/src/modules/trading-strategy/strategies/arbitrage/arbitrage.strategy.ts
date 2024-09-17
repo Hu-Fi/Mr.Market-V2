@@ -132,7 +132,7 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async start(strategies: ArbitrageStrategyData[]): Promise<void> {
-    this.logger.debug('Starting arbitrage strategy');
+    this.logger.debug(`Amount of active arbitrage strategies: ${strategies.length}`);
 
     for (const strategy of strategies) {
       if (!this.strategies.get(strategy.id)) {

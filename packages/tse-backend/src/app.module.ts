@@ -14,6 +14,8 @@ import { HealthModule } from './modules/health/health.module';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CacheModule } from '@nestjs/common/cache';
 import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { StrategyExecutionModule } from './modules/strategy-execution/strategy-execution.module';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { TradingStrategyModule } from './modules/trading-strategy/trading-strate
       strategyInitializer: classes(),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),
+    ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
     ExchangeDataModule,
@@ -40,6 +43,7 @@ import { TradingStrategyModule } from './modules/trading-strategy/trading-strate
     ExchangeTradeModule,
     HealthModule,
     TradingStrategyModule,
+    StrategyExecutionModule
   ],
   controllers: [],
   providers: [
