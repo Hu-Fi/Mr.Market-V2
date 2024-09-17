@@ -19,7 +19,6 @@ describe('AuthService', () => {
   let service: AuthService;
   let mixinGateway: MixinGateway;
   let jwtService: JwtService;
-  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -58,7 +57,6 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     mixinGateway = module.get<MixinGateway>(MixinGateway);
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {

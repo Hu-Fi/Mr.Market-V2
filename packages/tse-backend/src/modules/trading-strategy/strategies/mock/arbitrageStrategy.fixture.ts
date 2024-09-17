@@ -41,7 +41,7 @@ export class ArbitrageStrategyFixtureDto implements ArbitrageStrategy {
 export class MockArbitrageStrategy implements Strategy {
   constructor(private strategyParamsDto: ArbitrageStrategy) {}
 
-  async start(params: ArbitrageStrategy): Promise<void> {}
+  async start(): Promise<void> {}
 
   async stop(): Promise<void> {}
 

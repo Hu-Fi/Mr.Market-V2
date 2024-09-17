@@ -5,7 +5,6 @@ import { GlobalExceptionFilter } from './global-exception.filter';
 
 describe('GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;
-  let httpAdapterHost: HttpAdapterHost;
 
   const mockHttpAdapter = {
     getRequestUrl: jest.fn().mockReturnValue('/test-url'),
@@ -24,7 +23,6 @@ describe('GlobalExceptionFilter', () => {
     }).compile();
 
     filter = module.get<GlobalExceptionFilter>(GlobalExceptionFilter);
-    httpAdapterHost = module.get<HttpAdapterHost>(HttpAdapterHost);
 
     jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
