@@ -16,7 +16,10 @@ import {
 } from '../model/arbitrage.dto';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
-import { ArbitrageCommandFixture, ArbitrageDataFixture } from './arbitrage.fixtures';
+import {
+  ArbitrageCommandFixture,
+  ArbitrageDataFixture,
+} from './arbitrage.fixtures';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateVWAPForAmount: jest.fn(),
@@ -103,9 +106,7 @@ describe('ArbitrageStrategy', () => {
 
       (isExchangeSupported as jest.Mock).mockReturnValue(false);
 
-      await expect(strategy.create(command)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(strategy.create(command)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -139,9 +140,7 @@ describe('ArbitrageStrategy', () => {
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
         .mockResolvedValue(null);
 
-      await expect(strategy.pause(command)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(strategy.pause(command)).rejects.toThrow(NotFoundException);
     });
   });
 

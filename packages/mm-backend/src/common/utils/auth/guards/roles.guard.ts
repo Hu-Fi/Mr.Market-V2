@@ -23,10 +23,10 @@ export class RolesGuard implements CanActivate {
     }
 
     const userMaxRolePriority = Math.max(
-      ...user.roles.map(role => ROLE_PRIORITIES[role as Role])
+      ...user.roles.map((role) => ROLE_PRIORITIES[role as Role]),
     );
     const requiredRolePriority = Math.max(
-      ...requiredRoles.map(role => ROLE_PRIORITIES[role as Role])
+      ...requiredRoles.map((role) => ROLE_PRIORITIES[role as Role]),
     );
 
     return userMaxRolePriority >= requiredRolePriority;

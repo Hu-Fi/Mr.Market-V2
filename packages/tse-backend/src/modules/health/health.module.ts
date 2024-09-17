@@ -8,7 +8,12 @@ import { DbHealthService } from './db.health.service';
 
 @Module({
   imports: [IntegrationsModule],
-  providers: [ConfigService, HealthService, ExchangesHealthService, DbHealthService],
+  providers: [
+    ConfigService,
+    HealthService,
+    ExchangesHealthService,
+    DbHealthService,
+  ],
   controllers: [HealthController],
 })
 export class HealthModule {}

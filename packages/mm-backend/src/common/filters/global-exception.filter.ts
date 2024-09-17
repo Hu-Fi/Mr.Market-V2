@@ -3,7 +3,8 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus, Logger,
+  HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 

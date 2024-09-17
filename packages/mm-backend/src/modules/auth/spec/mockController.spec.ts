@@ -10,7 +10,10 @@ import { AuthService } from '../auth.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
-import { adminLoginCommandFixture, mixinOAuthCommandFixture } from './auth.fixtures';
+import {
+  adminLoginCommandFixture,
+  mixinOAuthCommandFixture,
+} from './auth.fixtures';
 import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 
 describe('RolesGuard', () => {
@@ -43,7 +46,7 @@ describe('RolesGuard', () => {
           provide: MixinGateway,
           useValue: {
             oauthHandler: jest.fn().mockReturnValue({
-              clientId: 'clientId'
+              clientId: 'clientId',
             }),
           },
         },
@@ -69,8 +72,12 @@ describe('RolesGuard', () => {
     await app.init();
 
     const authService = module.get<AuthService>(AuthService);
-    adminLoginResponse = await authService.validateUser(adminLoginCommandFixture);
-    userLoginResponse = await authService.mixinOauthHandler(mixinOAuthCommandFixture);
+    adminLoginResponse = await authService.validateUser(
+      adminLoginCommandFixture,
+    );
+    userLoginResponse = await authService.mixinOauthHandler(
+      mixinOAuthCommandFixture,
+    );
   });
 
   it('should allow access if admin role is provided', () => {
@@ -93,7 +100,7 @@ describe('RolesGuard', () => {
     return request(app.getHttpServer())
       .get('/test/admin')
       .set('Authorization', `Bearer ${userLoginResponse.accessToken}`)
-      .expect(403)
+      .expect(403);
   });
 
   it('should allow access to user endpoint for regular users', () => {

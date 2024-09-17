@@ -3,7 +3,10 @@ import { MarketMakingService } from '../market-making.service';
 import { MarketMakingRepository } from '../market-making.repository';
 import { MarketMaking } from '../../../../../common/entities/market-making.entity';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
-import { MarketMakingDataFixture, MarketMakingPartialDataFixture } from './market-making.fixtures';
+import {
+  MarketMakingDataFixture,
+  MarketMakingPartialDataFixture,
+} from './market-making.fixtures';
 
 describe('MarketMakingService', () => {
   let service: MarketMakingService;

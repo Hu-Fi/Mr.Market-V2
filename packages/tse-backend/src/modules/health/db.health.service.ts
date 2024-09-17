@@ -6,17 +6,15 @@ import { Cache } from 'cache-manager';
 @Injectable()
 export class DbHealthService {
   private readonly logger = new CustomLogger(DbHealthService.name);
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ){}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async checkDbHealth() {
     this.logger.debug('Checking database health...');
 
     return {
-      'last database read': await this.cacheManager.get("SELECT"),
-      'last database write': await this.cacheManager.get("INSERT"),
-      'last database change': await this.cacheManager.get("UPDATE")
-    }
+      'last database read': await this.cacheManager.get('SELECT'),
+      'last database write': await this.cacheManager.get('INSERT'),
+      'last database change': await this.cacheManager.get('UPDATE'),
+    };
   }
 }

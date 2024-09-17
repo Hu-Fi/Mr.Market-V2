@@ -33,7 +33,12 @@ import { MarketMakingController } from './strategies/market-making/market-making
     MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
   ],
-  exports: [],
+  exports: [
+    ArbitrageStrategy,
+    ArbitrageService,
+    MarketMakingStrategy,
+    MarketMakingService,
+  ],
   controllers: [ArbitrageController, MarketMakingController],
 })
 export class TradingStrategyModule {}

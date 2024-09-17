@@ -10,7 +10,7 @@ export const ArbitrageDtoFixture = {
   exchangeBName: 'mexc',
   checkIntervalSeconds: 10,
   maxOpenOrders: 1,
-}
+};
 
 export const ArbitrageCommandFixture = {
   userId: '123',
@@ -23,11 +23,9 @@ export const ArbitrageCommandFixture = {
   exchangeBName: 'mexc',
   checkIntervalSeconds: 10,
   maxOpenOrders: 1,
-}
+};
 
-export const ArbitragePartialDataFixture = {
-
-}
+export const ArbitragePartialDataFixture = {};
 
 export const ArbitrageDataFixture = {
   id: 1,
@@ -43,4 +41,4 @@ export const ArbitrageDataFixture = {
   createdAt: new Date(),
   updatedAt: new Date(),
   status: StrategyInstanceStatus.RUNNING,
-}
+};

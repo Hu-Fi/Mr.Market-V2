@@ -34,7 +34,9 @@ describe('ExchangesHealthService', () => {
       ],
     }).compile();
 
-    exchangesHealthService = module.get<ExchangesHealthService>(ExchangesHealthService);
+    exchangesHealthService = module.get<ExchangesHealthService>(
+      ExchangesHealthService,
+    );
   });
 
   describe('checkExchanges', () => {

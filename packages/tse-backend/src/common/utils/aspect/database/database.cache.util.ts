@@ -20,23 +20,31 @@ export class DatabaseCacheUtil implements Aspect {
     private updateStrategy: UpdateStrategy,
   ) {
     this.strategies = {
-      'find': this.selectStrategy,
-      'create': this.insertStrategy,
-      'save': this.updateStrategy,
-      'update': this.updateStrategy,
+      find: this.selectStrategy,
+      create: this.insertStrategy,
+      save: this.updateStrategy,
+      update: this.updateStrategy,
     };
   }
 
   async execute(ctx: AspectContext) {
-    const strategy = Object.keys(this.strategies).find(prefix =>
-      ctx.methodName.startsWith(prefix)
+    const strategy = Object.keys(this.strategies).find((prefix) =>
+      ctx.methodName.startsWith(prefix),
     );
 
     if (strategy) {
-      return this.strategies[strategy].execute(this.cacheManager)
-        .then(() => this.logger.debug(`Cache strategy "${strategy}" executed successfully for method "${ctx.methodName}"`))
+      return this.strategies[strategy]
+        .execute(this.cacheManager)
+        .then(() =>
+          this.logger.debug(
+            `Cache strategy "${strategy}" executed successfully for method "${ctx.methodName}"`,
+          ),
+        )
         .catch((error) => {
-          this.logger.error(`Error executing ${ctx.methodName}: ${error.message}`, error.stack);
+          this.logger.error(
+            `Error executing ${ctx.methodName}: ${error.message}`,
+            error.stack,
+          );
         });
     } else {
       this.logger.error(`No cache aspect strategy found for ${ctx.methodName}`);

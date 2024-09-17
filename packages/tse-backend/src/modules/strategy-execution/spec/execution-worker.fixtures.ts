@@ -1,4 +1,8 @@
-import { AmountChangeType, PriceSourceType, StrategyInstanceStatus } from '../../../common/enums/strategy-type.enums';
+import {
+  AmountChangeType,
+  PriceSourceType,
+  StrategyInstanceStatus,
+} from '../../../common/enums/strategy-type.enums';
 import { Arbitrage } from '../../../common/entities/arbitrage.entity';
 import { MarketMaking } from '../../../common/entities/market-making.entity';
 
@@ -9,7 +13,7 @@ export const arbitrageStrategiesDataFixture: Arbitrage[] = [
     clientId: 'client1',
     sideA: 'BTC',
     sideB: 'USD',
-    amountToTrade: 1000.00,
+    amountToTrade: 1000.0,
     minProfitability: 0.05,
     exchangeAName: 'ExchangeA',
     exchangeBName: 'ExchangeB',
@@ -25,7 +29,7 @@ export const arbitrageStrategiesDataFixture: Arbitrage[] = [
     clientId: 'client2',
     sideA: 'BTC',
     sideB: 'USD',
-    amountToTrade: 500.00,
+    amountToTrade: 500.0,
     minProfitability: 0.03,
     exchangeAName: 'ExchangeA',
     exchangeBName: 'ExchangeB',
@@ -34,7 +38,7 @@ export const arbitrageStrategiesDataFixture: Arbitrage[] = [
     updatedAt: new Date(),
     status: StrategyInstanceStatus.CREATED,
   },
-]
+];
 
 export const marketMakingStrategiesDataFixture: MarketMaking[] = [
   {
@@ -46,14 +50,14 @@ export const marketMakingStrategiesDataFixture: MarketMaking[] = [
     exchangeName: 'ExchangeA',
     bidSpread: 0.01,
     askSpread: 0.01,
-    orderAmount: 1000.00,
+    orderAmount: 1000.0,
     checkIntervalSeconds: 60,
     numberOfLayers: 5,
     priceSourceType: PriceSourceType.MID_PRICE,
-    amountChangePerLayer: 50.00,
+    amountChangePerLayer: 50.0,
     amountChangeType: AmountChangeType.FIXED,
-    ceilingPrice: 50000.00,
-    floorPrice: 30000.00,
+    ceilingPrice: 50000.0,
+    floorPrice: 30000.0,
     createdAt: new Date(),
     updatedAt: new Date(),
     status: StrategyInstanceStatus.CREATED,
@@ -67,14 +71,14 @@ export const marketMakingStrategiesDataFixture: MarketMaking[] = [
     exchangeName: 'ExchangeB',
     bidSpread: 0.02,
     askSpread: 0.02,
-    orderAmount: 500.00,
+    orderAmount: 500.0,
     checkIntervalSeconds: 120,
     numberOfLayers: 3,
     priceSourceType: PriceSourceType.LAST_PRICE,
-    amountChangePerLayer: 30.00,
+    amountChangePerLayer: 30.0,
     amountChangeType: AmountChangeType.PERCENTAGE,
     createdAt: new Date(),
     updatedAt: new Date(),
     status: StrategyInstanceStatus.STOPPED,
   },
-]
+];

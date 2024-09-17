@@ -16,7 +16,10 @@ import {
 import { TradeSideType } from '../../../../../common/enums/exchange-operation.enums';
 import { PlaceOrderParams } from '../../../../../common/interfaces/trading-strategy.interfaces';
 import { MarketMaking } from '../../../../../common/entities/market-making.entity';
-import { MarketMakingCommandFixture, MarketMakingDataFixture } from './market-making.fixtures';
+import {
+  MarketMakingCommandFixture,
+  MarketMakingDataFixture,
+} from './market-making.fixtures';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateOrderDetails: jest.fn(),
@@ -109,9 +112,7 @@ describe('MarketMakingStrategy', () => {
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
         .mockResolvedValue(null);
 
-      await expect(strategy.pause(command)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(strategy.pause(command)).rejects.toThrow(NotFoundException);
     });
   });
 

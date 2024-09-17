@@ -93,11 +93,9 @@ describe('AuthService', () => {
       const command = mixinOAuthCommandFixture;
       const response = mixinOAuthResponseFixture;
       jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
-      jest
-        .spyOn(mixinGateway, 'oauthHandler')
-        .mockResolvedValue({
-          clientId: "clientId"
-        });
+      jest.spyOn(mixinGateway, 'oauthHandler').mockResolvedValue({
+        clientId: 'clientId',
+      });
 
       const result = await service.mixinOauthHandler(command);
 

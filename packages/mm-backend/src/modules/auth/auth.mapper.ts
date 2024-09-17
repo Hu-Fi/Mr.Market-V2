@@ -1,7 +1,12 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
-import { AdminLoginCommand, AdminLoginDto, MixinOAuthCommand, MixinOAuthDto } from './model/auth.model';
+import {
+  AdminLoginCommand,
+  AdminLoginDto,
+  MixinOAuthCommand,
+  MixinOAuthDto,
+} from './model/auth.model';
 
 @Injectable()
 export class AuthProfile extends AutomapperProfile {

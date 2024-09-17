@@ -5,14 +5,24 @@ import { OrderRepository } from '../../modules/exchange-operation/order.reposito
 import { OperationRepository } from '../../modules/exchange-operation/operation.repository';
 
 @Injectable()
-export class AspectConfig implements OnModuleInit  {
+export class AspectConfig implements OnModuleInit {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly operationRepository: OperationRepository,
-    private readonly databaseCacheUtil: DatabaseCacheUtil
+    private readonly databaseCacheUtil: DatabaseCacheUtil,
   ) {}
-  onModuleInit () {
-    addAspectToPointcut(this.orderRepository, '.*', Advice.After, this.databaseCacheUtil);
-    addAspectToPointcut(this.operationRepository, '.*', Advice.After, this.databaseCacheUtil);
+  onModuleInit() {
+    addAspectToPointcut(
+      this.orderRepository,
+      '.*',
+      Advice.After,
+      this.databaseCacheUtil,
+    );
+    addAspectToPointcut(
+      this.operationRepository,
+      '.*',
+      Advice.After,
+      this.databaseCacheUtil,
+    );
   }
 }

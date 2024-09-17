@@ -19,7 +19,10 @@ import {
   CreateLimitOrderCommand,
   OperationCommand,
 } from '../src/modules/exchange-operation/model/exchange-operation.model';
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 
 describe('ExchangeOperationService (e2e)', () => {
   let app: INestApplication;
@@ -51,8 +54,8 @@ describe('ExchangeOperationService (e2e)', () => {
               database: postgresContainer.getDatabase(),
               entities: [Order, Operation],
               synchronize: true,
-            }
-          }
+            };
+          },
         }),
         TypeOrmModule.forFeature([Order, Operation]),
       ],

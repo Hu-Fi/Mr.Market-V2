@@ -15,7 +15,8 @@ import {
 } from './model/market-making.dto';
 import {
   StrategyInstanceStatus,
-  StrategyTypeEnums, TimeUnit,
+  StrategyTypeEnums,
+  TimeUnit,
 } from '../../../../common/enums/strategy-type.enums';
 import {
   calculateOrderDetails,
@@ -121,7 +122,9 @@ export class MarketMakingStrategy implements Strategy {
   }
 
   async start(strategies: MarketMakingStrategyData[]): Promise<void> {
-    this.logger.debug(`Amount of active market making strategies: ${strategies.length}`);
+    this.logger.debug(
+      `Amount of active market making strategies: ${strategies.length}`,
+    );
 
     for (const strategy of strategies) {
       if (!this.strategies.get(strategy.id)) {
@@ -181,8 +184,26 @@ export class MarketMakingStrategy implements Strategy {
     );
 
     for (const detail of orderDetails) {
-      await this.handleBuyOrder(detail, exchange, pair, priceSource, userId, clientId, exchangeName, ceilingPrice);
-      await this.handleSellOrder(detail, exchange, pair, priceSource, userId, clientId, exchangeName, floorPrice);
+      await this.handleBuyOrder(
+        detail,
+        exchange,
+        pair,
+        priceSource,
+        userId,
+        clientId,
+        exchangeName,
+        ceilingPrice,
+      );
+      await this.handleSellOrder(
+        detail,
+        exchange,
+        pair,
+        priceSource,
+        userId,
+        clientId,
+        exchangeName,
+        floorPrice,
+      );
     }
 
     //TODO: persist data to redis cache - to check last trade is filled
@@ -201,7 +222,10 @@ export class MarketMakingStrategy implements Strategy {
     const { currentOrderAmount, buyPrice, shouldBuy } = detail;
 
     if (shouldBuy) {
-      const adjustedAmount = exchange.amountToPrecision(pair, currentOrderAmount);
+      const adjustedAmount = exchange.amountToPrecision(
+        pair,
+        currentOrderAmount,
+      );
       const adjustedPrice = exchange.priceToPrecision(pair, buyPrice);
       await this.placeOrder({
         userId,
@@ -232,7 +256,10 @@ export class MarketMakingStrategy implements Strategy {
     const { currentOrderAmount, sellPrice, shouldSell } = detail;
 
     if (shouldSell) {
-      const adjustedAmount = exchange.amountToPrecision(pair, currentOrderAmount);
+      const adjustedAmount = exchange.amountToPrecision(
+        pair,
+        currentOrderAmount,
+      );
       const adjustedPrice = exchange.priceToPrecision(pair, sellPrice);
       await this.placeOrder({
         userId,

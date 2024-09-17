@@ -26,7 +26,10 @@ describe('DatabaseCacheUtil', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DatabaseCacheUtil,
-        { provide: CACHE_MANAGER, useValue: { get: jest.fn(), set: jest.fn() } },
+        {
+          provide: CACHE_MANAGER,
+          useValue: { get: jest.fn(), set: jest.fn() },
+        },
         { provide: SelectStrategy, useValue: { execute: jest.fn() } },
         { provide: InsertStrategy, useValue: { execute: jest.fn() } },
         { provide: UpdateStrategy, useValue: { execute: jest.fn() } },
@@ -44,52 +47,66 @@ describe('DatabaseCacheUtil', () => {
     const ctx: AspectContext = { methodName: 'findSomething' } as AspectContext;
     (selectStrategy.execute as jest.Mock).mockResolvedValueOnce(null);
 
-    const debugSpy = jest.spyOn((databaseCacheUtil as any).logger, 'debug').mockImplementation(() => {});
+    const debugSpy = jest
+      .spyOn((databaseCacheUtil as any).logger, 'debug')
+      .mockImplementation(() => {});
 
     await databaseCacheUtil.execute(ctx);
 
     expect(selectStrategy.execute).toHaveBeenCalledWith(cacheManager);
     expect(debugSpy).toHaveBeenCalledWith(
-      'Cache strategy "find" executed successfully for method "findSomething"'
+      'Cache strategy "find" executed successfully for method "findSomething"',
     );
   });
 
   it('should execute the correct strategy for a create method', async () => {
-    const ctx: AspectContext = { methodName: 'createSomething' } as AspectContext;
+    const ctx: AspectContext = {
+      methodName: 'createSomething',
+    } as AspectContext;
     (insertStrategy.execute as jest.Mock).mockResolvedValueOnce(null);
 
-    const debugSpy = jest.spyOn((databaseCacheUtil as any).logger, 'debug').mockImplementation(() => {});
+    const debugSpy = jest
+      .spyOn((databaseCacheUtil as any).logger, 'debug')
+      .mockImplementation(() => {});
 
     await databaseCacheUtil.execute(ctx);
 
     expect(insertStrategy.execute).toHaveBeenCalledWith(cacheManager);
     expect(debugSpy).toHaveBeenCalledWith(
-      'Cache strategy "create" executed successfully for method "createSomething"'
+      'Cache strategy "create" executed successfully for method "createSomething"',
     );
   });
 
   it('should execute the correct strategy for an update method', async () => {
-    const ctx: AspectContext = { methodName: 'updateSomething' } as AspectContext;
+    const ctx: AspectContext = {
+      methodName: 'updateSomething',
+    } as AspectContext;
     (updateStrategy.execute as jest.Mock).mockResolvedValueOnce(null);
 
-    const debugSpy = jest.spyOn((databaseCacheUtil as any).logger, 'debug').mockImplementation(() => {});
+    const debugSpy = jest
+      .spyOn((databaseCacheUtil as any).logger, 'debug')
+      .mockImplementation(() => {});
 
     await databaseCacheUtil.execute(ctx);
 
     expect(updateStrategy.execute).toHaveBeenCalledWith(cacheManager);
     expect(debugSpy).toHaveBeenCalledWith(
-      'Cache strategy "update" executed successfully for method "updateSomething"'
+      'Cache strategy "update" executed successfully for method "updateSomething"',
     );
   });
 
   it('should log an error if no strategy is found for the method', async () => {
     const ctx: AspectContext = { methodName: 'unknownMethod' } as AspectContext;
 
-    const errorSpy = jest.spyOn((databaseCacheUtil as any).logger, 'error').mockImplementation(() => {});
+    const errorSpy = jest
+      .spyOn((databaseCacheUtil as any).logger, 'error')
+      .mockImplementation(() => {});
 
     await databaseCacheUtil.execute(ctx);
 
-    expect(errorSpy).toHaveBeenCalledWith('No cache aspect strategy found for unknownMethod');
+    expect(errorSpy).toHaveBeenCalledWith(
+      'No cache aspect strategy found for unknownMethod',
+    );
   });
 
   it('should log an error if a strategy execution fails', async () => {
@@ -97,11 +114,16 @@ describe('DatabaseCacheUtil', () => {
     const error = new Error('Execution failed');
     (selectStrategy.execute as jest.Mock).mockRejectedValueOnce(error);
 
-    const errorSpy = jest.spyOn((databaseCacheUtil as any).logger, 'error').mockImplementation(() => {});
+    const errorSpy = jest
+      .spyOn((databaseCacheUtil as any).logger, 'error')
+      .mockImplementation(() => {});
 
     await databaseCacheUtil.execute(ctx);
 
     expect(selectStrategy.execute).toHaveBeenCalledWith(cacheManager);
-    expect(errorSpy).toHaveBeenCalledWith('Error executing findSomething: Execution failed', expect.any(String));
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Error executing findSomething: Execution failed',
+      expect.any(String),
+    );
   });
 });

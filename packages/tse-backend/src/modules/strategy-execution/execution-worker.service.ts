@@ -19,33 +19,40 @@ export class ExecutionWorkerService {
     private readonly marketMakingStrategy: MarketMakingStrategy,
     private readonly configService: ConfigService,
     private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly schedulerUtils: SchedulerUtil
-  ) {
-  }
+    private readonly schedulerUtils: SchedulerUtil,
+  ) {}
 
   onModuleInit() {
     this.schedulerUtils.addCronJob(
       ExecutionWorkerService.name,
-      this.configService.get<string>('CRON_EXPRESSION', CronExpression.EVERY_30_SECONDS),
+      this.configService.get<string>(
+        'CRON_EXPRESSION',
+        CronExpression.EVERY_30_SECONDS,
+      ),
       this.handleCron.bind(this),
       this.schedulerRegistry,
-    )
+    );
   }
 
   private async processData() {
     this.logger.debug('Strategy Execution Worker started');
     try {
-      const arbitrageStrategies = await this.arbitrageService.findRunningStrategies();
+      const arbitrageStrategies =
+        await this.arbitrageService.findRunningStrategies();
       await this.arbitrageStrategy.start(arbitrageStrategies);
     } catch (error) {
       this.logger.error('Error executing arbitrage strategies', error.stack);
     }
 
     try {
-      const marketMakingStrategies = await this.marketMakingService.findRunningStrategies();
+      const marketMakingStrategies =
+        await this.marketMakingService.findRunningStrategies();
       await this.marketMakingStrategy.start(marketMakingStrategies);
     } catch (error) {
-      this.logger.error('Error executing market making strategies', error.stack);
+      this.logger.error(
+        'Error executing market making strategies',
+        error.stack,
+      );
     }
   }
 

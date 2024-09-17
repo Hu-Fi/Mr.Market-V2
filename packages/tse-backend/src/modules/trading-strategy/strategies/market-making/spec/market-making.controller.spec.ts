@@ -9,7 +9,10 @@ import {
   MarketMakingStrategyActionDto,
   MarketMakingStrategyDto,
 } from '../model/market-making.dto';
-import { MarketMakingCommandFixture, MarketMakingDtoFixture } from './market-making.fixtures';
+import {
+  MarketMakingCommandFixture,
+  MarketMakingDtoFixture,
+} from './market-making.fixtures';
 
 describe('MarketMakingController', () => {
   let controller: MarketMakingController;

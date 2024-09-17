@@ -29,7 +29,9 @@ describe('HealthService', () => {
 
     healthService = module.get<HealthService>(HealthService);
     dbHealthService = module.get<DbHealthService>(DbHealthService);
-    exchangesHealthService = module.get<ExchangesHealthService>(ExchangesHealthService);
+    exchangesHealthService = module.get<ExchangesHealthService>(
+      ExchangesHealthService,
+    );
   });
 
   describe('geHealthStatuses', () => {
@@ -37,8 +39,8 @@ describe('HealthService', () => {
       const checkDbHealthFixture = {
         'last database read': Date.now,
         'last database write': Date.now,
-        'last database change': Date.now
-      }
+        'last database change': Date.now,
+      };
       jest
         .spyOn(dbHealthService, 'checkDbHealth')
         .mockResolvedValue(checkDbHealthFixture);

@@ -5,7 +5,12 @@ import { UpdateStrategy } from './database/strategies/update.strategy';
 import { DatabaseCacheUtil } from './database/database.cache.util';
 
 @Module({
-  providers: [DatabaseCacheUtil, InsertStrategy, SelectStrategy, UpdateStrategy],
+  providers: [
+    DatabaseCacheUtil,
+    InsertStrategy,
+    SelectStrategy,
+    UpdateStrategy,
+  ],
   exports: [DatabaseCacheUtil, InsertStrategy, SelectStrategy, UpdateStrategy],
 })
 export class AspectModule {}

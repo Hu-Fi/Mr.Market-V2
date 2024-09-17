@@ -43,7 +43,7 @@ import { StrategyExecutionModule } from './modules/strategy-execution/strategy-e
     ExchangeTradeModule,
     HealthModule,
     TradingStrategyModule,
-    StrategyExecutionModule
+    StrategyExecutionModule,
   ],
   controllers: [],
   providers: [

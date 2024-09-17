@@ -10,7 +10,10 @@ import {
 import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { ArbitrageStrategyProfile } from '../arbitrage.mapper';
-import { ArbitrageCommandFixture, ArbitrageDtoFixture } from './arbitrage.fixtures';
+import {
+  ArbitrageCommandFixture,
+  ArbitrageDtoFixture,
+} from './arbitrage.fixtures';
 
 describe('ArbitrageController', () => {
   let controller: ArbitrageController;

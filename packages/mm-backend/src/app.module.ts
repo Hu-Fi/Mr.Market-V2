@@ -29,7 +29,7 @@ import Joi from 'joi';
       strategyInitializer: classes(),
     }),
     IntegrationsModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [],
   providers: [],

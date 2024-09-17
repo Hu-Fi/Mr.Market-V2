@@ -22,7 +22,7 @@ export class Arbitrage {
   sideA: string;
 
   @Column()
-  sideB: string
+  sideB: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
   amountToTrade: number;

@@ -23,7 +23,8 @@ import {
 } from '../../../../common/interfaces/trading-strategy.interfaces';
 import {
   StrategyInstanceStatus,
-  StrategyTypeEnums, TimeUnit,
+  StrategyTypeEnums,
+  TimeUnit,
 } from '../../../../common/enums/strategy-type.enums';
 import { ArbitrageService } from './arbitrage.service';
 
@@ -132,7 +133,9 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async start(strategies: ArbitrageStrategyData[]): Promise<void> {
-    this.logger.debug(`Amount of active arbitrage strategies: ${strategies.length}`);
+    this.logger.debug(
+      `Amount of active arbitrage strategies: ${strategies.length}`,
+    );
 
     for (const strategy of strategies) {
       if (!this.strategies.get(strategy.id)) {

@@ -11,10 +11,7 @@ import { AspectConfig } from '../../common/config/aspect.config';
 import { AspectModule } from '../../common/utils/aspect/aspect.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Order, Operation]),
-    AspectModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Order, Operation]), AspectModule],
   providers: [
     ExchangeOperationService,
     OrderService,

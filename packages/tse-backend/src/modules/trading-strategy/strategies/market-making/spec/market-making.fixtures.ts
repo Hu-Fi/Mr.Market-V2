@@ -19,7 +19,7 @@ export const MarketMakingDtoFixture = {
   amountChangeType: AmountChangeType.PERCENTAGE,
   ceilingPrice: 2000,
   floorPrice: 1500,
-}
+};
 
 export const MarketMakingCommandFixture = {
   userId: 'user1',
@@ -37,7 +37,7 @@ export const MarketMakingCommandFixture = {
   amountChangeType: AmountChangeType.PERCENTAGE,
   ceilingPrice: 2000,
   floorPrice: 1500,
-}
+};
 
 export const MarketMakingPartialDataFixture = {
   userId: 'user1',
@@ -55,7 +55,7 @@ export const MarketMakingPartialDataFixture = {
   amountChangeType: AmountChangeType.PERCENTAGE,
   ceilingPrice: 50000,
   floorPrice: 20000,
-}
+};
 
 export const MarketMakingDataFixture = {
   id: 1,
@@ -77,4 +77,4 @@ export const MarketMakingDataFixture = {
   createdAt: new Date(),
   updatedAt: new Date(),
   status: StrategyInstanceStatus.CREATED,
-}
+};

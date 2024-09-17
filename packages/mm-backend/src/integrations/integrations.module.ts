@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 
 @Module({
   providers: [],
-  exports: []
+  exports: [],
 })
 export class IntegrationsModule {}

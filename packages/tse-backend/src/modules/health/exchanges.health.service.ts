@@ -10,7 +10,7 @@ export class ExchangesHealthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly ccxtGateway: CcxtGateway,
-  ){}
+  ) {}
 
   async checkExchanges() {
     this.logger.debug('Checking exchanges configuration health...');
