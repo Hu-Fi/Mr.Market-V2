@@ -1,8 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtGateway } from '../../integrations/ccxt.gateway';
 import { ExchangeConfig } from '../../common/interfaces/exchange-registry.interfaces';
+import { buildExchangeConfigs } from '../../common/utils/config-utils';
 
 @Injectable()
 export class ExchangeRegistryService {
@@ -14,18 +15,7 @@ export class ExchangeRegistryService {
   ) {}
 
   async initializeExchanges() {
-    const exchangeConfigs = Object.keys(process.env)
-      .filter((key) => key.startsWith('EXCHANGE'))
-      .reduce((configs, key) => {
-        const [_, exchangeName, field] = key.split('_');
-        const lowerCaseExchangeName = exchangeName.toLowerCase();
-        if (!configs[lowerCaseExchangeName]) {
-          configs[lowerCaseExchangeName] = { name: lowerCaseExchangeName };
-        }
-        configs[lowerCaseExchangeName][field.toLowerCase()] =
-          this.configService.get<string>(key);
-        return configs;
-      }, {});
+    const exchangeConfigs = buildExchangeConfigs(this.configService);
 
     await Promise.all(
       Object.values(exchangeConfigs).map(async (config: ExchangeConfig) => {

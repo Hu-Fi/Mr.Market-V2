@@ -10,6 +10,9 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
 import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.module';
+import { HealthModule } from './modules/health/health.module';
+import { CacheFactoryConfig } from './common/config/cache-factory.config';
+import { CacheModule } from '@nestjs/common/cache';
 import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { StrategyExecutionModule } from './modules/strategy-execution/strategy-execution.module';
@@ -31,12 +34,14 @@ import { StrategyExecutionModule } from './modules/strategy-execution/strategy-e
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
+    CacheModule.registerAsync(CacheFactoryConfig),
     ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
     ExchangeDataModule,
     ExchangeOperationModule,
     ExchangeTradeModule,
+    HealthModule,
     TradingStrategyModule,
     StrategyExecutionModule
   ],

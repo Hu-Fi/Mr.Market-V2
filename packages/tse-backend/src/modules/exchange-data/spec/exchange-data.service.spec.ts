@@ -14,8 +14,6 @@ import { MarketDataType } from '../../../common/enums/exchange-data.enums';
 
 describe('ExchangeDataService', () => {
   let service: ExchangeDataService;
-  let exchangeRegistryService: ExchangeRegistryService;
-  let subscriptionManager: ExchangeDataSubscriptionManager;
 
   const mockExchangeRegistryService = {
     getExchange: jest.fn(),
@@ -70,12 +68,6 @@ describe('ExchangeDataService', () => {
     }).compile();
 
     service = module.get<ExchangeDataService>(ExchangeDataService);
-    exchangeRegistryService = module.get<ExchangeRegistryService>(
-      ExchangeRegistryService,
-    );
-    subscriptionManager = module.get<ExchangeDataSubscriptionManager>(
-      ExchangeDataSubscriptionManager,
-    );
   });
 
   it('should be defined', () => {

@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Operation } from '../../common/entities/operation.entity';
-import { SaveOperationDto } from '../../common/interfaces/exchange-operation.interfaces';
+import { CreateOperationDto } from '../../common/interfaces/exchange-operation.interfaces';
 
 @Injectable()
 export class OperationRepository {
@@ -11,7 +11,7 @@ export class OperationRepository {
     private readonly operationRepository: Repository<Operation>,
   ) {}
 
-  async save(data: SaveOperationDto) {
+  async create(data: CreateOperationDto) {
     return await this.operationRepository.save(data);
   }
 }
