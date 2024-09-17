@@ -204,7 +204,7 @@ describe('MarketMakingStrategy', () => {
 
         const placeOrderSpy = jest
           .spyOn(strategy as any, 'placeOrder')
-          .mockImplementation(async (params: PlaceOrderParams) => {});
+          .mockImplementation(async () => {});
 
         await strategy['evaluateMarketMaking'](command);
 
