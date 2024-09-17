@@ -13,7 +13,7 @@ export class ArbitrageService {
     try {
       return this.repository.createStrategy(strategy);
     } catch (error) {
-      this.logger.error(`Error creating strategy: ${error.message}`);
+      this.logger.error(`Error creating arbitrage strategy: ${error.message}`);
       throw error;
     }
   }

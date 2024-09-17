@@ -10,8 +10,8 @@ import {
   ArbitrageStrategyDto,
 } from './model/arbitrage.dto';
 
-@ApiTags('arbitrage')
-@Controller('trading-strategy')
+@ApiTags('trading-strategy')
+@Controller('arbitrage')
 export class ArbitrageController {
   constructor(
     private readonly service: ArbitrageStrategy,
