@@ -1,7 +1,7 @@
 import { Order } from '../entities/order.entity';
 import { OrderStatus } from '../enums/exchange-operation.enums';
 
-export interface SaveOperationDto {
+export interface CreateOperationDto {
   status: OrderStatus;
   details: Record<string, any>;
   order: Order;

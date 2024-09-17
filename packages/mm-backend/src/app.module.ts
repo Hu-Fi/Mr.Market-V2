@@ -3,12 +3,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './common/config/typeorm-config.service';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
+import Joi from 'joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: Joi.object({
+        ADMIN_PASSWORD: Joi.string().required(),
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -18,7 +25,11 @@ import { IntegrationsModule } from './integrations/integrations.module';
         return typeOrmConfigService.getTypeOrmConfig();
       },
     }),
+    AutomapperModule.forRoot({
+      strategyInitializer: classes(),
+    }),
     IntegrationsModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],

@@ -19,9 +19,6 @@ import {
 
 describe('ExchangeTradeService', () => {
   let service: ExchangeTradeService;
-  let exchangeRegistryService: ExchangeRegistryService;
-  let exchangeOperationService: ExchangeOperationService;
-  let logger: CustomLogger;
 
   const mockExchangeRegistryService = {
     getExchange: jest.fn(),
@@ -59,13 +56,6 @@ describe('ExchangeTradeService', () => {
     }).compile();
 
     service = module.get<ExchangeTradeService>(ExchangeTradeService);
-    exchangeRegistryService = module.get<ExchangeRegistryService>(
-      ExchangeRegistryService,
-    );
-    exchangeOperationService = module.get<ExchangeOperationService>(
-      ExchangeOperationService,
-    );
-    logger = module.get<CustomLogger>(CustomLogger);
   });
 
   it('should be defined', () => {

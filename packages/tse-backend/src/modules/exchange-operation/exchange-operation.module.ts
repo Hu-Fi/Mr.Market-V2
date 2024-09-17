@@ -7,15 +7,21 @@ import { Order } from '../../common/entities/order.entity';
 import { OrderRepository } from './order.repository';
 import { OrderService } from './order.service';
 import { OperationService } from './operation.service';
+import { AspectConfig } from '../../common/config/aspect.config';
+import { AspectModule } from '../../common/utils/aspect/aspect.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, Operation])],
+  imports: [
+    TypeOrmModule.forFeature([Order, Operation]),
+    AspectModule,
+  ],
   providers: [
     ExchangeOperationService,
     OrderService,
     OperationService,
     OrderRepository,
     OperationRepository,
+    AspectConfig,
   ],
   exports: [
     ExchangeOperationService,
