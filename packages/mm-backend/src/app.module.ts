@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeOrmConfigService } from './common/config/typeorm-config.service';
+import { TypeormConfig } from './common/config/typeorm.config';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import Joi from 'joi';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import Joi from 'joi';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const typeOrmConfigService = new TypeOrmConfigService(configService);
+        const typeOrmConfigService = new TypeormConfig(configService);
         return typeOrmConfigService.getTypeOrmConfig();
       },
     }),
@@ -30,6 +31,7 @@ import Joi from 'joi';
     }),
     IntegrationsModule,
     AuthModule,
+    UserModule
   ],
   controllers: [],
   providers: [],

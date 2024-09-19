@@ -31,7 +31,7 @@ export class TypeormConfig {
       password: this.configService.get<string>('DATABASE_PASSWORD', 'postgres'),
       database: this.configService.get<string>('DATABASE_NAME', 'mr_market_v2'),
       entities: [Order, Operation, Arbitrage, MarketMaking],
-      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:
         this.configService.get<string>('DATABASE_SYNCHRONIZE') === 'true',

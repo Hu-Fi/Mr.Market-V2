@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
+import { User } from '../entities/user.entity';
 
 @Injectable()
-export class TypeOrmConfigService {
+export class TypeormConfig {
   constructor(private configService: ConfigService) {}
 
   getTypeOrmConfig(): DataSourceOptions {
@@ -26,8 +27,8 @@ export class TypeOrmConfigService {
       username: this.configService.get<string>('DATABASE_USERNAME', 'postgres'),
       password: this.configService.get<string>('DATABASE_PASSWORD', 'postgres'),
       database: this.configService.get<string>('DATABASE_NAME', 'mr_market_v2'),
-      entities: [],
-      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      entities: [User],
+      migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:
         this.configService.get<string>('DATABASE_SYNCHRONIZE') === 'true',

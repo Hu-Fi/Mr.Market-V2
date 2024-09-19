@@ -48,6 +48,10 @@ export class MixinGateway {
 
     return {
       clientId: authorization.user.user_id,
+      type: authorization.user.type,
+      identityNumber: authorization.user.identity_number,
+      fullName: authorization.user.full_name,
+      avatarUrl: authorization.user.avatar_url,
     };
   }
 }
