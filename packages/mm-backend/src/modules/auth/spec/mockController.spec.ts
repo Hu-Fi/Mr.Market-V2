@@ -15,6 +15,7 @@ import {
   mixinOAuthCommandFixture,
 } from './auth.fixtures';
 import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
+import { UserService } from '../../user/user.service';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
@@ -65,6 +66,12 @@ describe('RolesGuard', () => {
             }),
           },
         },
+        {
+          provide: UserService,
+          useValue: {
+            createUser: jest.fn(),
+          },
+        }
       ],
     }).compile();
 
