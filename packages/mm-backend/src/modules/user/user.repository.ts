@@ -11,6 +11,13 @@ export class UserRepository {
   ) {}
 
   async create(data: Partial<User>) {
-    return await this.repository.save(data);
+    const queryBuilder = this.repository.createQueryBuilder()
+      .insert()
+      .into(User)
+      .values(data)
+      .orIgnore()
+    // Executes 'ON CONFLICT DO NOTHING' when a record with the unique 'userId' already exists in the database
+
+    await queryBuilder.execute();
   }
 }

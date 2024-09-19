@@ -7,6 +7,6 @@ export class UserService {
   constructor(private repository: UserRepository) {}
 
   async createUser(user: Partial<User>) {
-    return await this.repository.create(user);
+    await this.repository.create(user);
   }
 }

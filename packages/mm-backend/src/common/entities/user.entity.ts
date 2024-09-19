@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Unique } from 'typeorm';
 import { Role } from '../enums/role.enum';
 
 @Entity()
+@Unique(['userId'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   userId: string;

@@ -13,3 +13,11 @@ export interface UserResponse {
 export interface JwtResponse {
   accessToken: string;
 }
+
+export interface OAuthResponse {
+  clientId: string;
+  type: string;
+  identityNumber: string;
+  fullName: string;
+  avatarUrl: string;
+}

@@ -4,7 +4,7 @@ import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AdminLoginCommand, MixinOAuthCommand } from './model/auth.model';
-import { JwtResponse } from '../../common/interfaces/auth.interfaces';
+import { JwtResponse, OAuthResponse } from '../../common/interfaces/auth.interfaces';
 import { UserService } from '../user/user.service';
 import { Role } from '../../common/enums/role.enum';
 import { CustomLogger } from '../logger/logger.service';
@@ -46,7 +46,7 @@ export class AuthService {
       throw new BadRequestException('Invalid code length');
     }
 
-    const clientData: any = await this.mixinGateway.oauthHandler(code);
+    const clientData: OAuthResponse = await this.mixinGateway.oauthHandler(code);
 
     await this.saveUserToDatabase(clientData);
 
@@ -54,7 +54,7 @@ export class AuthService {
     return { accessToken: this.jwtService.sign(payload) };
   }
 
-  private async saveUserToDatabase(clientData: any): Promise<void> {
+  private async saveUserToDatabase(clientData: OAuthResponse): Promise<void> {
     try {
       await this.userService.createUser({
         userId: clientData.clientId,
