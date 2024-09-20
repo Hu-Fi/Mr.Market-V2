@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from '../../common/entities/transaction.entity';
-import { Type } from '../../common/enums/transaction.enum';
+import { TransactionData } from '../../common/interfaces/transaction.interfaces';
 
 @Injectable()
 export class TransactionRepository {
@@ -11,8 +11,7 @@ export class TransactionRepository {
     private readonly repository: Repository<Transaction>,
   ) {}
 
-
-  async save(param: { amount: number; currency: string; exchange: string; type: Type; userId: string }) {
-    
+  async save(data: TransactionData) {
+    return await this.repository.save(data);
   }
 }
