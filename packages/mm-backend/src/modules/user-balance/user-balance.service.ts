@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserBalanceRepository } from './user-balance.repository';
 import { UserBalance } from '../../common/entities/user-balance.entity';
+import { TransactionBalance } from '../../common/interfaces/transaction.interfaces';
 
 @Injectable()
 export class UserBalanceService {
@@ -32,12 +33,8 @@ export class UserBalanceService {
     return userBalance;
   }
 
-  async updateUserBalance(
-    userId: string,
-    exchange: string,
-    currency: string,
-    amount: number, // Positive for deposit, negative for withdrawal
-  ): Promise<UserBalance> {
+  async updateUserBalance(transactionBalance: TransactionBalance): Promise<UserBalance> {
+    const { userId, exchange, currency, amount } = transactionBalance;
     const userBalance = await this.findOrCreateUserBalance(
       userId,
       exchange,

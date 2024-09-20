@@ -12,6 +12,9 @@ import { HealthModule } from './modules/health/health.module';
 import { CacheModule } from '@nestjs/common/cache';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { UserBalanceModule } from './modules/user-balance/user-balance.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 @Module({
   imports: [
@@ -29,6 +32,13 @@ import { UserBalanceModule } from './modules/user-balance/user-balance.module';
         const typeOrmConfigService = new TypeormConfig(configService);
         return typeOrmConfigService.getTypeOrmConfig();
       },
+      async dataSourceFactory(options) {
+        if (!options) {
+          throw new Error('Invalid options passed');
+        }
+
+        return addTransactionalDataSource(new DataSource(options));
+      },
     }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
@@ -38,7 +48,8 @@ import { UserBalanceModule } from './modules/user-balance/user-balance.module';
     AuthModule,
     UserModule,
     HealthModule,
-    UserBalanceModule
+    UserBalanceModule,
+    TransactionModule,
   ],
   controllers: [],
   providers: [],
