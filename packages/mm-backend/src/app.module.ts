@@ -11,6 +11,7 @@ import { UserModule } from './modules/user/user.module';
 import { HealthModule } from './modules/health/health.module';
 import { CacheModule } from '@nestjs/common/cache';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
+import { UserBalanceModule } from './modules/user-balance/user-balance.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { CacheFactoryConfig } from './common/config/cache-factory.config';
     IntegrationsModule,
     AuthModule,
     UserModule,
-    HealthModule
+    HealthModule,
+    UserBalanceModule
   ],
   controllers: [],
   providers: [],
