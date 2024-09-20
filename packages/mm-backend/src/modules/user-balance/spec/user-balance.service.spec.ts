@@ -52,7 +52,7 @@ describe('UserBalanceService', () => {
       balance: 200,
     });
 
-    const result = await service.updateUserBalance('1', 'binance', 'USD', 100);
+    const result = await service.updateUserBalance({ userId: '1', exchange: 'binance', currency: 'USD', amount: 100 });
     expect(result.balance).toEqual(200);
     expect(repository.saveUserBalance).toHaveBeenCalledWith({
       ...userBalance,
@@ -65,7 +65,7 @@ describe('UserBalanceService', () => {
 
     jest.spyOn(repository, 'findByUserIdExchangeCurrency').mockResolvedValue(userBalance);
 
-    await expect(service.updateUserBalance('1', 'binance', 'USD', -100)).rejects.toThrow(
+    await expect(service.updateUserBalance({userId: '1', exchange: 'binance', currency: 'USD', amount: -100})).rejects.toThrow(
       'Insufficient balance',
     );
   });
