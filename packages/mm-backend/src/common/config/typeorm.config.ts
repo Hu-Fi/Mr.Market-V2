@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { UserBalance } from '../entities/user-balance.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -27,7 +28,7 @@ export class TypeormConfig {
       username: this.configService.get<string>('DATABASE_USERNAME', 'postgres'),
       password: this.configService.get<string>('DATABASE_PASSWORD', 'postgres'),
       database: this.configService.get<string>('DATABASE_NAME', 'mr_market_v2'),
-      entities: [User],
+      entities: [User, UserBalance],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:
