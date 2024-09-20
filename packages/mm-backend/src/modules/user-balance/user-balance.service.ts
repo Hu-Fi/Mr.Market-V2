@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserBalanceRepository } from './user-balance.repository';
 import { UserBalance } from '../../common/entities/user-balance.entity';
 import Decimal from 'decimal.js';
-import { TransactionBalance } from '../../../dist/src/common/interfaces/transaction.interfaces';
+import { TransactionBalance } from '../../common/interfaces/transaction.interfaces';
 
 @Injectable()
 export class UserBalanceService {
