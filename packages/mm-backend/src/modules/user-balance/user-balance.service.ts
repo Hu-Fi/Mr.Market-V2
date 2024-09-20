@@ -38,7 +38,7 @@ export class UserBalanceService {
     currency: string,
     amount: number, // Positive for deposit, negative for withdrawal
   ): Promise<UserBalance> {
-    let userBalance = await this.findOrCreateUserBalance(
+    const userBalance = await this.findOrCreateUserBalance(
       userId,
       exchange,
       currency,
