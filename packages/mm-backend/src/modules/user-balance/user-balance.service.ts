@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UserBalanceRepository } from './user-balance.repository';
 import { UserBalance } from '../../common/entities/user-balance.entity';
-import { TransactionBalance } from '../../common/interfaces/transaction.interfaces';
+import Decimal from 'decimal.js';
+import { TransactionBalance } from '../../../dist/src/common/interfaces/transaction.interfaces';
 
 @Injectable()
 export class UserBalanceService {
@@ -35,18 +36,17 @@ export class UserBalanceService {
 
   async updateUserBalance(transactionBalance: TransactionBalance): Promise<UserBalance> {
     const { userId, exchange, currency, amount } = transactionBalance;
-    const userBalance = await this.findOrCreateUserBalance(
-      userId,
-      exchange,
-      currency,
-    );
+    const userBalance = await this.findOrCreateUserBalance(userId, exchange, currency);
 
-    if (userBalance.balance + amount < 0) {
+    const currentBalance = new Decimal(userBalance.balance);
+    const transactionAmount = new Decimal(amount);
+
+    if (currentBalance.plus(transactionAmount).isNegative()) {
       throw new Error('Insufficient balance');
     }
 
-    userBalance.balance += amount;
+    userBalance.balance = currentBalance.plus(transactionAmount).toNumber();
 
-    return await this.userBalanceRepository.saveUserBalance(userBalance);
+    return this.userBalanceRepository.saveUserBalance(userBalance);
   }
 }
