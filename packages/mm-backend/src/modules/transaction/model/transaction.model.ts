@@ -14,14 +14,9 @@ export class DepositDto {
   amount: number;
 
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: '43d61dcd-e413-450d-80b8-101d5e903357' })
   @IsString()
-  currency: string;
-
-  @AutoMap()
-  @ApiProperty()
-  @IsString()
-  exchange: string;
+  assetId: string;
 }
 
 export class WithdrawDto {
@@ -36,14 +31,14 @@ export class WithdrawDto {
   amount: number;
 
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: '43d61dcd-e413-450d-80b8-101d5e903357' })
   @IsString()
-  currency: string;
+  assetId: string;
 
   @AutoMap()
   @ApiProperty()
   @IsString()
-  exchange: string;
+  destination: string;
 }
 
 export class DepositCommand {
@@ -52,9 +47,7 @@ export class DepositCommand {
   @AutoMap()
   amount: number;
   @AutoMap()
-  currency: string;
-  @AutoMap()
-  exchange: string;
+  assetId: string;
 }
 
 export class WithdrawCommand {
@@ -63,7 +56,7 @@ export class WithdrawCommand {
   @AutoMap()
   amount: number;
   @AutoMap()
-  currency: string;
+  assetId: string;
   @AutoMap()
-  exchange: string;
+  destination: string;
 }

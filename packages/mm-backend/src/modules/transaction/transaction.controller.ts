@@ -5,6 +5,7 @@ import { UserBalance } from '../../common/entities/user-balance.entity';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { DepositResponse } from '../../common/interfaces/transaction.interfaces';
 
 @ApiTags('transaction')
 @Controller('transaction')
@@ -16,7 +17,7 @@ export class TransactionController {
 
   @Post('deposit')
   @ApiOperation({ summary: 'Execute a deposit transaction' })
-  async deposit(@Body() dto: DepositDto): Promise<UserBalance> {
+  async deposit(@Body() dto: DepositDto): Promise<DepositResponse> {
     const command = this.mapper.map(dto, DepositDto, DepositCommand);
     return this.transactionService.deposit(command);
   }

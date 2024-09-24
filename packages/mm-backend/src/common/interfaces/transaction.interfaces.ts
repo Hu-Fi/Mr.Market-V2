@@ -3,16 +3,20 @@ import { Status, Type } from '../enums/transaction.enum';
 export interface TransactionBalance {
   userId: string;
   amount: number;
-  currency: string;
-  exchange: string;
+  assetId: string;
 }
 
 export interface TransactionData {
   userId: string;
-  exchange: string;
+  assetId: string;
   amount: number;
-  currency: string;
+  destination: string;
   type: Type;
   status: Status;
-  snapshotId: string;
+}
+
+export interface DepositResponse {
+  assetId: string;
+  amount: number;
+  destination: string;
 }

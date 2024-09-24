@@ -16,22 +16,19 @@ export class Transaction {
   userId: string;
 
   @Column()
-  exchange: string;
+  assetId: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 15, scale: 8, default: 0 })
   amount: number;
 
   @Column()
-  currency: string;
+  destination: string;
 
   @Column()
   type: Type;
 
   @Column({ default: 'pending' })
   status: Status;
-
-  @Column()
-  snapshotId: string;
 
   @CreateDateColumn()
   createdAt: Date;

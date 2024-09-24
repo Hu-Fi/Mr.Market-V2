@@ -54,4 +54,9 @@ export class MixinGateway {
       avatarUrl: authorization.user.avatar_url,
     };
   }
+
+  async createDepositAddressForAssetId(assetId: string) {
+    const assetResponse = await this._client.asset.fetch(assetId);
+    return assetResponse.destination;
+  }
 }
