@@ -12,20 +12,17 @@ export class UserBalanceService {
   }
   async findOrCreateUserBalance(
     userId: string,
-    exchange: string,
-    currency: string,
+    assetId: string,
   ): Promise<UserBalance> {
-    let userBalance = await this.userBalanceRepository.findByUserIdExchangeCurrency(
+    let userBalance = await this.userBalanceRepository.findByUserIdExchangeAssetId(
       userId,
-      exchange,
-      currency,
+      assetId,
     );
 
     if (!userBalance) {
       userBalance = new UserBalance();
       userBalance.userId = userId;
-      userBalance.exchange = exchange;
-      userBalance.currency = currency;
+      userBalance.assetId = assetId;
       userBalance.balance = 0;
 
       await this.userBalanceRepository.saveUserBalance(userBalance);
@@ -35,8 +32,8 @@ export class UserBalanceService {
   }
 
   async updateUserBalance(transactionBalance: TransactionBalance): Promise<UserBalance> {
-    const { userId, exchange, currency, amount } = transactionBalance;
-    const userBalance = await this.findOrCreateUserBalance(userId, exchange, currency);
+    const { userId, assetId, amount } = transactionBalance;
+    const userBalance = await this.findOrCreateUserBalance(userId, assetId);
 
     const currentBalance = new Decimal(userBalance.balance);
     const transactionAmount = new Decimal(amount);

@@ -9,10 +9,7 @@ export class UserBalance {
   userId: string;
 
   @Column()
-  exchange: string;
-
-  @Column()
-  currency: string;
+  assetId: string;
 
   @Column('decimal', { precision: 15, scale: 8, default: 0 })
   balance: number;

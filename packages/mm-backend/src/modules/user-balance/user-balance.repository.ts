@@ -10,13 +10,12 @@ export class UserBalanceRepository {
     private readonly repository: Repository<UserBalance>,
   ) {}
 
-  async findByUserIdExchangeCurrency(
+  async findByUserIdExchangeAssetId(
     userId: string,
-    exchange: string,
-    currency: string,
+    assetId: string,
   ): Promise<UserBalance | null> {
     return this.repository.findOne({
-      where: { userId, exchange, currency },
+      where: { userId, assetId },
     });
   }
 

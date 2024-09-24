@@ -32,27 +32,27 @@ describe('UserBalanceService', () => {
   });
 
   it('should find or create a user balance', async () => {
-    const userBalance = { userId: '1', exchange: 'binance', currency: 'USD', balance: 0 } as UserBalance;
+    const userBalance = { userId: '1', exchange: 'binance', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', balance: 0 } as UserBalance;
 
-    jest.spyOn(repository, 'findByUserIdExchangeCurrency').mockResolvedValue(null);
+    jest.spyOn(repository, 'findByUserIdExchangeAssetId').mockResolvedValue(null);
     jest.spyOn(repository, 'saveUserBalance').mockResolvedValue(userBalance);
 
-    const result = await service.findOrCreateUserBalance('1', 'binance', 'USD');
+    const result = await service.findOrCreateUserBalance('1', 'binance', '43d61dcd-e413-450d-80b8-101d5e903357');
     expect(result).toEqual(userBalance);
-    expect(repository.findByUserIdExchangeCurrency).toHaveBeenCalledWith('1', 'binance', 'USD');
+    expect(repository.findByUserIdExchangeAssetId).toHaveBeenCalledWith('1', 'binance', '43d61dcd-e413-450d-80b8-101d5e903357');
     expect(repository.saveUserBalance).toHaveBeenCalledWith(expect.any(UserBalance));
   });
 
   it('should update user balance on deposit', async () => {
-    const userBalance = { userId: '1', exchange: 'binance', currency: 'USD', balance: 100 } as UserBalance;
+    const userBalance = { userId: '1', exchange: 'binance', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', balance: 100 } as UserBalance;
 
-    jest.spyOn(repository, 'findByUserIdExchangeCurrency').mockResolvedValue(userBalance);
+    jest.spyOn(repository, 'findByUserIdExchangeAssetId').mockResolvedValue(userBalance);
     jest.spyOn(repository, 'saveUserBalance').mockResolvedValue({
       ...userBalance,
       balance: 200,
     });
 
-    const result = await service.updateUserBalance({ userId: '1', exchange: 'binance', currency: 'USD', amount: 100 });
+    const result = await service.updateUserBalance({ userId: '1', exchange: 'binance', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', amount: 100 });
     expect(result.balance).toEqual(200);
     expect(repository.saveUserBalance).toHaveBeenCalledWith({
       ...userBalance,
@@ -61,11 +61,11 @@ describe('UserBalanceService', () => {
   });
 
   it('should throw an error for insufficient balance on withdrawal', async () => {
-    const userBalance = { userId: '1', exchange: 'binance', currency: 'USD', balance: 50 } as UserBalance;
+    const userBalance = { userId: '1', exchange: 'binance', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', balance: 50 } as UserBalance;
 
-    jest.spyOn(repository, 'findByUserIdExchangeCurrency').mockResolvedValue(userBalance);
+    jest.spyOn(repository, 'findByUserIdExchangeAssetId').mockResolvedValue(userBalance);
 
-    await expect(service.updateUserBalance({userId: '1', exchange: 'binance', currency: 'USD', amount: -100})).rejects.toThrow(
+    await expect(service.updateUserBalance({userId: '1', exchange: 'binance', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', amount: -100})).rejects.toThrow(
       'Insufficient balance',
     );
   });
