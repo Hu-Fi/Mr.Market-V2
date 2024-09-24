@@ -14,7 +14,7 @@ export class UserBalanceService {
     userId: string,
     assetId: string,
   ): Promise<UserBalance> {
-    let userBalance = await this.userBalanceRepository.findByUserIdExchangeAssetId(
+    let userBalance = await this.userBalanceRepository.findByUserIdAssetId(
       userId,
       assetId,
     );

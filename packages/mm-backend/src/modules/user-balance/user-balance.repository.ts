@@ -10,7 +10,7 @@ export class UserBalanceRepository {
     private readonly repository: Repository<UserBalance>,
   ) {}
 
-  async findByUserIdExchangeAssetId(
+  async findByUserIdAssetId(
     userId: string,
     assetId: string,
   ): Promise<UserBalance | null> {
