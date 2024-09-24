@@ -5,10 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Status, Type } from '../enums/transaction.enum';
+import { Status } from '../enums/deposit.enum';
 
 @Entity()
-export class Transaction {
+export class Deposit {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,16 +18,16 @@ export class Transaction {
   @Column()
   assetId: string;
 
+  @Column()
+  chainId: string;
+
   @Column('decimal', { precision: 15, scale: 8, default: 0 })
   amount: number;
 
   @Column()
   destination: string;
 
-  @Column()
-  type: Type;
-
-  @Column({ default: 'pending' })
+  @Column({ default: Status.PENDING })
   status: Status;
 
   @CreateDateColumn()

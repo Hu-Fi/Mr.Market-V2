@@ -8,6 +8,7 @@ import {
 } from '@mixin.dev/mixin-node-sdk';
 import { ConfigService } from '@nestjs/config';
 import { AuthorizationResponse, OAuthResponse } from '../common/interfaces/auth.interfaces';
+import { DepositCommand } from '../modules/transaction/model/transaction.model';
 
 @Injectable()
 export class MixinGateway {
@@ -45,7 +46,6 @@ export class MixinGateway {
       authorization_id: tokenResponse.authorization_id,
       scopes: ['PROFILE:READ'],
     })) as unknown as AuthorizationResponse;
-
     return {
       clientId: authorization.user.user_id,
       type: authorization.user.type,
@@ -55,8 +55,22 @@ export class MixinGateway {
     };
   }
 
-  async createDepositAddressForAssetId(assetId: string) {
-    const assetResponse = await this._client.asset.fetch(assetId);
-    return assetResponse.destination;
+  async getDepositAddress(command: DepositCommand) {
+    const { userId, chainId } = command
+    const payload = {
+      members: [userId, this.keystore.app_id],
+      threshold: 1,
+      chain_id: chainId,
+    };
+
+    const response = await this._client.safe.depositEntries(payload);
+    return response[0].destination;
+  }
+
+  async getDepositsInProgress(assetId: string, destination: string) {
+    return await this._client.safe.pendingDeposits({
+      asset: assetId,
+      destination
+    });
   }
 }

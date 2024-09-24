@@ -30,6 +30,7 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Mr Market V2 API')
     .setDescription('Documentation of API endpoints')
     .setVersion('0.0.1')

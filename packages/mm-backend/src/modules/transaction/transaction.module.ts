@@ -1,21 +1,31 @@
 import { Module } from '@nestjs/common';
-import { TransactionService } from './transaction.service';
+import { DepositService } from './deposit.service';
 import { TransactionController } from './transaction.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Transaction } from '../../common/entities/transaction.entity';
-import { TransactionRepository } from './transaction.repository';
+import { DepositRepository } from './deposit.repository';
 import { IntegrationsModule } from '../../integrations/integrations.module';
 import { TransactionProfile } from './transaction.mapper';
 import { UserBalanceModule } from '../user-balance/user-balance.module';
+import { Deposit } from '../../common/entities/deposit.entity';
+import { SchedulerUtil } from '../../common/utils/scheduler.utils';
+import { TransactionService } from './transaction.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction]),
+    TypeOrmModule.forFeature([Deposit]),
     IntegrationsModule,
     UserBalanceModule,
   ],
-  providers: [TransactionService, TransactionRepository, TransactionProfile],
+  providers: [
+    DepositService,
+    DepositRepository,
+    TransactionProfile,
+    TransactionService,
+    SchedulerUtil,
+    ConfigService
+  ],
   controllers: [TransactionController],
-  exports: [TransactionService, TransactionRepository],
+  exports: [DepositService, DepositRepository],
 })
 export class TransactionModule {}

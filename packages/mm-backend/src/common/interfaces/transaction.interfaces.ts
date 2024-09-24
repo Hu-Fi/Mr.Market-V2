@@ -1,4 +1,4 @@
-import { Status, Type } from '../enums/transaction.enum';
+import { Status } from '../enums/deposit.enum';
 
 export interface TransactionBalance {
   userId: string;
@@ -9,9 +9,9 @@ export interface TransactionBalance {
 export interface TransactionData {
   userId: string;
   assetId: string;
+  chainId: string;
   amount: number;
   destination: string;
-  type: Type;
   status: Status;
 }
 

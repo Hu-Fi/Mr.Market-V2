@@ -1,53 +1,45 @@
-import { Injectable } from '@nestjs/common';
-import { MixinGateway } from '../../integrations/mixin.gateway';
-import { UserBalanceService } from '../user-balance/user-balance.service';
-import { UserBalance } from '../../common/entities/user-balance.entity';
-import { Transactional } from 'typeorm-transactional';
-import { TransactionRepository } from './transaction.repository';
-import { Status, Type } from '../../common/enums/transaction.enum';
-import { DepositCommand, WithdrawCommand } from './model/transaction.model';
-import { DepositResponse } from '../../common/interfaces/transaction.interfaces';
+import { Injectable, Logger } from '@nestjs/common';
+import { SchedulerUtil } from '../../common/utils/scheduler.utils';
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TransactionService {
+  private logger = new Logger(TransactionService.name);
+  private isJobRunning: boolean = false;
+
   constructor(
-    private readonly mixinGateway: MixinGateway,
-    private readonly transactionRepository: TransactionRepository,
-    private readonly userBalanceService: UserBalanceService,
-  ) {}
-
-  @Transactional()
-  async deposit(command: DepositCommand): Promise<DepositResponse> {
-    const destination = await this.mixinGateway.createDepositAddressForAssetId(command.assetId);
-    await this.transactionRepository.save({
-      ...command,
-      type: Type.DEPOSIT,
-      status: Status.PENDING,
-      destination,
-    });
-
-    await this.userBalanceService.updateUserBalance(command);
-
-    return {
-      assetId: command.assetId,
-      amount: command.amount,
-      destination: destination,
-    } as DepositResponse
+    private readonly configService: ConfigService,
+    private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly schedulerUtils: SchedulerUtil,
+  ) {
   }
 
-  @Transactional()
-  async withdraw(command: WithdrawCommand): Promise<UserBalance> {
-    await this.transactionRepository.save({
-      ...command,
-      type: Type.WITHDRAWAL,
-      status: Status.PENDING,
-      destination: 'withdrawalAddress',
-    })
-
-    return await this.userBalanceService.updateUserBalance({
-       ...command,
-       amount: -command.amount,
-      }
+  onModuleInit() {
+    this.schedulerUtils.addCronJob(
+      TransactionService.name,
+      CronExpression.EVERY_5_MINUTES,
+      this.handleCron.bind(this),
+      this.schedulerRegistry,
     );
+  }
+
+  private async processData() {
+    this.logger.debug('Worker checking transactions in progress started');
+  }
+
+  async handleCron() {
+    if (this.isJobRunning) {
+      this.logger.warn('Job still running, skipping');
+      return;
+    }
+    this.isJobRunning = true;
+    try {
+      await this.processData();
+    } catch (error) {
+      this.logger.error('Error processing data', error.stack);
+    } finally {
+      this.isJobRunning = false;
+    }
   }
 }

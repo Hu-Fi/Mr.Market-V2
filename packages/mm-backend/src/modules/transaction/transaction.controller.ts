@@ -1,31 +1,34 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { TransactionService } from './transaction.service';
-import { DepositCommand, DepositDto, WithdrawCommand, WithdrawDto } from './model/transaction.model';
-import { UserBalance } from '../../common/entities/user-balance.entity';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import { DepositService } from './deposit.service';
+import { DepositCommand, DepositDto } from './model/transaction.model';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { DepositResponse } from '../../common/interfaces/transaction.interfaces';
+import { Roles } from '../../common/utils/auth/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
+import { RolesGuard } from '../../common/utils/auth/guards/roles.guard';
+import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
 
 @ApiTags('transaction')
 @Controller('transaction')
+@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TransactionController {
   constructor(
-    private readonly transactionService: TransactionService,
+    private readonly transactionService: DepositService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
+  @Roles(Role.USER)
   @Post('deposit')
   @ApiOperation({ summary: 'Execute a deposit transaction' })
-  async deposit(@Body() dto: DepositDto): Promise<DepositResponse> {
+  async deposit(@Body() dto: DepositDto, @Request() req): Promise<DepositResponse> {
     const command = this.mapper.map(dto, DepositDto, DepositCommand);
-    return this.transactionService.deposit(command);
-  }
 
-  @Post('withdraw')
-  @ApiOperation({ summary: 'Execute a withdrawal transaction' })
-  async withdraw(@Body() dto: WithdrawDto) {
-    const command = this.mapper.map(dto, WithdrawDto, WithdrawCommand);
-    return this.transactionService.withdraw(command);
+    command.userId = req.user.userId;
+    console.log(command.userId)
+    return this.transactionService.deposit(command);
   }
 }

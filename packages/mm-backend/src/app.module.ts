@@ -15,6 +15,7 @@ import { UserBalanceModule } from './modules/user-balance/user-balance.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
       strategyInitializer: classes(),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),
+    ScheduleModule.forRoot(),
     IntegrationsModule,
     AuthModule,
     UserModule,

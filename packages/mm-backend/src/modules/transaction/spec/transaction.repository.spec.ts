@@ -1,30 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Transaction } from '../../../common/entities/transaction.entity';
-import { TransactionRepository } from '../transaction.repository';
+import { Withdrawal } from '../../../common/entities/withdrawal.entity';
+import { DepositRepository } from '../deposit.repository';
 
 const mockRepository = {
 
 };
 
 describe('TransactionRepository', () => {
-  let transactionRepository: TransactionRepository;
-  let repository: Repository<Transaction>;
+  let transactionRepository: DepositRepository;
+  let repository: Repository<Withdrawal>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        TransactionRepository,
+        DepositRepository,
         {
-          provide: getRepositoryToken(Transaction),
+          provide: getRepositoryToken(Withdrawal),
           useValue: mockRepository,
         },
       ],
     }).compile();
 
-    transactionRepository = module.get<TransactionRepository>(TransactionRepository);
-    repository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction));
+    transactionRepository = module.get<DepositRepository>(DepositRepository);
+    repository = module.get<Repository<Withdrawal>>(getRepositoryToken(Withdrawal));
   });
 
   it('should be defined', () => {
