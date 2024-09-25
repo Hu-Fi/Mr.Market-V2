@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AuthorizationResponse, OAuthResponse } from '../common/interfaces/auth.interfaces';
 import { DepositCommand } from '../modules/transaction/model/transaction.model';
+import { SafePendingDepositResponse } from '@mixin.dev/mixin-node-sdk/src/client/types/safe';
 
 @Injectable()
 export class MixinGateway {
@@ -67,10 +68,10 @@ export class MixinGateway {
     return response[0].destination;
   }
 
-  async getDepositsInProgress(assetId: string, destination: string) {
+  async getDepositsInProgress(assetId: string, offset?: string): Promise<SafePendingDepositResponse[]> {
     return await this._client.safe.pendingDeposits({
       asset: assetId,
-      destination
+      offset,
     });
   }
 }

@@ -6,6 +6,7 @@ import { DepositRepository } from './deposit.repository';
 import { Status } from '../../common/enums/deposit.enum';
 import { DepositCommand } from './model/transaction.model';
 import { DepositResponse } from '../../common/interfaces/transaction.interfaces';
+import { Deposit } from '../../common/entities/deposit.entity';
 
 @Injectable()
 export class DepositService {
@@ -31,5 +32,13 @@ export class DepositService {
       amount: command.amount,
       destination: destination,
     } as DepositResponse
+  }
+
+  async getPendingDeposits(): Promise<Deposit[]> {
+    return await this.transactionRepository.getByStatus(Status.PENDING);
+  }
+
+  async updateDepositStatus(depositId: number, status: Status) {
+    await this.transactionRepository.update(depositId, status);
   }
 }

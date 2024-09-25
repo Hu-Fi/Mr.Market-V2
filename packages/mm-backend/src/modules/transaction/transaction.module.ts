@@ -9,7 +9,6 @@ import { UserBalanceModule } from '../user-balance/user-balance.module';
 import { Deposit } from '../../common/entities/deposit.entity';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { TransactionService } from './transaction.service';
-import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -23,7 +22,6 @@ import { ConfigService } from '@nestjs/config';
     TransactionProfile,
     TransactionService,
     SchedulerUtil,
-    ConfigService
   ],
   controllers: [TransactionController],
   exports: [DepositService, DepositRepository],
