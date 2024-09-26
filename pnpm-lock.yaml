@@ -20,8 +20,8 @@ importers:
         specifier: ^8.8.1
         version: 8.8.1(@automapper/core@8.8.1)(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.1(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.1)(@nestjs/websockets@10.4.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))
       '@mixin.dev/mixin-node-sdk':
-        specifier: ^7.0.10
-        version: 7.0.10
+        specifier: ^7.1.0
+        version: 7.1.0
       '@nestjs/axios':
         specifier: ^3.0.3
         version: 3.0.3(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(axios@1.7.7)(rxjs@7.8.1)
@@ -753,8 +753,8 @@ packages:
   '@microsoft/tsdoc@0.15.0':
     resolution: {integrity: sha512-HZpPoABogPvjeJOdzCOSJsXeL/SMCBgBZMVC3X3d7YYp2gf31MfxhUoYUNwf1ERPJOnQc0wkFn9trqI6ZEdZuA==}
 
-  '@mixin.dev/mixin-node-sdk@7.0.10':
-    resolution: {integrity: sha512-ZK4SSrXZB5of6Wa/KpSjs+9a0fpIDoFBiqbM57usUFXFI+foHevhP9aVc5C+o3Xj2jUWZ2jL2OrNhokSV1pUhg==}
+  '@mixin.dev/mixin-node-sdk@7.1.0':
+    resolution: {integrity: sha512-1F2eFRs3R9SmaPsCfHXuemoKtasZKVNZUWAf2PvST5EMi1j3EQOn0InC4Uxj/zKP+Z9y88a1/ia5AtBbDzfqzg==}
     engines: {node: '>=10'}
 
   '@nestjs/axios@3.0.3':
@@ -1451,9 +1451,6 @@ packages:
 
   axios-retry@3.4.0:
     resolution: {integrity: sha512-VdgaP+gHH4iQYCCNUWF2pcqeciVOdGrBBAYUfTY+wPcO5Ltvp/37MLFNCmJKo7Gj3SHvCSdL8ouI1qLYJN3liA==}
-
-  axios@1.6.2:
-    resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
 
   axios@1.7.7:
     resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
@@ -4576,12 +4573,12 @@ snapshots:
 
   '@microsoft/tsdoc@0.15.0': {}
 
-  '@mixin.dev/mixin-node-sdk@7.0.10':
+  '@mixin.dev/mixin-node-sdk@7.1.0':
     dependencies:
       '@noble/curves': 1.6.0
       '@noble/hashes': 1.5.0
       '@types/qs': 6.9.15
-      axios: 1.6.2
+      axios: 1.7.7
       axios-retry: 3.4.0
       bignumber.js: 9.1.2
       bs58: 5.0.0
@@ -5365,14 +5362,6 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.6
       is-retry-allowed: 2.2.0
-
-  axios@1.6.2:
-    dependencies:
-      follow-redirects: 1.15.6
-      form-data: 4.0.0
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
 
   axios@1.7.7:
     dependencies:
