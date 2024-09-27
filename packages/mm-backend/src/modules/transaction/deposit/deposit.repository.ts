@@ -1,9 +1,9 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TransactionData } from '../../common/interfaces/transaction.interfaces';
-import { Deposit } from '../../common/entities/deposit.entity';
-import { Status } from '../../common/enums/deposit.enum';
+import { DepositData } from '../../../common/interfaces/transaction.interfaces';
+import { Deposit } from '../../../common/entities/deposit.entity';
+import { Status } from '../../../common/enums/transaction.enum';
 
 @Injectable()
 export class DepositRepository {
@@ -12,7 +12,7 @@ export class DepositRepository {
     private readonly repository: Repository<Deposit>,
   ) {}
 
-  async save(data: TransactionData) {
+  async save(data: DepositData) {
     return await this.repository.save(data);
   }
 

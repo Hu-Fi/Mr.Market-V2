@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { TransactionService } from '../transaction.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from '../deposit.service';
+import { DepositService } from '../deposit/deposit.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { SchedulerUtil } from '../../../common/utils/scheduler.utils';
-import { Status } from '../../../common/enums/deposit.enum';
+import { Status } from '../../../common/enums/transaction.enum';
 import { mockDeposits, mockMixinPendingDeposits } from './transaction.fixtures';
 
 const mockDepositService = {

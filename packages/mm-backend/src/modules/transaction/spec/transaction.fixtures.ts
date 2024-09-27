@@ -1,5 +1,5 @@
 import { Deposit } from '../../../common/entities/deposit.entity';
-import { Status } from '../../../common/enums/deposit.enum';
+import { Status } from '../../../common/enums/transaction.enum';
 
 const DB_DATE = new Date('2024-09-25T13:47:25.000Z');
 const MIXIN_DATE = '2024-09-25T13:47:25.332Z';

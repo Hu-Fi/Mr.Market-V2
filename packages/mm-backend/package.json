@@ -40,7 +40,9 @@
     "@nestjs/swagger": "^7.4.0",
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/typeorm": "^10.0.2",
+    "@types/uuid": "^10.0.0",
     "axios": "^1.7.7",
+    "bignumber.js": "^9.1.2",
     "cache-manager": "^5.7.6",
     "cache-manager-redis-store": "^3.0.1",
     "class-transformer": "^0.5.1",
@@ -55,7 +57,8 @@
     "rxjs": "^7.8.1",
     "ts-aspect": "^3.1.2",
     "typeorm": "^0.3.20",
-    "typeorm-transactional": "^0.5.0"
+    "typeorm-transactional": "^0.5.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",

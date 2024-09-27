@@ -8,7 +8,7 @@ import {
 import { Status } from '../enums/transaction.enum';
 
 @Entity()
-export class Deposit {
+export class Withdraw {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,9 +17,6 @@ export class Deposit {
 
   @Column()
   assetId: string;
-
-  @Column()
-  chainId: string;
 
   @Column('decimal', { precision: 15, scale: 8, default: 0 })
   amount: number;

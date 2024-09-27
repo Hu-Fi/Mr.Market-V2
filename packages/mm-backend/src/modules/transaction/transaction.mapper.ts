@@ -1,7 +1,8 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
-import { DepositCommand, DepositDto, WithdrawCommand, WithdrawDto } from './model/transaction.model';
+import { DepositCommand, DepositDto } from './deposit/model/deposit.model';
+import { WithdrawCommand, WithdrawDto } from './withdraw/model/withdraw.model';
 
 @Injectable()
 export class TransactionProfile extends AutomapperProfile {

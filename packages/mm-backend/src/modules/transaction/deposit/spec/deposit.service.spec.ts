@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DepositService } from '../deposit.service';
 import { DepositRepository } from '../deposit.repository';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
-import { UserBalanceService } from '../../user-balance/user-balance.service';
-import { DepositCommand } from '../model/transaction.model';
-import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
-import { Status } from '../../../common/enums/deposit.enum';
-import { Deposit } from '../../../common/entities/deposit.entity';
+import { MixinGateway } from '../../../../integrations/mixin.gateway';
+import { UserBalanceService } from '../../../user-balance/user-balance.service';
+import { DepositCommand } from '../model/deposit.model';
+import { DepositResponse } from '../../../../common/interfaces/transaction.interfaces';
+import { Status } from '../../../../common/enums/transaction.enum';
+import { Deposit } from '../../../../common/entities/deposit.entity';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DepositRepository } from '../deposit.repository';
-import { Deposit } from '../../../common/entities/deposit.entity';
-import { Status } from '../../../common/enums/deposit.enum';
+import { Deposit } from '../../../../common/entities/deposit.entity';
+import { Status } from '../../../../common/enums/transaction.enum';
 
 const mockRepository = {
   save: jest.fn(),

@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from './deposit.service';
+import { DepositService } from './deposit/deposit.service';
 import { MixinGateway } from '../../integrations/mixin.gateway';
-import { Status } from '../../common/enums/deposit.enum';
+import { Status } from '../../common/enums/transaction.enum';
 import { Deposit } from '../../common/entities/deposit.entity';
 import { PendingDeposit } from '../../common/interfaces/mixin.interfaces';
 
