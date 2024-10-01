@@ -20,7 +20,7 @@ export class TseHealthService {
         this.httpService.get(`${this.TRADING_STRATEGY_EXECUTION_API}/health`)
       );
       return response.data;
-    } catch (error) {
+    } catch {
       throw new Error('Failed to check trading strategy execution health');
     }
   }
