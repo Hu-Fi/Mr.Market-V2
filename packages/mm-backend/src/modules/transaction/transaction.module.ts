@@ -8,10 +8,11 @@ import { TransactionProfile } from './transaction.mapper';
 import { UserBalanceModule } from '../user-balance/user-balance.module';
 import { Deposit } from '../../common/entities/deposit.entity';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
-import { TransactionService } from './transaction.service';
 import { WithdrawService } from './withdraw/withdraw.service';
 import { WithdrawRepository } from './withdraw/withdraw.repository';
 import { Withdraw } from '../../common/entities/withdraw.entity';
+import { TransactionService } from './transaction.service';
+import { UserBalanceService } from '../user-balance/user-balance.service';
 
 @Module({
   imports: [
@@ -24,9 +25,10 @@ import { Withdraw } from '../../common/entities/withdraw.entity';
     DepositRepository,
     WithdrawService,
     WithdrawRepository,
-    TransactionProfile,
     TransactionService,
+    TransactionProfile,
     SchedulerUtil,
+    UserBalanceService
   ],
   controllers: [TransactionController],
   exports: [DepositService, DepositRepository],

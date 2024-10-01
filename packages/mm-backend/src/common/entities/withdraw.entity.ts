@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Status } from '../enums/transaction.enum';
+import { WithdrawalStatus } from '../enums/transaction.enum';
 
 @Entity()
 export class Withdraw {
@@ -24,8 +24,11 @@ export class Withdraw {
   @Column()
   destination: string;
 
-  @Column({ default: Status.PENDING })
-  status: Status;
+  @Column()
+  status: WithdrawalStatus;
+
+  @Column({ nullable: true })
+  transactionHash: string;
 
   @CreateDateColumn()
   createdAt: Date;

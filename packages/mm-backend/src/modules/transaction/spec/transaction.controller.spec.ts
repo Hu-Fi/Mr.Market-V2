@@ -76,7 +76,7 @@ describe('TransactionController', () => {
   describe('withdraw', () => {
     it('should execute a withdraw transaction', async () => {
       const withdrawDto: WithdrawDto = {
-        amount: 0.001,
+        amount: '0.001',
         assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
         destination: 'some-destination',
       };

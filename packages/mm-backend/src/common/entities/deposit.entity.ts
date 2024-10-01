@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Status } from '../enums/transaction.enum';
+import { DepositStatus } from '../enums/transaction.enum';
 
 @Entity()
 export class Deposit {
@@ -27,8 +27,11 @@ export class Deposit {
   @Column()
   destination: string;
 
-  @Column({ default: Status.PENDING })
-  status: Status;
+  @Column({ default: DepositStatus.PENDING })
+  status: DepositStatus;
+
+  @Column({ nullable: true })
+  transactionHash: string;
 
   @CreateDateColumn()
   createdAt: Date;

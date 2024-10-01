@@ -2,11 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DepositService } from '../deposit.service';
 import { DepositRepository } from '../deposit.repository';
 import { MixinGateway } from '../../../../integrations/mixin.gateway';
-import { UserBalanceService } from '../../../user-balance/user-balance.service';
 import { DepositCommand } from '../model/deposit.model';
 import { DepositResponse } from '../../../../common/interfaces/transaction.interfaces';
-import { Status } from '../../../../common/enums/transaction.enum';
 import { Deposit } from '../../../../common/entities/deposit.entity';
+import { DepositStatus } from '../../../../common/enums/transaction.enum';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
@@ -20,20 +19,19 @@ describe('DepositService', () => {
   let service: DepositService;
   let mixinGateway: MixinGateway;
   let transactionRepository: DepositRepository;
-  let userBalanceService: UserBalanceService;
 
   const mockMixinGateway = {
-    getDepositAddress: jest.fn(),
+    fetchTransactionDetails: jest.fn(),
+    handleWithdrawal: jest.fn(),
+    getUnspentTransactionOutputs: jest.fn(),
+    createDepositAddress: jest.fn()
   };
 
-  const mockTransactionRepository = {
+  const mockDepositRepository = {
     save: jest.fn(),
-    getByStatus: jest.fn(),
-    update: jest.fn(),
-  };
-
-  const mockUserBalanceService = {
-    updateUserBalance: jest.fn(),
+    findByStatus: jest.fn(),
+    updateStatusById: jest.fn(),
+    updateTransactionHashById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -46,11 +44,7 @@ describe('DepositService', () => {
         },
         {
           provide: DepositRepository,
-          useValue: mockTransactionRepository,
-        },
-        {
-          provide: UserBalanceService,
-          useValue: mockUserBalanceService,
+          useValue: mockDepositRepository,
         },
       ],
     }).compile();
@@ -58,7 +52,6 @@ describe('DepositService', () => {
     service = module.get<DepositService>(DepositService);
     mixinGateway = module.get<MixinGateway>(MixinGateway);
     transactionRepository = module.get<DepositRepository>(DepositRepository);
-    userBalanceService = module.get<UserBalanceService>(UserBalanceService);
   });
 
   it('should be defined', () => {
@@ -81,18 +74,17 @@ describe('DepositService', () => {
         destination: destination,
       };
 
-      mockMixinGateway.getDepositAddress.mockResolvedValue(destination);
-      mockTransactionRepository.save.mockResolvedValue(depositResponse);
+      mockMixinGateway.createDepositAddress.mockResolvedValue(destination);
+      mockDepositRepository.save.mockResolvedValue(depositResponse);
 
       const result = await service.deposit(command);
 
-      expect(mixinGateway.getDepositAddress).toHaveBeenCalledWith(command);
+      expect(mixinGateway.createDepositAddress).toHaveBeenCalledWith(command);
       expect(transactionRepository.save).toHaveBeenCalledWith({
         ...command,
-        status: Status.PENDING,
+        status: DepositStatus.PENDING,
         destination,
       });
-      expect(userBalanceService.updateUserBalance).toHaveBeenCalledWith(command);
       expect(result).toEqual(depositResponse);
     });
   });
@@ -106,18 +98,19 @@ describe('DepositService', () => {
           amount: 100,
           assetId: 'asset-id-456',
           chainId: 'chain-id-789',
-          status: Status.PENDING,
+          status: DepositStatus.PENDING,
+          transactionHash: 'transaction-hash',
           destination: 'destination-address',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
 
-      mockTransactionRepository.getByStatus.mockResolvedValue(pendingDeposits);
+      mockDepositRepository.findByStatus.mockResolvedValue(pendingDeposits);
 
       const result = await service.getPendingDeposits();
 
-      expect(transactionRepository.getByStatus).toHaveBeenCalledWith(Status.PENDING);
+      expect(transactionRepository.findByStatus).toHaveBeenCalledWith(DepositStatus.PENDING);
       expect(result).toEqual(pendingDeposits);
     });
   });
@@ -125,11 +118,22 @@ describe('DepositService', () => {
   describe('updateDepositStatus', () => {
     it('should update the deposit status', async () => {
       const depositId = 1;
-      const status = Status.CONFIRMED;
+      const status = DepositStatus.CONFIRMED;
 
       await service.updateDepositStatus(depositId, status);
 
-      expect(transactionRepository.update).toHaveBeenCalledWith(depositId, status);
+      expect(transactionRepository.updateStatusById).toHaveBeenCalledWith(depositId, status);
+    });
+  });
+
+  describe('updateDepositTransactionHash', () => {
+    it('should update the transaction hash of a deposit', async () => {
+      const depositId = 1;
+      const txHash = 'new-transaction-hash';
+
+      await service.updateDepositTransactionHash(depositId, txHash);
+
+      expect(transactionRepository.updateTransactionHashById).toHaveBeenCalledWith(depositId, txHash);
     });
   });
 });

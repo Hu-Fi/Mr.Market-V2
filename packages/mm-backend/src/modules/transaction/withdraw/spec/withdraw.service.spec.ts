@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MixinGateway } from '../../../../integrations/mixin.gateway';
-import { UserBalanceService } from '../../../user-balance/user-balance.service';
 import { WithdrawRepository } from '../withdraw.repository';
 import { WithdrawService } from '../withdraw.service';
 import { WithdrawCommand } from '../model/withdraw.model';
-import { Status } from '../../../../common/enums/transaction.enum';
+import { WithdrawalStatus } from '../../../../common/enums/transaction.enum';
+import { WithdrawResponse } from '../../../../common/interfaces/transaction.interfaces';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
@@ -25,11 +25,10 @@ describe('WithdrawService', () => {
   };
 
   const mockWithdrawRepository = {
-    save: jest.fn(),
-  };
-
-  const mockUserBalanceService = {
-    updateUserBalance: jest.fn(),
+    save: jest.fn().mockResolvedValue({id: 1}),
+    updateTransactionHashById: jest.fn(),
+    updateStatusById: jest.fn(),
+    findWithdrawalsByStatus: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -44,10 +43,6 @@ describe('WithdrawService', () => {
           provide: WithdrawRepository,
           useValue: mockWithdrawRepository,
         },
-        {
-          provide: UserBalanceService,
-          useValue: mockUserBalanceService,
-        },
       ],
     }).compile();
 
@@ -58,31 +53,75 @@ describe('WithdrawService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should call transactionRepository.save, userBalanceService.updateUserBalance, and mixinGateway.handleWithdrawal on withdraw', async () => {
-    const command: WithdrawCommand = {
-      userId: 'user1',
-      assetId: 'asset1',
-      amount: 100,
-      destination: 'address1',
-    };
+  describe('withdraw', () => {
+    it('should call save, updateUserBalance, and handleWithdrawal', async () => {
+      const command: WithdrawCommand = {
+        userId: 'user1',
+        assetId: 'asset1',
+        amount: '100',
+        destination: 'address1',
+      };
 
-    const result = await service.withdraw(command);
+      const result = await service.withdraw(command);
 
-    expect(mockWithdrawRepository.save).toHaveBeenCalledWith({
-      ...command,
-      status: Status.PENDING,
+      expect(mockWithdrawRepository.save).toHaveBeenCalledWith({
+        ...command,
+        amount: Number(command.amount),
+        status: WithdrawalStatus.SIGNED,
+      });
+
+      expect(mockMixinGateway.handleWithdrawal).toHaveBeenCalledWith(command);
+
+      expect(result).toEqual<WithdrawResponse>({
+        transactionHash: 'mockTransactionHash',
+        snapshotId: 'mockSnapshotId',
+      });
     });
 
-    expect(mockUserBalanceService.updateUserBalance).toHaveBeenCalledWith({
-      ...command,
-      amount: -command.amount,
+    it('should update the transaction hash after withdrawal', async () => {
+      const command: WithdrawCommand = {
+        userId: 'user1',
+        assetId: 'asset1',
+        amount: '100',
+        destination: 'address1',
+      };
+
+      await service.withdraw(command);
+
+      expect(mockWithdrawRepository.updateTransactionHashById).toHaveBeenCalledWith(
+        1,
+        'mockTransactionHash',
+      );
     });
+  });
 
-    expect(mockMixinGateway.handleWithdrawal).toHaveBeenCalledWith(command);
+  describe('getSignedWithdrawals', () => {
+    it('should call repository to find signed withdrawals', async () => {
+      await service.getSignedWithdrawals();
 
-    expect(result).toEqual({
-      transactionHash: 'mockTransactionHash',
-      snapshotId: 'mockSnapshotId',
+      expect(mockWithdrawRepository.findWithdrawalsByStatus).toHaveBeenCalledWith(WithdrawalStatus.SIGNED);
+    });
+  });
+
+  describe('updateWithdrawalStatus', () => {
+    it('should update the withdrawal status by ID', async () => {
+      const withdrawalId = 1;
+      const status = WithdrawalStatus.SPENT;
+
+      await service.updateWithdrawalStatus(withdrawalId, status);
+
+      expect(mockWithdrawRepository.updateStatusById).toHaveBeenCalledWith(withdrawalId, status);
+    });
+  });
+
+  describe('updateWithdrawalTransactionHash', () => {
+    it('should update the transaction hash by withdrawal ID', async () => {
+      const withdrawalId = 1;
+      const txHash = 'new-transaction-hash';
+
+      await service.updateWithdrawalTransactionHash(withdrawalId, txHash);
+
+      expect(mockWithdrawRepository.updateTransactionHashById).toHaveBeenCalledWith(withdrawalId, txHash);
     });
   });
 });

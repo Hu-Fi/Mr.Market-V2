@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DepositData } from '../../../common/interfaces/transaction.interfaces';
 import { Deposit } from '../../../common/entities/deposit.entity';
-import { Status } from '../../../common/enums/transaction.enum';
+import { DepositStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
 export class DepositRepository {
@@ -16,11 +16,15 @@ export class DepositRepository {
     return await this.repository.save(data);
   }
 
-  async getByStatus(status: Status) {
+  async findByStatus(status: DepositStatus) {
     return await this.repository.find({ where: { status } });
   }
 
-  async update(depositId: number, status: Status) {
+  async updateStatusById(depositId: number, status: DepositStatus) {
     return await this.repository.update({ id: depositId }, { status });
+  }
+
+  async updateTransactionHashById(depositId: number, txHash: string) {
+    return await this.repository.update({ id: depositId }, { transactionHash: txHash });
   }
 }

@@ -26,7 +26,7 @@ export class TransactionController {
 
   @Roles(Role.USER)
   @Post('deposit')
-  @ApiOperation({ summary: 'Execute a deposit transaction' })
+  @ApiOperation({ summary: 'Create address for a deposit' })
   async deposit(@Body() dto: DepositDto, @Request() req): Promise<DepositResponse> {
     const command = this.mapper.map(dto, DepositDto, DepositCommand);
     command.userId = req.user.userId;

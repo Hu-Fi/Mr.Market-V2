@@ -1,24 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import {
-  base64RawURLEncode, buildSafeTransaction, encodeSafeTransaction,
-  getED25519KeyPair, getUnspentOutputsForRecipients,
+  base64RawURLEncode,
+  buildSafeTransaction,
+  buildSafeTransactionRecipient,
+  encodeSafeTransaction,
+  getED25519KeyPair,
+  getUnspentOutputsForRecipients,
   Keystore,
   KeystoreClientReturnType,
-  MixinApi, MixinCashier, SafeAsset, SafeWithdrawalRecipient, signSafeTransaction,
+  MixinApi,
+  MixinCashier,
+  SafeAsset,
+  SafeUtxoOutput,
+  SafeWithdrawalRecipient,
+  signSafeTransaction,
 } from '@mixin.dev/mixin-node-sdk';
 import { ConfigService } from '@nestjs/config';
 import { AuthorizationResponse, OAuthResponse } from '../common/interfaces/auth.interfaces';
 import { DepositCommand } from '../modules/transaction/deposit/model/deposit.model';
-import { SafePendingDepositResponse } from '@mixin.dev/mixin-node-sdk/src/client/types/safe';
-import { WithdrawCommand } from '../modules/transaction/withdraw/model/withdraw.model';
 import { v4 } from 'uuid';
 import BigNumber from 'bignumber.js';
+import { Fee } from '../common/interfaces/mixin.interfaces';
+import { WithdrawCommand } from '../modules/transaction/withdraw/model/withdraw.model';
 
 @Injectable()
 export class MixinGateway {
   private readonly keystore: Keystore;
   private readonly _clientSecret: string;
   private _client: KeystoreClientReturnType;
+  private readonly spendPrivateKey: string;
 
   constructor(private configService: ConfigService) {
     this.keystore = {
@@ -35,6 +45,7 @@ export class MixinGateway {
     this._client = MixinApi({
       keystore: this.keystore,
     });
+    this.spendPrivateKey = this.configService.get<string>('MIXIN_SPEND_PRIVATE_KEY');
   }
 
   async oauthHandler(code: string): Promise<OAuthResponse> {
@@ -59,7 +70,7 @@ export class MixinGateway {
     };
   }
 
-  async getDepositAddress(command: DepositCommand) {
+  async createDepositAddress(command: DepositCommand) {
     const { chainId } = command;
     const payload = {
       members: [this.keystore.app_id],
@@ -71,31 +82,30 @@ export class MixinGateway {
     return response[0].destination;
   }
 
-  async getDepositsInProgress(assetId: string, offset?: string): Promise<SafePendingDepositResponse[]> {
-    return await this._client.safe.pendingDeposits({
-      asset: assetId,
-      offset,
+  async getUnspentTransactionOutputs() {
+    return await this._client.utxo.safeOutputs({
+      state: 'unspent',
     });
   }
 
-  async handleWithdrawal(command: WithdrawCommand): Promise<any> {
+  async handleWithdrawal(command: WithdrawCommand) {
     const { assetId, destination } = command;
     const asset = await this._client.safe.fetchAsset(assetId);
     const chain = await this.getChainAsset(asset);
     const fees = await this._client.safe.fetchFee(asset.asset_id, destination);
-    const fee = this.getTransactionFee(fees, asset.asset_id, chain.asset_id);
+    const transactionFee = this.getTransactionFee(fees, asset.asset_id, chain.asset_id);
 
     // Check if the withdrawal fee is in a different asset than the one being withdrawn.
     // If the fee is in a different asset, execute the withdrawal process using the chain asset as the fee.
     // Otherwise, execute the withdrawal process using the asset itself as the fee.
-    if (this.isFeeInDifferentAsset(fee, asset)) {
-      return await this.withdrawWithChainAssetAsFee(command, fee);
+    if (this.isFeeInDifferentAsset(transactionFee, asset)) {
+      return await this.withdrawWithChainAssetAsFee(command, transactionFee);
     } else {
-      return await this.withdrawWithAssetAsFee(command);
+      return await this.withdrawWithAssetAsFee(command, transactionFee);
     }
   }
 
-  private isFeeInDifferentAsset(fee: any, asset: any): boolean {
+  private isFeeInDifferentAsset(fee: Fee, asset: SafeAsset): boolean {
     return fee.asset_id !== asset.asset_id;
   }
 
@@ -106,7 +116,7 @@ export class MixinGateway {
     return await this._client.safe.fetchAsset(asset.chain_id);
   }
 
-  private getTransactionFee(fees: any[], assetId: string, chainId: string) {
+  private getTransactionFee(fees: Fee[], assetId: string, chainId: string) {
     const assetFee = fees.find(f => f.asset_id === assetId);
     const chainFee = fees.find(f => f.asset_id === chainId);
     return assetFee ?? chainFee;
@@ -116,47 +126,47 @@ export class MixinGateway {
     return !change.isZero() && !change.isNegative();
   }
 
-  private async createRecipientsAndGhosts(command: WithdrawCommand, outputs: any[], additionalRecipient?: {
-    amount: string,
-    destination: string
-  }): Promise<{ recipients: SafeWithdrawalRecipient[], ghosts: any[] }> {
+  private async createRecipientsAndGhosts(command: WithdrawCommand, outputs: SafeUtxoOutput[], additionalRecipient?) {
     const { amount, destination } = command;
     const recipients: SafeWithdrawalRecipient[] = [
-      { amount: amount.toString(), destination },
+      { amount: amount, destination },
       ...(additionalRecipient ? [additionalRecipient] : []),
     ];
 
     const { change } = getUnspentOutputsForRecipients(outputs, recipients);
     if (this.hasPositiveChange(change)) {
-      recipients.push({
-        amount: change.toString(),
-        destination: outputs[0].receivers[0],
-      });
+      recipients.push(<SafeWithdrawalRecipient>buildSafeTransactionRecipient(
+        outputs[0].receivers,
+        outputs[0].receivers_threshold,
+        change.toString()
+      ));
     }
 
     const ghosts = await this._client.utxo.ghostKey(
-      recipients.map((r, i) => ({
-        hint: v4(),
-        receivers: [r.destination],
-        index: i + 1,
-      })),
+      recipients
+        .filter(r => 'members' in r)
+        .map((r, i) => ({
+          hint: v4(),
+          receivers: r.members as string[],
+          index: i + 1,
+        })),
     );
 
     return { recipients, ghosts };
   }
 
-  private async createAndSendTransaction(utxos: any[], recipients: SafeWithdrawalRecipient[], ghosts: any[], memo: string, feeRef?: string): Promise<any> {
+  private async createAndSendTransaction(utxos: SafeUtxoOutput[], recipients: SafeWithdrawalRecipient[], ghosts, memo: string, feeRef?){
     // spare the 0 index for withdrawal output, withdrawal output doesn't need ghost key
     const tx = buildSafeTransaction(utxos, recipients, [undefined, ...ghosts], memo, feeRef ? [feeRef] : undefined);
     const raw = encodeSafeTransaction(tx);
     const request_id = v4();
     const txs = await this._client.utxo.verifyTransaction([{ raw, request_id }]);
-    const signedRaw = signSafeTransaction(tx, txs[0].views, this.keystore.session_private_key);
-
-    return await this._client.utxo.sendTransactions([{ raw: signedRaw, request_id }]);
+    const signedRaw = signSafeTransaction(tx, txs[0].views, this.spendPrivateKey);
+    const response = await this._client.utxo.sendTransactions([{ raw: signedRaw, request_id }]);
+    return response[0];
   }
 
-  private async withdrawWithChainAssetAsFee(command: WithdrawCommand, fee: any) {
+  private async withdrawWithChainAssetAsFee(command: WithdrawCommand, fee: Fee) {
     const { assetId } = command;
 
     const outputs = await this._client.utxo.safeOutputs({
@@ -190,7 +200,7 @@ export class MixinGateway {
   }
 
 
-  private async withdrawWithAssetAsFee(command: WithdrawCommand) {
+  private async withdrawWithAssetAsFee(command: WithdrawCommand, fee: Fee) {
     const { assetId } = command;
 
     const outputs = await this._client.utxo.safeOutputs({
@@ -198,9 +208,13 @@ export class MixinGateway {
       state: 'unspent',
     });
 
-    const { recipients, ghosts } = await this.createRecipientsAndGhosts(command, outputs);
+    const feeOutput = buildSafeTransactionRecipient([MixinCashier], 1, fee.amount);
+    const { recipients, ghosts } = await this.createRecipientsAndGhosts(command, outputs, feeOutput);
 
     return await this.createAndSendTransaction(outputs, recipients, ghosts, 'withdrawal-memo');
   }
 
+  async fetchTransactionDetails(txHash: string) {
+    return await this._client.utxo.fetchTransaction(txHash);
+  }
 }
