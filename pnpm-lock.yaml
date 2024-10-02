@@ -279,10 +279,10 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
       socket.io:
-        specifier: ^4.7.5
+        specifier: 4.7.5
         version: 4.7.5
       socket.io-client:
-        specifier: ^4.7.5
+        specifier: 4.7.5
         version: 4.7.5
       testcontainers:
         specifier: ^10.13.0
