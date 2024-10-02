@@ -36,7 +36,7 @@ import { CacheFactoryConfig } from './common/config/cache-factory.config';
     IntegrationsModule,
     AuthModule,
     UserModule,
-    HealthModule
+    HealthModule,
   ],
   controllers: [],
   providers: [],
