@@ -44,6 +44,7 @@
     "cache-manager-redis-store": "^3.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "decimal.js": "^10.4.3",
     "joi": "^17.13.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
