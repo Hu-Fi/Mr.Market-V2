@@ -1,22 +1,23 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AdminLoginCommand, MixinOAuthCommand } from './model/auth.model';
-import { JwtResponse } from '../../common/interfaces/auth.interfaces';
+import { JwtResponse, OAuthResponse } from '../../common/interfaces/auth.interfaces';
+import { UserService } from '../user/user.service';
+import { Role } from '../../common/enums/role.enum';
+import { CustomLogger } from '../logger/logger.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new CustomLogger(AuthService.name);
   private readonly adminPassword: string;
   constructor(
     private readonly mixinGateway: MixinGateway,
     private configService: ConfigService,
     private jwtService: JwtService,
+    private readonly userService: UserService,
   ) {
     this.adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
   }
@@ -45,11 +46,27 @@ export class AuthService {
       throw new BadRequestException('Invalid code length');
     }
 
-    const clientData: any = await this.mixinGateway.oauthHandler(code);
+    const clientData: OAuthResponse = await this.mixinGateway.oauthHandler(code);
 
-    //TODO: Save the user to the database, if not already there.
+    await this.saveUserToDatabase(clientData);
 
     const payload = { sub: clientData.clientId, roles: ['User'] };
     return { accessToken: this.jwtService.sign(payload) };
+  }
+
+  private async saveUserToDatabase(clientData: OAuthResponse): Promise<void> {
+    try {
+      await this.userService.createUser({
+        userId: clientData.clientId,
+        role: Role.USER,
+        type: clientData.type,
+        identityNumber: clientData.identityNumber,
+        fullName: clientData.fullName,
+        avatarUrl: clientData.avatarUrl,
+      });
+    } catch (e) {
+      this.logger.error(`Error saving user to database: ${e.message}`);
+      throw e;
+    }
   }
 }

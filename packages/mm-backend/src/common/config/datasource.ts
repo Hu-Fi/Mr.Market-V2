@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import { TypeOrmConfigService } from './typeorm-config.service';
+import { TypeormConfig } from './typeorm.config';
 
 ConfigModule.forRoot({
   isGlobal: true,
@@ -8,7 +8,7 @@ ConfigModule.forRoot({
 });
 
 const configService = new ConfigService();
-const typeOrmConfigService = new TypeOrmConfigService(configService);
+const typeOrmConfigService = new TypeormConfig(configService);
 
 export const dataSource = new DataSource(
   typeOrmConfigService.getTypeOrmConfig(),

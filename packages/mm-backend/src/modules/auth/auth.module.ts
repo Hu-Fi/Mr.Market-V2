@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthProfile } from './auth.mapper';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthProfile } from './auth.mapper';
       inject: [ConfigService],
     }),
     ConfigModule,
+    UserModule
   ],
   providers: [AuthService, MixinGateway, JwtStrategy, AuthProfile],
   controllers: [AuthController],

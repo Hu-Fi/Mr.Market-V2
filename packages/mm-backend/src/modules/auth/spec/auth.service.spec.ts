@@ -14,6 +14,7 @@ import {
   mixinOAuthCommandFixture,
   mixinOAuthResponseFixture,
 } from './auth.fixtures';
+import { UserService } from '../../user/user.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -51,6 +52,12 @@ describe('AuthService', () => {
             }),
           },
         },
+        {
+          provide: UserService,
+          useValue: {
+            createUser: jest.fn(),
+          },
+        }
       ],
     }).compile();
 
@@ -95,6 +102,10 @@ describe('AuthService', () => {
       jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
       jest.spyOn(mixinGateway, 'oauthHandler').mockResolvedValue({
         clientId: 'clientId',
+        type: 'type',
+        identityNumber: 'identityNumber',
+        fullName: 'fullName',
+        avatarUrl: 'avatarUrl',
       });
 
       const result = await service.mixinOauthHandler(command);
