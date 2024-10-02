@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthService } from '../health.service';
 import { DbHealthService } from '../db.health.service';
+import { TseHealthService } from '../tse.health.service';
 
 describe('HealthService', () => {
   let healthService: HealthService;
@@ -12,6 +13,12 @@ describe('HealthService', () => {
         HealthService,
         {
           provide: DbHealthService,
+          useValue: {
+            checkDbHealth: jest.fn(),
+          },
+        },
+        {
+          provide: TseHealthService,
           useValue: {
             checkDbHealth: jest.fn(),
           },
