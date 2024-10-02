@@ -43,7 +43,7 @@ The purpose of this technical documentation is to provide an overview of the pro
 ## Goals & Requirements
 
 - Simplify the process for users to launch their instance of MrMarket.
-    - The user's instance should be easy to deploy on Vercel.
+    - The instance should be easy to deploy on Vercel.
 - Research stateless and serverless solutions, although these are not mandatory requirements.
 - Ensure that the developed V2 is ready for a security review by Trail of Bits.
 - The code should have a test coverage of a minimum of 80%.
