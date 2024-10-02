@@ -38,7 +38,7 @@ import { UserBalanceModule } from './modules/user-balance/user-balance.module';
     AuthModule,
     UserModule,
     HealthModule,
-    UserBalanceModule
+    UserBalanceModule,
   ],
   controllers: [],
   providers: [],
