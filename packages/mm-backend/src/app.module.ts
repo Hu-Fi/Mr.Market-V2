@@ -8,6 +8,9 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import Joi from 'joi';
 import { UserModule } from './modules/user/user.module';
+import { HealthModule } from './modules/health/health.module';
+import { CacheModule } from '@nestjs/common/cache';
+import { CacheFactoryConfig } from './common/config/cache-factory.config';
 
 @Module({
   imports: [
@@ -29,9 +32,11 @@ import { UserModule } from './modules/user/user.module';
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
+    CacheModule.registerAsync(CacheFactoryConfig),
     IntegrationsModule,
     AuthModule,
-    UserModule
+    UserModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],

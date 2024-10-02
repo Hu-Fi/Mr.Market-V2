@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthService } from '../health.service';
 import { DbHealthService } from '../db.health.service';
-import { ExchangesHealthService } from '../exchanges.health.service';
-import { StrategiesHealthService } from '../strategies.health.service';
+import { TseHealthService } from '../tse.health.service';
 
 describe('HealthService', () => {
   let healthService: HealthService;
   let dbHealthService: DbHealthService;
-  let exchangesHealthService: ExchangesHealthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,25 +18,16 @@ describe('HealthService', () => {
           },
         },
         {
-          provide: ExchangesHealthService,
+          provide: TseHealthService,
           useValue: {
-            checkExchanges: jest.fn(),
+            checkDbHealth: jest.fn(),
           },
         },
-        {
-          provide: StrategiesHealthService,
-          useValue: {
-            checkStrategies: jest.fn(),
-          }
-        }
       ],
     }).compile();
 
     healthService = module.get<HealthService>(HealthService);
     dbHealthService = module.get<DbHealthService>(DbHealthService);
-    exchangesHealthService = module.get<ExchangesHealthService>(
-      ExchangesHealthService,
-    );
   });
 
   describe('geHealthStatuses', () => {
@@ -51,14 +40,10 @@ describe('HealthService', () => {
       jest
         .spyOn(dbHealthService, 'checkDbHealth')
         .mockResolvedValue(checkDbHealthFixture);
-      jest
-        .spyOn(exchangesHealthService, 'checkExchanges')
-        .mockResolvedValue({ status: 'UP', details: {} });
 
       const result = await healthService.geHealthStatuses();
       expect(result).toEqual({
         db: checkDbHealthFixture,
-        exchanges: { status: 'UP', details: {} },
       });
     });
   });

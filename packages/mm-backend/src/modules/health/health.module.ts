@@ -3,19 +3,17 @@ import { HealthService } from './health.service';
 import { HealthController } from './health.controller';
 import { IntegrationsModule } from '../../integrations/integrations.module';
 import { ConfigService } from '@nestjs/config';
-import { ExchangesHealthService } from './exchanges.health.service';
 import { DbHealthService } from './db.health.service';
-import { TradingStrategyModule } from '../trading-strategy/trading-strategy.module';
-import { StrategiesHealthService } from './strategies.health.service';
+import { TseHealthService } from './tse.health.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [IntegrationsModule, TradingStrategyModule],
+  imports: [IntegrationsModule, HttpModule],
   providers: [
     ConfigService,
     HealthService,
-    ExchangesHealthService,
     DbHealthService,
-    StrategiesHealthService,
+    TseHealthService,
   ],
   controllers: [HealthController],
 })
