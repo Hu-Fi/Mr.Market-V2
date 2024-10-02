@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UserBalance } from '../entities/user-balance.entity';
+import { Deposit } from '../entities/deposit.entity';
+import { Withdraw } from '../entities/withdraw.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -28,7 +30,7 @@ export class TypeormConfig {
       username: this.configService.get<string>('DATABASE_USERNAME', 'postgres'),
       password: this.configService.get<string>('DATABASE_PASSWORD', 'postgres'),
       database: this.configService.get<string>('DATABASE_NAME', 'mr_market_v2'),
-      entities: [User, UserBalance],
+      entities: [User, UserBalance, Deposit, Withdraw],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:
