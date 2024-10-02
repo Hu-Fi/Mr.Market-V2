@@ -54,7 +54,7 @@ The purpose of this technical documentation is to provide an overview of the pro
 
 1. As a user, I want to be able to use MrMarket as a Mixin bot.
 2. As a user, I want to be able to deposit tokens.
-3. As a user, I want to withdraw tokens.
+3. As a user, I want to withdraw tokens in whatever LP format is available to me.
 4. As a user, I want to be able to discover available MrMarket instances and choose which one to connect to.
 5. As a user, I want to be able to set up predefined trading strategies.
 6. As a user, I want to be able to execute market-making strategies.
