@@ -44,11 +44,9 @@ describe('ExecutionWorkerService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest
-              .fn()
-              .mockReturnValue({
-                CRON_EXPRESSION: CronExpression.EVERY_5_SECONDS,
-              }),
+            get: jest.fn().mockReturnValue({
+              CRON_EXPRESSION: CronExpression.EVERY_5_SECONDS,
+            }),
           },
         },
         SchedulerRegistry,

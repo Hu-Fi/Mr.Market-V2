@@ -8,9 +8,10 @@ import { Deposit } from '../../../../common/entities/deposit.entity';
 import { DepositStatus } from '../../../../common/enums/transaction.enum';
 
 jest.mock('typeorm-transactional', () => ({
-  Transactional: () => jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
-    return descriptor;
-  }),
+  Transactional: () =>
+    jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
+      return descriptor;
+    }),
   initializeTransactionalContext: jest.fn(),
   addTransactionalDataSource: jest.fn(),
 }));
@@ -24,7 +25,7 @@ describe('DepositService', () => {
     fetchTransactionDetails: jest.fn(),
     handleWithdrawal: jest.fn(),
     getUnspentTransactionOutputs: jest.fn(),
-    createDepositAddress: jest.fn()
+    createDepositAddress: jest.fn(),
   };
 
   const mockDepositRepository = {
@@ -110,7 +111,9 @@ describe('DepositService', () => {
 
       const result = await service.getPendingDeposits();
 
-      expect(transactionRepository.findByStatus).toHaveBeenCalledWith(DepositStatus.PENDING);
+      expect(transactionRepository.findByStatus).toHaveBeenCalledWith(
+        DepositStatus.PENDING,
+      );
       expect(result).toEqual(pendingDeposits);
     });
   });
@@ -122,7 +125,10 @@ describe('DepositService', () => {
 
       await service.updateDepositStatus(depositId, status);
 
-      expect(transactionRepository.updateStatusById).toHaveBeenCalledWith(depositId, status);
+      expect(transactionRepository.updateStatusById).toHaveBeenCalledWith(
+        depositId,
+        status,
+      );
     });
   });
 
@@ -133,7 +139,9 @@ describe('DepositService', () => {
 
       await service.updateDepositTransactionHash(depositId, txHash);
 
-      expect(transactionRepository.updateTransactionHashById).toHaveBeenCalledWith(depositId, txHash);
+      expect(
+        transactionRepository.updateTransactionHashById,
+      ).toHaveBeenCalledWith(depositId, txHash);
     });
   });
 });

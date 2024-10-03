@@ -7,9 +7,10 @@ import { WithdrawalStatus } from '../../../../common/enums/transaction.enum';
 import { WithdrawResponse } from '../../../../common/interfaces/transaction.interfaces';
 
 jest.mock('typeorm-transactional', () => ({
-  Transactional: () => jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
-    return descriptor;
-  }),
+  Transactional: () =>
+    jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
+      return descriptor;
+    }),
   initializeTransactionalContext: jest.fn(),
   addTransactionalDataSource: jest.fn(),
 }));
@@ -25,7 +26,7 @@ describe('WithdrawService', () => {
   };
 
   const mockWithdrawRepository = {
-    save: jest.fn().mockResolvedValue({id: 1}),
+    save: jest.fn().mockResolvedValue({ id: 1 }),
     updateTransactionHashById: jest.fn(),
     updateStatusById: jest.fn(),
     findWithdrawalsByStatus: jest.fn(),
@@ -88,10 +89,9 @@ describe('WithdrawService', () => {
 
       await service.withdraw(command);
 
-      expect(mockWithdrawRepository.updateTransactionHashById).toHaveBeenCalledWith(
-        1,
-        'mockTransactionHash',
-      );
+      expect(
+        mockWithdrawRepository.updateTransactionHashById,
+      ).toHaveBeenCalledWith(1, 'mockTransactionHash');
     });
   });
 
@@ -99,7 +99,9 @@ describe('WithdrawService', () => {
     it('should call repository to find signed withdrawals', async () => {
       await service.getSignedWithdrawals();
 
-      expect(mockWithdrawRepository.findWithdrawalsByStatus).toHaveBeenCalledWith(WithdrawalStatus.SIGNED);
+      expect(
+        mockWithdrawRepository.findWithdrawalsByStatus,
+      ).toHaveBeenCalledWith(WithdrawalStatus.SIGNED);
     });
   });
 
@@ -110,7 +112,10 @@ describe('WithdrawService', () => {
 
       await service.updateWithdrawalStatus(withdrawalId, status);
 
-      expect(mockWithdrawRepository.updateStatusById).toHaveBeenCalledWith(withdrawalId, status);
+      expect(mockWithdrawRepository.updateStatusById).toHaveBeenCalledWith(
+        withdrawalId,
+        status,
+      );
     });
   });
 
@@ -121,7 +126,9 @@ describe('WithdrawService', () => {
 
       await service.updateWithdrawalTransactionHash(withdrawalId, txHash);
 
-      expect(mockWithdrawRepository.updateTransactionHashById).toHaveBeenCalledWith(withdrawalId, txHash);
+      expect(
+        mockWithdrawRepository.updateTransactionHashById,
+      ).toHaveBeenCalledWith(withdrawalId, txHash);
     });
   });
 });

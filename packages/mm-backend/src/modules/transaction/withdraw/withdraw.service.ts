@@ -23,7 +23,10 @@ export class WithdrawService {
 
     const withdrawalResult = await this.mixinGateway.handleWithdrawal(command);
 
-    await this.updateWithdrawalTransactionHash(withdrawal.id, withdrawalResult.transaction_hash);
+    await this.updateWithdrawalTransactionHash(
+      withdrawal.id,
+      withdrawalResult.transaction_hash,
+    );
 
     return {
       transactionHash: withdrawalResult.transaction_hash,
@@ -32,7 +35,9 @@ export class WithdrawService {
   }
 
   async getSignedWithdrawals() {
-    return await this.repository.findWithdrawalsByStatus(WithdrawalStatus.SIGNED);
+    return await this.repository.findWithdrawalsByStatus(
+      WithdrawalStatus.SIGNED,
+    );
   }
 
   async updateWithdrawalStatus(withdrawalId: number, status: WithdrawalStatus) {

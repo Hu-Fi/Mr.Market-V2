@@ -34,7 +34,9 @@ describe('UserRepository', () => {
 
     repository = module.get<UserRepository>(UserRepository);
 
-    (mockRepository.createQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+    (mockRepository.createQueryBuilder as jest.Mock).mockReturnValue(
+      mockQueryBuilder,
+    );
   });
 
   it('should be defined', () => {

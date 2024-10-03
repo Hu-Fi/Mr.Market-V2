@@ -14,12 +14,14 @@ export class StrategiesHealthService {
   async checkStrategies() {
     this.logger.debug('Checking number of strategies running health...');
 
-    const arbitrageStrategies = await this.arbitrageService.findRunningStrategies();
-    const marketMakingStrategies = await this.marketMakingService.findRunningStrategies();
+    const arbitrageStrategies =
+      await this.arbitrageService.findRunningStrategies();
+    const marketMakingStrategies =
+      await this.marketMakingService.findRunningStrategies();
 
     return {
       arbitrageStrategiesCount: arbitrageStrategies.length,
       marketMakingStrategiesCount: marketMakingStrategies.length,
-    }
+    };
   }
 }

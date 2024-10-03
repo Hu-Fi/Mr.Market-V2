@@ -8,7 +8,10 @@ import { SchedulerUtil } from '../../../common/utils/scheduler.utils';
 import { mockDeposits } from './transaction.fixtures';
 import { WithdrawService } from '../withdraw/withdraw.service';
 import { UserBalanceService } from '../../user-balance/user-balance.service';
-import { DepositStatus, WithdrawalStatus } from '../../../common/enums/transaction.enum';
+import {
+  DepositStatus,
+  WithdrawalStatus,
+} from '../../../common/enums/transaction.enum';
 
 const mockDepositService = {
   getPendingDeposits: jest.fn(),
@@ -26,7 +29,7 @@ const mockMixinGateway = {
   fetchTransactionDetails: jest.fn(),
   handleWithdrawal: jest.fn(),
   getUnspentTransactionOutputs: jest.fn(),
-  createDepositAddress: jest.fn()
+  createDepositAddress: jest.fn(),
 };
 
 const mockSchedulerUtils = {
@@ -108,7 +111,9 @@ describe('TransactionService', () => {
           transaction_hash: 'transaction-hash-1',
         },
       ];
-      mockMixinGateway.getUnspentTransactionOutputs.mockResolvedValue(mockOutputs);
+      mockMixinGateway.getUnspentTransactionOutputs.mockResolvedValue(
+        mockOutputs,
+      );
       mockDepositService.getPendingDeposits.mockResolvedValue(mockDeposits);
 
       await transactionService.processDeposits();
@@ -119,8 +124,16 @@ describe('TransactionService', () => {
         assetId: mockDeposits[0].assetId,
         amount: mockDeposits[0].amount,
       });
-      expect(mockDepositService.updateDepositStatus).toHaveBeenCalledWith(mockDeposits[0].id, DepositStatus.CONFIRMED);
-      expect(mockDepositService.updateDepositTransactionHash).toHaveBeenCalledWith(mockDeposits[0].id, mockOutputs[0].transaction_hash);
+      expect(mockDepositService.updateDepositStatus).toHaveBeenCalledWith(
+        mockDeposits[0].id,
+        DepositStatus.CONFIRMED,
+      );
+      expect(
+        mockDepositService.updateDepositTransactionHash,
+      ).toHaveBeenCalledWith(
+        mockDeposits[0].id,
+        mockOutputs[0].transaction_hash,
+      );
     });
 
     it('should not process deposits if there are no pending deposits', async () => {
@@ -132,7 +145,9 @@ describe('TransactionService', () => {
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).not.toHaveBeenCalled();
       expect(mockDepositService.updateDepositStatus).not.toHaveBeenCalled();
-      expect(mockDepositService.updateDepositTransactionHash).not.toHaveBeenCalled();
+      expect(
+        mockDepositService.updateDepositTransactionHash,
+      ).not.toHaveBeenCalled();
     });
 
     it('should not process deposits if there are no outputs', async () => {
@@ -144,7 +159,9 @@ describe('TransactionService', () => {
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).not.toHaveBeenCalled();
       expect(mockDepositService.updateDepositStatus).not.toHaveBeenCalled();
-      expect(mockDepositService.updateDepositTransactionHash).not.toHaveBeenCalled();
+      expect(
+        mockDepositService.updateDepositTransactionHash,
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -165,8 +182,13 @@ describe('TransactionService', () => {
       await transactionService.processWithdrawals();
 
       expect(mockWithdrawService.getSignedWithdrawals).toHaveBeenCalled();
-      expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(withdrawal.transactionHash);
-      expect(mockWithdrawService.updateWithdrawalStatus).toHaveBeenCalledWith(withdrawal.id, WithdrawalStatus.SPENT);
+      expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(
+        withdrawal.transactionHash,
+      );
+      expect(mockWithdrawService.updateWithdrawalStatus).toHaveBeenCalledWith(
+        withdrawal.id,
+        WithdrawalStatus.SPENT,
+      );
       expect(mockUserBalanceService.updateUserBalance).toHaveBeenCalledWith({
         userId: withdrawal.userId,
         amount: -Number(withdrawal.amount),
@@ -187,7 +209,9 @@ describe('TransactionService', () => {
       await transactionService.processWithdrawals();
 
       expect(mockWithdrawService.getSignedWithdrawals).toHaveBeenCalled();
-      expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(withdrawal.transactionHash);
+      expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(
+        withdrawal.transactionHash,
+      );
       expect(mockWithdrawService.updateWithdrawalStatus).not.toHaveBeenCalled();
     });
   });

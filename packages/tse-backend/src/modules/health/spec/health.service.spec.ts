@@ -29,8 +29,8 @@ describe('HealthService', () => {
           provide: StrategiesHealthService,
           useValue: {
             checkStrategies: jest.fn(),
-          }
-        }
+          },
+        },
       ],
     }).compile();
 

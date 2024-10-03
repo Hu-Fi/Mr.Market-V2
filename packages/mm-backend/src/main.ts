@@ -4,7 +4,10 @@ import { Logger, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
+import {
+  initializeTransactionalContext,
+  StorageDriver,
+} from 'typeorm-transactional';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');

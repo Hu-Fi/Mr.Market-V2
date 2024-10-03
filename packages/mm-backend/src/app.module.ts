@@ -14,7 +14,10 @@ import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { UserBalanceModule } from './modules/user-balance/user-balance.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { DataSource } from 'typeorm';
-import { addTransactionalDataSource, deleteDataSourceByName } from 'typeorm-transactional';
+import {
+  addTransactionalDataSource,
+  deleteDataSourceByName,
+} from 'typeorm-transactional';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({

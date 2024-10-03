@@ -4,7 +4,10 @@ import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { DepositService } from './deposit/deposit.service';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { Deposit } from '../../common/entities/deposit.entity';
-import { DepositStatus, WithdrawalStatus } from '../../common/enums/transaction.enum';
+import {
+  DepositStatus,
+  WithdrawalStatus,
+} from '../../common/enums/transaction.enum';
 import { UserBalanceService } from '../user-balance/user-balance.service';
 import { WithdrawService } from './withdraw/withdraw.service';
 
@@ -20,8 +23,7 @@ export class TransactionService {
     private readonly withdrawService: WithdrawService,
     private readonly mixinGateway: MixinGateway,
     private readonly userBalanceService: UserBalanceService,
-  ) {
-  }
+  ) {}
 
   onModuleInit() {
     this.schedulerUtils.addCronJob(
@@ -41,7 +43,12 @@ export class TransactionService {
   async processDeposits() {
     const outputs = await this.mixinGateway.getUnspentTransactionOutputs();
     const pendingDeposits = await this.getPendingDeposits();
-    if (outputs && outputs.length > 0 && pendingDeposits && pendingDeposits.length > 0) {
+    if (
+      outputs &&
+      outputs.length > 0 &&
+      pendingDeposits &&
+      pendingDeposits.length > 0
+    ) {
       await this.findMatchingDeposit(outputs, pendingDeposits);
     }
   }
@@ -50,30 +57,42 @@ export class TransactionService {
     const signedWithdrawals = await this.withdrawService.getSignedWithdrawals();
     for (const withdrawal of signedWithdrawals) {
       const { transactionHash, id } = withdrawal;
-      const transactionDetails = await this.mixinGateway.fetchTransactionDetails(transactionHash);
+      const transactionDetails =
+        await this.mixinGateway.fetchTransactionDetails(transactionHash);
       if (transactionDetails.state === WithdrawalStatus.SPENT) {
-        await this.withdrawService.updateWithdrawalStatus(id, WithdrawalStatus.SPENT);
+        await this.withdrawService.updateWithdrawalStatus(
+          id,
+          WithdrawalStatus.SPENT,
+        );
         await this.userBalanceService.updateUserBalance({
           userId: withdrawal.userId,
           assetId: withdrawal.assetId,
           amount: -withdrawal.amount,
         });
-        this.logger.debug(`Withdrawal ${withdrawal.id} confirmed and updated to spent`);
+        this.logger.debug(
+          `Withdrawal ${withdrawal.id} confirmed and updated to spent`,
+        );
       }
     }
   }
 
   private async getPendingDeposits(): Promise<Deposit[]> {
     const pendingDeposits = await this.depositService.getPendingDeposits();
-    return pendingDeposits && pendingDeposits.length > 0 ? pendingDeposits : null;
+    return pendingDeposits && pendingDeposits.length > 0
+      ? pendingDeposits
+      : null;
   }
 
-  private async findMatchingDeposit(outputs: any[], pendingDeposits: Deposit[]) {
+  private async findMatchingDeposit(
+    outputs: any[],
+    pendingDeposits: Deposit[],
+  ) {
     for (const deposit of pendingDeposits) {
-      const matchingOutput = outputs.find(output =>
-        output.asset_id === deposit.assetId &&
-        parseFloat(output.amount) === parseFloat(String(deposit.amount)) &&
-        new Date(output.created_at) > new Date(deposit.createdAt)
+      const matchingOutput = outputs.find(
+        (output) =>
+          output.asset_id === deposit.assetId &&
+          parseFloat(output.amount) === parseFloat(String(deposit.amount)) &&
+          new Date(output.created_at) > new Date(deposit.createdAt),
       );
 
       if (matchingOutput) {
@@ -82,9 +101,17 @@ export class TransactionService {
           assetId: deposit.assetId,
           amount: deposit.amount,
         });
-        await this.depositService.updateDepositStatus(deposit.id, DepositStatus.CONFIRMED);
-        await this.depositService.updateDepositTransactionHash(deposit.id, matchingOutput.transaction_hash);
-        this.logger.debug(`Deposit ${deposit.id} confirmed with transaction hash ${matchingOutput.transaction_hash}`);
+        await this.depositService.updateDepositStatus(
+          deposit.id,
+          DepositStatus.CONFIRMED,
+        );
+        await this.depositService.updateDepositTransactionHash(
+          deposit.id,
+          matchingOutput.transaction_hash,
+        );
+        this.logger.debug(
+          `Deposit ${deposit.id} confirmed with transaction hash ${matchingOutput.transaction_hash}`,
+        );
       }
     }
   }

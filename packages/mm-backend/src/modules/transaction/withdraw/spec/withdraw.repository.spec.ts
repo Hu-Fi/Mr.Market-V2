@@ -76,7 +76,10 @@ describe('WithdrawRepository', () => {
 
       await withdrawRepository.updateStatusById(withdrawalId, status);
 
-      expect(mockRepository.update).toHaveBeenCalledWith({ id: withdrawalId }, { status });
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        { id: withdrawalId },
+        { status },
+      );
     });
   });
 
@@ -87,7 +90,10 @@ describe('WithdrawRepository', () => {
 
       await withdrawRepository.updateTransactionHashById(withdrawalId, txHash);
 
-      expect(mockRepository.update).toHaveBeenCalledWith({ id: withdrawalId }, { transactionHash: txHash });
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        { id: withdrawalId },
+        { transactionHash: txHash },
+      );
     });
   });
 });

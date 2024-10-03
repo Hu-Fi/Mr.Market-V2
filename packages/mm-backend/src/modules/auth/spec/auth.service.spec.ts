@@ -57,7 +57,7 @@ describe('AuthService', () => {
           useValue: {
             createUser: jest.fn(),
           },
-        }
+        },
       ],
     }).compile();
 

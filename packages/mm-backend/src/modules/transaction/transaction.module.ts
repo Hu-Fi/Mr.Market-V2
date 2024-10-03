@@ -28,7 +28,7 @@ import { UserBalanceService } from '../user-balance/user-balance.service';
     TransactionService,
     TransactionProfile,
     SchedulerUtil,
-    UserBalanceService
+    UserBalanceService,
   ],
   controllers: [TransactionController],
   exports: [DepositService, DepositRepository],

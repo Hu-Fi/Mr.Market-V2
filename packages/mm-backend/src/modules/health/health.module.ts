@@ -9,12 +9,7 @@ import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [IntegrationsModule, HttpModule],
-  providers: [
-    ConfigService,
-    HealthService,
-    DbHealthService,
-    TseHealthService,
-  ],
+  providers: [ConfigService, HealthService, DbHealthService, TseHealthService],
   controllers: [HealthController],
 })
 export class HealthModule {}

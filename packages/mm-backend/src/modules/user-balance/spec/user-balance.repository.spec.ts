@@ -24,8 +24,12 @@ describe('UserBalanceRepository', () => {
       ],
     }).compile();
 
-    userBalanceRepository = module.get<UserBalanceRepository>(UserBalanceRepository);
-    repository = module.get<Repository<UserBalance>>(getRepositoryToken(UserBalance));
+    userBalanceRepository = module.get<UserBalanceRepository>(
+      UserBalanceRepository,
+    );
+    repository = module.get<Repository<UserBalance>>(
+      getRepositoryToken(UserBalance),
+    );
   });
 
   it('should be defined', () => {
@@ -33,10 +37,17 @@ describe('UserBalanceRepository', () => {
   });
 
   it('should find a user balance by userId and assetId', async () => {
-    const userBalance = { userId: '1', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', balance: 100 } as UserBalance;
+    const userBalance = {
+      userId: '1',
+      assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
+      balance: 100,
+    } as UserBalance;
     jest.spyOn(repository, 'findOne').mockResolvedValue(userBalance);
 
-    const result = await userBalanceRepository.findByUserIdAssetId('1', '43d61dcd-e413-450d-80b8-101d5e903357');
+    const result = await userBalanceRepository.findByUserIdAssetId(
+      '1',
+      '43d61dcd-e413-450d-80b8-101d5e903357',
+    );
     expect(result).toEqual(userBalance);
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { userId: '1', assetId: '43d61dcd-e413-450d-80b8-101d5e903357' },
@@ -44,7 +55,11 @@ describe('UserBalanceRepository', () => {
   });
 
   it('should save a user balance', async () => {
-    const userBalance = { userId: '1', assetId: '43d61dcd-e413-450d-80b8-101d5e903357', balance: 100 } as UserBalance;
+    const userBalance = {
+      userId: '1',
+      assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
+      balance: 100,
+    } as UserBalance;
     jest.spyOn(repository, 'save').mockResolvedValue(userBalance);
 
     const result = await userBalanceRepository.saveUserBalance(userBalance);

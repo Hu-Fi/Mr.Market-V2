@@ -16,7 +16,7 @@ export class DepositService {
 
   @Transactional()
   async deposit(command: DepositCommand): Promise<DepositResponse> {
-    const destination = await this.mixinGateway.createDepositAddress(command)
+    const destination = await this.mixinGateway.createDepositAddress(command);
     await this.repository.save({
       ...command,
       status: DepositStatus.PENDING,
@@ -27,7 +27,7 @@ export class DepositService {
       assetId: command.assetId,
       amount: command.amount,
       destination: destination,
-    } as DepositResponse
+    } as DepositResponse;
   }
 
   async getPendingDeposits(): Promise<Deposit[]> {

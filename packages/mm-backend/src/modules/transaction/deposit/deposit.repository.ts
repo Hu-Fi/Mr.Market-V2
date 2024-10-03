@@ -25,6 +25,9 @@ export class DepositRepository {
   }
 
   async updateTransactionHashById(depositId: number, txHash: string) {
-    return await this.repository.update({ id: depositId }, { transactionHash: txHash });
+    return await this.repository.update(
+      { id: depositId },
+      { transactionHash: txHash },
+    );
   }
 }

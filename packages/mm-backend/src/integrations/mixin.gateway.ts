@@ -16,7 +16,10 @@ import {
   signSafeTransaction,
 } from '@mixin.dev/mixin-node-sdk';
 import { ConfigService } from '@nestjs/config';
-import { AuthorizationResponse, OAuthResponse } from '../common/interfaces/auth.interfaces';
+import {
+  AuthorizationResponse,
+  OAuthResponse,
+} from '../common/interfaces/auth.interfaces';
 import { DepositCommand } from '../modules/transaction/deposit/model/deposit.model';
 import { v4 } from 'uuid';
 import BigNumber from 'bignumber.js';
@@ -45,7 +48,9 @@ export class MixinGateway {
     this._client = MixinApi({
       keystore: this.keystore,
     });
-    this.spendPrivateKey = this.configService.get<string>('MIXIN_SPEND_PRIVATE_KEY');
+    this.spendPrivateKey = this.configService.get<string>(
+      'MIXIN_SPEND_PRIVATE_KEY',
+    );
   }
 
   async oauthHandler(code: string): Promise<OAuthResponse> {
@@ -93,7 +98,11 @@ export class MixinGateway {
     const asset = await this._client.safe.fetchAsset(assetId);
     const chain = await this.getChainAsset(asset);
     const fees = await this._client.safe.fetchFee(asset.asset_id, destination);
-    const transactionFee = this.getTransactionFee(fees, asset.asset_id, chain.asset_id);
+    const transactionFee = this.getTransactionFee(
+      fees,
+      asset.asset_id,
+      chain.asset_id,
+    );
 
     // Check if the withdrawal fee is in a different asset than the one being withdrawn.
     // If the fee is in a different asset, execute the withdrawal process using the chain asset as the fee.
@@ -117,8 +126,8 @@ export class MixinGateway {
   }
 
   private getTransactionFee(fees: Fee[], assetId: string, chainId: string) {
-    const assetFee = fees.find(f => f.asset_id === assetId);
-    const chainFee = fees.find(f => f.asset_id === chainId);
+    const assetFee = fees.find((f) => f.asset_id === assetId);
+    const chainFee = fees.find((f) => f.asset_id === chainId);
     return assetFee ?? chainFee;
   }
 
@@ -126,7 +135,11 @@ export class MixinGateway {
     return !change.isZero() && !change.isNegative();
   }
 
-  private async createRecipientsAndGhosts(command: WithdrawCommand, outputs: SafeUtxoOutput[], additionalRecipient?) {
+  private async createRecipientsAndGhosts(
+    command: WithdrawCommand,
+    outputs: SafeUtxoOutput[],
+    additionalRecipient?,
+  ) {
     const { amount, destination } = command;
     const recipients: SafeWithdrawalRecipient[] = [
       { amount: amount, destination },
@@ -135,16 +148,20 @@ export class MixinGateway {
 
     const { change } = getUnspentOutputsForRecipients(outputs, recipients);
     if (this.hasPositiveChange(change)) {
-      recipients.push(<SafeWithdrawalRecipient>buildSafeTransactionRecipient(
-        outputs[0].receivers,
-        outputs[0].receivers_threshold,
-        change.toString()
-      ));
+      recipients.push(
+        <SafeWithdrawalRecipient>(
+          buildSafeTransactionRecipient(
+            outputs[0].receivers,
+            outputs[0].receivers_threshold,
+            change.toString(),
+          )
+        ),
+      );
     }
 
     const ghosts = await this._client.utxo.ghostKey(
       recipients
-        .filter(r => 'members' in r)
+        .filter((r) => 'members' in r)
         .map((r, i) => ({
           hint: v4(),
           receivers: r.members as string[],
@@ -155,18 +172,41 @@ export class MixinGateway {
     return { recipients, ghosts };
   }
 
-  private async createAndSendTransaction(utxos: SafeUtxoOutput[], recipients: SafeWithdrawalRecipient[], ghosts, memo: string, feeRef?){
+  private async createAndSendTransaction(
+    utxos: SafeUtxoOutput[],
+    recipients: SafeWithdrawalRecipient[],
+    ghosts,
+    memo: string,
+    feeRef?,
+  ) {
     // spare the 0 index for withdrawal output, withdrawal output doesn't need ghost key
-    const tx = buildSafeTransaction(utxos, recipients, [undefined, ...ghosts], memo, feeRef ? [feeRef] : undefined);
+    const tx = buildSafeTransaction(
+      utxos,
+      recipients,
+      [undefined, ...ghosts],
+      memo,
+      feeRef ? [feeRef] : undefined,
+    );
     const raw = encodeSafeTransaction(tx);
     const request_id = v4();
-    const txs = await this._client.utxo.verifyTransaction([{ raw, request_id }]);
-    const signedRaw = signSafeTransaction(tx, txs[0].views, this.spendPrivateKey);
-    const response = await this._client.utxo.sendTransactions([{ raw: signedRaw, request_id }]);
+    const txs = await this._client.utxo.verifyTransaction([
+      { raw, request_id },
+    ]);
+    const signedRaw = signSafeTransaction(
+      tx,
+      txs[0].views,
+      this.spendPrivateKey,
+    );
+    const response = await this._client.utxo.sendTransactions([
+      { raw: signedRaw, request_id },
+    ]);
     return response[0];
   }
 
-  private async withdrawWithChainAssetAsFee(command: WithdrawCommand, fee: Fee) {
+  private async withdrawWithChainAssetAsFee(
+    command: WithdrawCommand,
+    fee: Fee,
+  ) {
     const { assetId } = command;
 
     const outputs = await this._client.utxo.safeOutputs({
@@ -178,10 +218,17 @@ export class MixinGateway {
       state: 'unspent',
     });
 
-    const { recipients, ghosts } = await this.createRecipientsAndGhosts(command, outputs, fee);
+    const { recipients, ghosts } = await this.createRecipientsAndGhosts(
+      command,
+      outputs,
+      fee,
+    );
 
     const feeRecipients = [{ amount: fee.amount, destination: MixinCashier }];
-    const { utxos: feeUtxos } = getUnspentOutputsForRecipients(feeOutputs, feeRecipients);
+    const { utxos: feeUtxos } = getUnspentOutputsForRecipients(
+      feeOutputs,
+      feeRecipients,
+    );
 
     const feeCommand: WithdrawCommand = {
       ...command,
@@ -189,16 +236,24 @@ export class MixinGateway {
       destination: MixinCashier,
     };
 
-    const {
-      recipients: feeRecipientsWithChange,
-      ghosts: feeGhosts,
-    } = await this.createRecipientsAndGhosts(feeCommand, feeOutputs, fee);
+    const { recipients: feeRecipientsWithChange, ghosts: feeGhosts } =
+      await this.createRecipientsAndGhosts(feeCommand, feeOutputs, fee);
 
-    const feeTx = await this.createAndSendTransaction(feeUtxos, feeRecipientsWithChange, feeGhosts, 'withdrawal-fee-memo');
+    const feeTx = await this.createAndSendTransaction(
+      feeUtxos,
+      feeRecipientsWithChange,
+      feeGhosts,
+      'withdrawal-fee-memo',
+    );
 
-    return await this.createAndSendTransaction(outputs, recipients, ghosts, 'withdrawal-memo', feeTx);
+    return await this.createAndSendTransaction(
+      outputs,
+      recipients,
+      ghosts,
+      'withdrawal-memo',
+      feeTx,
+    );
   }
-
 
   private async withdrawWithAssetAsFee(command: WithdrawCommand, fee: Fee) {
     const { assetId } = command;
@@ -208,10 +263,23 @@ export class MixinGateway {
       state: 'unspent',
     });
 
-    const feeOutput = buildSafeTransactionRecipient([MixinCashier], 1, fee.amount);
-    const { recipients, ghosts } = await this.createRecipientsAndGhosts(command, outputs, feeOutput);
+    const feeOutput = buildSafeTransactionRecipient(
+      [MixinCashier],
+      1,
+      fee.amount,
+    );
+    const { recipients, ghosts } = await this.createRecipientsAndGhosts(
+      command,
+      outputs,
+      feeOutput,
+    );
 
-    return await this.createAndSendTransaction(outputs, recipients, ghosts, 'withdrawal-memo');
+    return await this.createAndSendTransaction(
+      outputs,
+      recipients,
+      ghosts,
+      'withdrawal-memo',
+    );
   }
 
   async fetchTransactionDetails(txHash: string) {

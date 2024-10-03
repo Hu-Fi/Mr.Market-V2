@@ -71,7 +71,7 @@ describe('RolesGuard', () => {
           useValue: {
             createUser: jest.fn(),
           },
-        }
+        },
       ],
     }).compile();
 

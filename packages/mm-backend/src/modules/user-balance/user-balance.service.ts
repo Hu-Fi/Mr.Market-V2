@@ -6,10 +6,7 @@ import { TransactionBalance } from '../../common/interfaces/transaction.interfac
 
 @Injectable()
 export class UserBalanceService {
-  constructor(
-    private readonly userBalanceRepository: UserBalanceRepository,
-  ) {
-  }
+  constructor(private readonly userBalanceRepository: UserBalanceRepository) {}
   async findOrCreateUserBalance(
     userId: string,
     assetId: string,
@@ -31,7 +28,9 @@ export class UserBalanceService {
     return userBalance;
   }
 
-  async updateUserBalance(transactionBalance: TransactionBalance): Promise<UserBalance> {
+  async updateUserBalance(
+    transactionBalance: TransactionBalance,
+  ): Promise<UserBalance> {
     const { userId, assetId, amount } = transactionBalance;
     const userBalance = await this.findOrCreateUserBalance(userId, assetId);
 

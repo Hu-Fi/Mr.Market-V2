@@ -25,6 +25,9 @@ export class WithdrawRepository {
   }
 
   async updateTransactionHashById(withdrawalId: number, txHash: string) {
-    return await this.repository.update({ id: withdrawalId }, { transactionHash: txHash });
+    return await this.repository.update(
+      { id: withdrawalId },
+      { transactionHash: txHash },
+    );
   }
 }
