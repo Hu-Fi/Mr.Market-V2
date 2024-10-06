@@ -4,10 +4,10 @@
 
 ## What is Mr.Market?
 
-Mr.Market is a CeFi crypto bot and the reference exchange oracle for Hu-Fi. Mr.Market has three main functions:
+Mr.Market is a Trading bot and the reference exchange oracle for Hu-Fi. Mr.Market has three main functions:
 
-- An automated crypto bot that supports a variety of strategies for arbitrage across CeFi exchanges.
-- A front end where users can contribute funds to increase the ability to do Hu-Fi market making.
+- An automated CeFi, DeFi, TradFi  bot that supports a variety of strategies for arbitrage.
+- A front end where users can transact using crypto, and tradfi accounts .
 
 Learn more about [Hu-Fi](https://github.com/hu-fi).
 
