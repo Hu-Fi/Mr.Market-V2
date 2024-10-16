@@ -1,92 +1,207 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { EscrowClient } from '@human-protocol/sdk';
-import axios from 'axios';
-import { Wallet, JsonRpcProvider } from 'ethers';
 import * as dotenv from 'dotenv';
-import { StoredResultsUrlResponse, StoreResultsParams } from '../src/common/interfaces/escrow.interfaces';
-import { CampaignCreateRequestData } from '../src/common/interfaces/campaign.interfaces';
+import axios from 'axios';
+
 dotenv.config();
 
-describe('Exchange oracle (mr market) integration with Recording Oracle (e2e)', () => {
+describe('Exchange oracle (mr market) integration with Hu-Fi (e2e)', () => {
   let app: INestApplication;
-  const RPC_URL = process.env.E2E_RPC_URL;
-  const TRUSTED_ADDRESS_PRIVATE_KEY = process.env.E2E_TRUSTED_ADDRESS_PRIVATE_KEY;
-  const CHAIN_ID = process.env.E2E_CHAIN_ID;
-  const ESCROW_ADDRESS = process.env.E2E_ESCROW_ADDRESS;
-  const CAMPAIGN_ADDRESS = process.env.E2E_CAMPAIGN_ADDRESS;
+  const EXCHANGE_API_KEY = process.env.E2E_EXCHANGE_API_KEY;
+  const CAMPAIGN_LAUNCHER_API = process.env.E2E_CAMPAIGN_LAUNCHER_API;
+  const UPLOAD_MANIFEST_ENDPOINT = '/manifest/upload';
+  const CAMPAIGN_LAUNCHER_API_KEY = process.env.E2E_CAMPAIGN_LAUNCHER_API_KEY;
+  const TRUSTED_ADDRESS = process.env.E2E_TRUSTED_ADDRESS;
+  const GET_CAMPAIGNS_BY_CHAIN_ID_ENDPOINT = '/campaign';
+  const RECORDING_ORACLE_API = process.env.E2E_RECORDING_ORACLE_API;
+  const REGISTER_USER_TO_CAMPAIGN = '/user/campaign';
+  const REGISTER_BOT_TO_CAMPAIGN = '/mr-market/campaign';
+  const USER_BEARER = process.env.E2E_USER_BEARER;
+  const CHECK_IF_REGISTERED_TO_CAMPAIGN = '/user/campaign';
 
-  const escrowDataFixture = {
-    url: 'https://example.com/results.json',
-    hash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
-  };
-
-  const provider = new JsonRpcProvider(RPC_URL);
-  const signer = new Wallet(TRUSTED_ADDRESS_PRIVATE_KEY, provider);
-  let escrowClient: EscrowClient;
+  const CHAIN_ID = 80002;
+  const EXCHANGE_NAME = 'mexc';
+  const TOKEN = 'XIN/USDT';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [],
     }).compile();
-
     app = moduleFixture.createNestApplication();
     await app.init();
-
-    escrowClient = await EscrowClient.build(signer);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it('should store results on-chain using EscrowClient', async () => {
-    const params: StoreResultsParams = {
-      escrowAddress: ESCROW_ADDRESS,
-      url: escrowDataFixture.url,
-      hash: escrowDataFixture.hash,
+  it.skip('1a. should create a new campaign', async () => {
+    const payload = {
+      "chainId": CHAIN_ID,
+      "requesterAddress": TRUSTED_ADDRESS,
+      "exchangeName": EXCHANGE_NAME,
+      "token": TOKEN,
+      "startDate": "2024-10-15T13:35:36.226Z",
+      "duration": 86400,
+      "fundAmount": "100000000000000",
+      "additionalData": ""
     };
 
-    expect(params.escrowAddress).toBeDefined();
-    expect(params.url).toBeDefined();
-    expect(params.hash).toBeDefined();
-
-    await escrowClient.storeResults(
-      params.escrowAddress,
-      params.url,
-      params.hash,
+    const response = await axios.post(
+      `${CAMPAIGN_LAUNCHER_API}${UPLOAD_MANIFEST_ENDPOINT}`,
+      payload,
+      {
+        headers: {
+          'x-api-key': `${CAMPAIGN_LAUNCHER_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      },
     );
+
+    const { url, hash } = response.data;
+
+    expect(url).toBeDefined();
+    expect(hash).toBeDefined();
+    //TODO: No escrow created.
   });
 
-  it('should retrieve results data from escrow', async () => {
-    const result: string = await escrowClient.getResultsUrl(ESCROW_ADDRESS);
-    const resultsUrl: StoredResultsUrlResponse = {
-      url: result
-    };
+  it.only('1b. should join to existing campaign', async () => {
+    const campaigns = await fetchCampaignsByChainId(Number(CHAIN_ID));
+    const filteredByChainId = campaigns.filter(campaign => campaign.chainId == CHAIN_ID);
 
-    expect(resultsUrl.url).toBeDefined();
-    console.log(resultsUrl.url);
-  });
+    const foundCampaign = await filteredByChainId.find(async campaign =>
+      Boolean(await checkIfUserIsRegisteredToTheCampaign(campaign.id))
+    );
 
-  it('should post campaign to recording oracle API', async () => {
-    const data: CampaignCreateRequestData = {
-      chainId: Number(CHAIN_ID),
-      address: CAMPAIGN_ADDRESS,
+    const foundId = foundCampaign ? foundCampaign.id : filteredByChainId[0];
+
+    const payload = {
+      'chain_id': Number(CHAIN_ID),
+      'address': foundId
     };
-    const url = `${process.env.E2E_RECORDING_ORACLE_API}/campaign`;
 
     try {
-      const response = await axios.post(url, data, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.E2E_RECORDING_ORACLE_API_KEY
+      const response = await registerUserToCampaign(payload);
+      expect(response.status).toEqual(201);
+    } catch (error: any) {
+      if (error.response &&
+        error.response.status === 500 &&
+        error.response.data.message === 'User already registered for the campaign') {
+        expect(error.response.status).toEqual(500);
+        console.log(error.response.data.message);
+      } else {
+        throw error;
+      }
+    }
+  })
+
+  it('2. should recording oracle calculate liquidity score for this campaign', async () => {
+    //TODO: the called endpoint requires x-api-key
+  });
+
+  it('3. should fetch available campaigns', async () => {
+    const campaigns = await fetchCampaignsByChainId(Number(CHAIN_ID));
+
+    expect(campaigns).toBeDefined();
+    expect(campaigns.length).toBeGreaterThan(0);
+  }, 10 * 1000);
+
+  it('4. should bot join a campaign', async () => {
+    const campaignAddress = '0x52692f4F348d851C2B2965311fB52f63a01F45e0';
+    const payload = { 'chain_id': CHAIN_ID, 'address': campaignAddress };
+
+    const response = await registerBotToCampaign(payload);
+
+    expect(response.status).toBe(200);
+    expect(response.data.message).toBe('true');
+  });
+
+  it('5. should bot automatically crate trading strategies', async () => {
+
+  });
+
+  it('6a. should user join a strategy created by bot', async () => {
+
+  });
+
+  it('6b. should user can create own strategy', async () => {
+
+  });
+
+  it('7. should user deposit funds into the bot wallet to increase the liquidity of the campaign', async () => {
+
+  });
+
+  it('8. should rewards be distributed at the end of the campaign', async () => {
+
+  })
+
+  const fetchCampaignsByChainId = async (chainId: number): Promise<any> => {
+    try {
+      const response = await axios.get(`${CAMPAIGN_LAUNCHER_API}${GET_CAMPAIGNS_BY_CHAIN_ID_ENDPOINT}`, {
+        params: {
+          chainId: chainId,
         },
       });
-
-      expect(response.status).toBe(201);
-      console.log(response.data);
+      return response.data;
     } catch (error) {
-      console.error('Error posting to recording oracle API:', error);
+      throw error;
     }
-  });
+  };
+  async function registerUserToCampaign(
+    payload: any,
+  ) {
+    try {
+      return await axios.post(
+        `${RECORDING_ORACLE_API}${REGISTER_USER_TO_CAMPAIGN}`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + USER_BEARER
+          },
+        }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function registerBotToCampaign(
+    payload: any,
+  ) {
+    try {
+      return await axios.post(
+        `${RECORDING_ORACLE_API}${REGISTER_BOT_TO_CAMPAIGN}`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': EXCHANGE_API_KEY
+          },
+        }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function checkIfUserIsRegisteredToTheCampaign(
+    address: string,
+  ) {
+    try {
+      const response = await axios.get(
+        `${RECORDING_ORACLE_API}${CHECK_IF_REGISTERED_TO_CAMPAIGN}/${address}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + USER_BEARER
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 });
