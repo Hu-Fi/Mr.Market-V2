@@ -11,7 +11,7 @@ describe('TradingHistoryController', () => {
   let controller: TradingHistoryController;
   let service: TradingHistoryService;
 
-  let mockTradingHistoryService = {
+  const mockTradingHistoryService = {
     getUserTradingHistory: jest.fn(),
   };
 
