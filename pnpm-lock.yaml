@@ -64,6 +64,12 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.1(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.1)(@nestjs/websockets@10.4.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(reflect-metadata@0.1.14)(rxjs@7.8.1)(typeorm@0.3.20(ioredis@5.4.1)(pg@8.12.0)(redis@4.7.0)(ts-node@10.9.2(@types/node@22.5.4)(typescript@5.6.2)))
+      '@testcontainers/postgresql':
+        specifier: ^10.13.0
+        version: 10.13.0
+      '@testcontainers/redis':
+        specifier: ^10.13.2
+        version: 10.13.2
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
@@ -1316,6 +1322,9 @@ packages:
 
   '@testcontainers/postgresql@10.13.0':
     resolution: {integrity: sha512-wsZHOEkcAA2rszCeq5Jk/46FwjpuQCxx8dT41Ka7Pjk41WP41vgFptXeykQbd8qqIe8V7vaXcbuzprAec58V4g==}
+
+  '@testcontainers/redis@10.13.2':
+    resolution: {integrity: sha512-SFNdO/aGkJlgyS04pXPTGiC8lJqR7aw6xdhgB5NXVnEPoic+y6SozxY4Fa7DeXxyYftF/xYW7D0iDobpMik6Vg==}
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -4160,6 +4169,9 @@ packages:
   testcontainers@10.13.0:
     resolution: {integrity: sha512-SDblQvirbJw1ZpenxaAairGtAesw5XMOCHLbRhTTUBJtBkZJGce8Vx/I8lXQxWIM8HRXsg3HILTHGQvYo4x7wQ==}
 
+  testcontainers@10.13.2:
+    resolution: {integrity: sha512-LfEll+AG/1Ks3n4+IA5lpyBHLiYh/hSfI4+ERa6urwfQscbDU+M2iW1qPQrHQi+xJXQRYy4whyK1IEHdmxWa3Q==}
+
   text-decoder@1.1.1:
     resolution: {integrity: sha512-8zll7REEv4GDD3x4/0pW+ppIxSNs7H1J10IKFZsuOMscumCdM2a+toDGLPA3T+1+fLBql4zbt5z83GEQGGV5VA==}
 
@@ -5714,6 +5726,12 @@ snapshots:
   '@testcontainers/postgresql@10.13.0':
     dependencies:
       testcontainers: 10.13.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@testcontainers/redis@10.13.2':
+    dependencies:
+      testcontainers: 10.13.2
     transitivePeerDependencies:
       - supports-color
 
@@ -9003,6 +9021,26 @@ snapshots:
       minimatch: 3.1.2
 
   testcontainers@10.13.0:
+    dependencies:
+      '@balena/dockerignore': 1.0.2
+      '@types/dockerode': 3.3.31
+      archiver: 7.0.1
+      async-lock: 1.4.1
+      byline: 5.0.0
+      debug: 4.3.5
+      docker-compose: 0.24.8
+      dockerode: 3.3.5
+      get-port: 5.1.1
+      proper-lockfile: 4.1.2
+      properties-reader: 2.3.0
+      ssh-remote-port-forward: 1.0.4
+      tar-fs: 3.0.6
+      tmp: 0.2.3
+      undici: 5.28.4
+    transitivePeerDependencies:
+      - supports-color
+
+  testcontainers@10.13.2:
     dependencies:
       '@balena/dockerignore': 1.0.2
       '@types/dockerode': 3.3.31
