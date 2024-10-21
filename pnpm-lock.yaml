@@ -118,6 +118,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      testcontainers:
+        specifier: ^10.13.0
+        version: 10.13.2
       ts-aspect:
         specifier: ^3.1.2
         version: 3.1.2
@@ -5725,7 +5728,7 @@ snapshots:
 
   '@testcontainers/postgresql@10.13.0':
     dependencies:
-      testcontainers: 10.13.0
+      testcontainers: 10.13.2
     transitivePeerDependencies:
       - supports-color
 
