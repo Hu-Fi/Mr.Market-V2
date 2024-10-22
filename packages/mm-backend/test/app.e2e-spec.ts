@@ -1,4 +1,4 @@
-import { app, setupTestApp, shutdownServices } from './test-setup';
+import { depositService, setupTestApp, shutdownServices } from './test-setup';
 import {
   calculateLiquidityScore,
   checkIfUserIsRegisteredToTheCampaign,
@@ -14,10 +14,9 @@ import {
   campaignPayload,
   CHAIN_ID, depositPayload,
   joinCampaignPayload,
-  MM_USER_BEARER, userStrategyPayload,
+  userStrategyPayload,
 } from './fixtures';
 import axios from 'axios';
-import request from 'supertest';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -147,11 +146,14 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
   });
 
   it('7. should the user deposit funds into the bot wallet to increase the liquidity of the campaign', async () => {
-    await request(app.getHttpServer())
-      .post('/transaction/deposit')
-      .set('Authorization', `Bearer ${MM_USER_BEARER}`)
-      .send(depositPayload)
-      .expect(201);
+    const command = {
+      userId: '123',
+      ...depositPayload
+    }
+    const response = await depositService.deposit(command);
+    expect(response).toHaveProperty('assetId')
+    expect(response).toHaveProperty('amount')
+    expect(response).toHaveProperty('destination')
   });
 
   it('8. should rewards be distributed at the end of the campaign', async () => {

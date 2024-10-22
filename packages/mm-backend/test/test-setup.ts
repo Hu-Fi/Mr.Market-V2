@@ -5,20 +5,22 @@ import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { AppModule } from '../src/app.module';
 import { Deposit } from '../src/common/entities/deposit.entity';
 import { Withdraw } from '../src/common/entities/withdraw.entity';
 import { Wait } from 'testcontainers';
+import { DepositService } from '../src/modules/transaction/deposit/deposit.service';
+import { MixinGateway } from '../src/integrations/mixin.gateway';
+import { DepositRepository } from '../src/modules/transaction/deposit/deposit.repository';
 
 export let app: INestApplication;
 export let dataSource: DataSource;
 export let postgresContainer: StartedPostgreSqlContainer;
 export let redisContainer: StartedRedisContainer;
+export let depositService: DepositService;
 
 export const setupTestApp = async () => {
   postgresContainer = await new PostgreSqlContainer()
-    .withName('testcontainer')
-    .withDatabase('testcontainer')
+    .withExposedPorts(5432)
     .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections'))
     .start();
 
@@ -36,7 +38,7 @@ export const setupTestApp = async () => {
       TypeOrmModule.forRootAsync({
         useFactory: () => ({
           type: 'postgres',
-          host: 'localhost',
+          host: postgresContainer.getHost(),
           port: postgresContainer.getPort(),
           username: postgresContainer.getUsername(),
           password: postgresContainer.getPassword(),
@@ -46,11 +48,16 @@ export const setupTestApp = async () => {
         }),
       }),
       TypeOrmModule.forFeature([Deposit, Withdraw]),
-      AppModule,
     ],
+    providers: [
+      DepositService,
+      MixinGateway,
+      DepositRepository
+    ]
   }).compile();
 
   app = moduleRef.createNestApplication();
+  depositService = moduleRef.get<DepositService>(DepositService);
   dataSource = moduleRef.get<DataSource>(DataSource);
   await app.init();
 };

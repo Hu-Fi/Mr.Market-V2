@@ -1,10 +1,6 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-// Bearers
-export const USER_BEARER = process.env.E2E_USER_BEARER;
-export const MM_USER_BEARER = process.env.E2E_MRMARKET_USER_BEARER;
-
 // API Keys
 export const CAMPAIGN_LAUNCHER_API_KEY = process.env.E2E_CAMPAIGN_LAUNCHER_API_KEY;
 export const RECORDING_ORACLE_API_KEY = process.env.E2E_RECORDING_ORACLE_API_KEY;
@@ -14,6 +10,7 @@ export const EXCHANGE_SECRET = process.env.E2E_EXCHANGE_SECRET;
 // APIs
 export const CAMPAIGN_LAUNCHER_API = process.env.E2E_CAMPAIGN_LAUNCHER_API;
 export const RECORDING_ORACLE_API = process.env.E2E_RECORDING_ORACLE_API;
+export const TSE_APP_API = process.env.E2E_TSE_APP_API;
 
 // Constants
 export const CHAIN_ID = 80002;
@@ -22,6 +19,7 @@ export const TOKEN = 'XIN/USDT';
 
 // Addresses
 export const TRUSTED_ADDRESS = process.env.E2E_TRUSTED_ADDRESS;
+export const TRUSTED_ADDRESS_PRIVATE_KEY = process.env.E2E_TRUSTED_ADDRESS_PRIVATE_KEY;
 export const BOT_ADDRESS = process.env.E2E_BOT_ADDRESS;
 
 // Payloads
