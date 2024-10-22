@@ -10,6 +10,7 @@ export const EXCHANGE_SECRET = process.env.E2E_EXCHANGE_SECRET;
 // APIs
 export const CAMPAIGN_LAUNCHER_API = process.env.E2E_CAMPAIGN_LAUNCHER_API;
 export const RECORDING_ORACLE_API = process.env.E2E_RECORDING_ORACLE_API;
+export const REPUTATION_ORACLE_API = process.env.E2E_REPUTATION_ORACLE_API;
 export const TSE_APP_API = process.env.E2E_TSE_APP_API;
 
 // Constants

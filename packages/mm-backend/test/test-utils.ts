@@ -3,7 +3,7 @@ import {
   CAMPAIGN_LAUNCHER_API,
   RECORDING_ORACLE_API,
   RECORDING_ORACLE_API_KEY,
-  TRUSTED_ADDRESS_PRIVATE_KEY, TRUSTED_ADDRESS, TSE_APP_API,
+  TRUSTED_ADDRESS_PRIVATE_KEY, TRUSTED_ADDRESS, TSE_APP_API, REPUTATION_ORACLE_API,
 } from './fixtures';
 import * as dotenv from 'dotenv';
 import { ethers } from 'ethers';
@@ -109,4 +109,8 @@ export async function handleUserAuthentication() {
       },
     }
   );
+}
+
+export async function manuallyExecutePayouts() {
+  return await axios.post(`${REPUTATION_ORACLE_API}/payout/manual-payout`);
 }

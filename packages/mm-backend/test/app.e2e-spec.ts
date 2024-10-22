@@ -3,7 +3,7 @@ import {
   calculateLiquidityScore,
   checkIfUserIsRegisteredToTheCampaign,
   createStrategyByUser,
-  fetchCampaignsByChainId,
+  fetchCampaignsByChainId, manuallyExecutePayouts,
   registerBotToCampaign,
   registerUserToCampaign,
 } from './test-utils';
@@ -157,7 +157,7 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
   });
 
   it('8. should rewards be distributed at the end of the campaign', async () => {
-    // The campaign launcher manages the distribution of rewards after the campaign ends
-    // At this moment there is no possibility to end the campaign earlier.
+    const response = await manuallyExecutePayouts();
+    expect(response.status).toEqual(201);
   });
 });
