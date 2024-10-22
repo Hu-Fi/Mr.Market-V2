@@ -63,6 +63,8 @@ jobs:
       - name: Install dependencies
         working-directory: packages/mm-backend
         run: pnpm install
+      - name: Copy ENV file
+        run: echo "${{ vars.APP_ENV_FILE }}" > .env
       - name: Run e2e tests
         working-directory: packages/mm-backend
         run: pnpm test:e2e
