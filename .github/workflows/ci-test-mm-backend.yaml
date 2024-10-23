@@ -67,6 +67,9 @@ jobs:
         run: pnpm install
       - name: Copy ENV file
         run: echo "${{ vars.APP_ENV_FILE }}" > .env
+      - name: Convert .env file to use LF (Unix) line endings
+        run: |
+          sed -i 's/\r$//' .env
       - name: Load environment variables from .env
         run: |
           set -a
