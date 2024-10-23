@@ -66,16 +66,21 @@ jobs:
         working-directory: packages/mm-backend
         run: pnpm install
       - name: Copy ENV file
+        working-directory: packages/mm-backend
         run: echo "${{ vars.APP_ENV_FILE }}" > .env
       - name: Convert .env file to use LF (Unix) line endings
+        working-directory: packages/mm-backend
         run: |
           sed -i 's/\r$//' .env
       - name: Verify .env content
+        working-directory: packages/mm-backend
         run: cat .env
       - name: Load environment variables from .env
+        working-directory: packages/mm-backend
         run: |
           export $(grep -v '^#' .env | xargs)
       - name: Check env var
+        working-directory: packages/mm-backend
         run: echo "$E2E_CAMPAIGN_LAUNCHER_API"
       - name: Run e2e tests
         working-directory: packages/mm-backend
