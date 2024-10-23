@@ -74,9 +74,7 @@ jobs:
         run: cat .env
       - name: Load environment variables from .env
         run: |
-          set -a
-          source .env
-          set +a
+          export $(grep -v '^#' .env | xargs)
       - name: Check env var
         run: echo "$E2E_CAMPAIGN_LAUNCHER_API"
       - name: Run e2e tests
