@@ -51,6 +51,8 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment:
+      name: end2end
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node.js
