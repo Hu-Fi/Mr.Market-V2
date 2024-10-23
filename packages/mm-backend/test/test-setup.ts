@@ -29,6 +29,10 @@ export const setupTestApp = async () => {
     .withWaitStrategy(Wait.forLogMessage('Ready to accept connections tcp'))
     .start();
 
+  const mockMixinGateway = {
+    createDepositAddress: jest.fn().mockResolvedValue('mockedDepositAddress'),
+  };
+
   const moduleRef: TestingModule = await Test.createTestingModule({
     imports: [
       ConfigModule.forRoot({
@@ -51,7 +55,7 @@ export const setupTestApp = async () => {
     ],
     providers: [
       DepositService,
-      MixinGateway,
+      { provide: MixinGateway, useValue: mockMixinGateway },
       DepositRepository
     ]
   }).compile();
