@@ -67,6 +67,11 @@ jobs:
         run: pnpm install
       - name: Copy ENV file
         run: echo "${{ vars.APP_ENV_FILE }}" > .env
+      - name: Load environment variables from .env
+        run: |
+          set -a
+          source .env
+          set +a
       - name: Run e2e tests
         working-directory: packages/mm-backend
         run: pnpm test:e2e
