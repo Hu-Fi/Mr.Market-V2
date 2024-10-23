@@ -75,6 +75,8 @@ jobs:
           set -a
           source .env
           set +a
+      - name: Check env var
+        run: echo "$E2E_CAMPAIGN_LAUNCHER_API"
       - name: Run e2e tests
         working-directory: packages/mm-backend
         run: pnpm test:e2e
