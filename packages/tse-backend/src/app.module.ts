@@ -16,6 +16,8 @@ import { CacheModule } from '@nestjs/common/cache';
 import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { StrategyExecutionModule } from './modules/strategy-execution/strategy-execution.module';
+import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-deposit.module';
+import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange-withdrawal.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { StrategyExecutionModule } from './modules/strategy-execution/strategy-e
     HealthModule,
     TradingStrategyModule,
     StrategyExecutionModule,
+    ExchangeDepositModule,
+    ExchangeWithdrawalModule
   ],
   controllers: [],
   providers: [

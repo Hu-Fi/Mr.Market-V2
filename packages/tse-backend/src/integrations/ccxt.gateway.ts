@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { CustomLogger } from '../modules/logger/logger.service';
+import {
+  ExchangeErrorException,
+  NetworkErrorException,
+} from '../common/filters/withdrawal.exception.filter';
 
 @Injectable()
 export class CcxtGateway {
-  private readonly logger = new CustomLogger(CcxtGateway.name);
   private readonly exchanges = new Map<string, ccxt.Exchange>();
 
   addExchange(name: string, exchange: ccxt.Exchange): void {
@@ -38,5 +40,15 @@ export class CcxtGateway {
     } catch (error) {
       throw new Error(`Failed to initialize ${name}: ${error.message}`);
     }
+  }
+
+  interpretError(error: Error, exchangeName: string) {
+    const errorMap = new Map([
+      [ccxt.NetworkError, () => new NetworkErrorException(exchangeName, error)],
+      [ccxt.ExchangeError, () => new ExchangeErrorException(exchangeName, error)],
+    ]);
+
+    const ExceptionClass = errorMap.get(error.constructor as any);
+    return ExceptionClass ? ExceptionClass() : error;
   }
 }
