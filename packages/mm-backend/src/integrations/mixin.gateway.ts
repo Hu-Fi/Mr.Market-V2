@@ -20,11 +20,11 @@ import {
   AuthorizationResponse,
   OAuthResponse,
 } from '../common/interfaces/auth.interfaces';
-import { DepositCommand } from '../modules/transaction/deposit/model/deposit.model';
+import { DepositCommand } from '../modules/transaction/mixin-deposit/model/deposit.model';
 import { v4 } from 'uuid';
 import BigNumber from 'bignumber.js';
 import { Fee } from '../common/interfaces/mixin.interfaces';
-import { WithdrawCommand } from '../modules/transaction/withdraw/model/withdraw.model';
+import { WithdrawCommand } from '../modules/transaction/mixin-withdraw/model/withdraw.model';
 
 @Injectable()
 export class MixinGateway {

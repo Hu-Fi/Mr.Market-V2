@@ -3,11 +3,11 @@ import { TransactionController } from '../transaction.controller';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { TransactionProfile } from '../transaction.mapper';
-import { DepositService } from '../deposit/deposit.service';
-import { DepositCommand, DepositDto } from '../deposit/model/deposit.model';
+import { DepositService } from '../mixin-deposit/deposit.service';
+import { DepositCommand, DepositDto } from '../mixin-deposit/model/deposit.model';
 import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
-import { WithdrawService } from '../withdraw/withdraw.service';
-import { WithdrawCommand, WithdrawDto } from '../withdraw/model/withdraw.model';
+import { WithdrawService } from '../mixin-withdraw/withdraw.service';
+import { WithdrawCommand, WithdrawDto } from '../mixin-withdraw/model/withdraw.model';
 
 describe('TransactionController', () => {
   let controller: TransactionController;

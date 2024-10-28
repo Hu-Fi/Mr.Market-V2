@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from './deposit/deposit.service';
+import { DepositService } from './mixin-deposit/deposit.service';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { Deposit } from '../../common/entities/deposit.entity';
 import {
@@ -9,7 +9,7 @@ import {
   WithdrawalStatus,
 } from '../../common/enums/transaction.enum';
 import { UserBalanceService } from '../user-balance/user-balance.service';
-import { WithdrawService } from './withdraw/withdraw.service';
+import { WithdrawService } from './mixin-withdraw/withdraw.service';
 
 @Injectable()
 export class TransactionService {

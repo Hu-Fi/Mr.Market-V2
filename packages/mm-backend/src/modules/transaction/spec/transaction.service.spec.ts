@@ -2,11 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { TransactionService } from '../transaction.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from '../deposit/deposit.service';
+import { DepositService } from '../mixin-deposit/deposit.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { SchedulerUtil } from '../../../common/utils/scheduler.utils';
 import { mockDeposits } from './transaction.fixtures';
-import { WithdrawService } from '../withdraw/withdraw.service';
+import { WithdrawService } from '../mixin-withdraw/withdraw.service';
 import { UserBalanceService } from '../../user-balance/user-balance.service';
 import {
   DepositStatus,
