@@ -8,6 +8,10 @@ import { DepositCommand, DepositDto } from '../mixin-deposit/model/deposit.model
 import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
 import { WithdrawService } from '../mixin-withdraw/withdraw.service';
 import { WithdrawCommand, WithdrawDto } from '../mixin-withdraw/model/withdraw.model';
+import { CreateWithdrawalDto } from '../exchange-withdraw/model/exchange-withdrawal.model';
+import { CreateDepositDto } from '../exchange-deposit/model/exchange-deposit.model';
+import { ExchangeDepositService } from '../exchange-deposit/exchange-deposit.service';
+import { ExchangeWithdrawService } from '../exchange-withdraw/exchange-withdraw.service';
 
 describe('TransactionController', () => {
   let controller: TransactionController;
@@ -16,6 +20,12 @@ describe('TransactionController', () => {
     deposit: jest.fn(),
   };
   const mockWithdrawService = {
+    withdraw: jest.fn(),
+  };
+  const mockExchangeDepositService = {
+    deposit: jest.fn(),
+  };
+  const mockExchangeWithdrawService = {
     withdraw: jest.fn(),
   };
 
@@ -35,6 +45,14 @@ describe('TransactionController', () => {
         {
           provide: WithdrawService,
           useValue: mockWithdrawService,
+        },
+        {
+          provide: ExchangeDepositService,
+          useValue: mockExchangeDepositService,
+        },
+        {
+          provide: ExchangeWithdrawService,
+          useValue: mockExchangeWithdrawService,
         },
         TransactionProfile,
       ],
@@ -66,7 +84,7 @@ describe('TransactionController', () => {
       mockDepositService.deposit.mockResolvedValue(depositResponse);
 
       const req = { user: { userId } };
-      const result = await controller.deposit(depositDto, req);
+      const result = await controller.mixinDeposit(depositDto, req);
 
       expect(mockDepositService.deposit).toHaveBeenCalledWith(command);
       expect(result).toEqual(depositResponse);
@@ -93,9 +111,58 @@ describe('TransactionController', () => {
 
       const req = { user: { userId } };
 
-      const result = await controller.withdraw(withdrawDto, req);
+      const result = await controller.mixinWithdraw(withdrawDto, req);
 
       expect(mockWithdrawService.withdraw).toHaveBeenCalledWith(command);
+      expect(result).toEqual(withdrawResponse);
+    });
+  });
+
+  describe('exchangeDeposit', () => {
+    it('should execute an exchange deposit transaction', async () => {
+      const createDepositDto: CreateDepositDto = {
+        exchangeName: 'Binance',
+        symbol: 'BTC',
+        network: 'BTC',
+      };
+
+      const depositResponse = {
+        exchangeName: createDepositDto.exchangeName,
+        symbol: createDepositDto.symbol,
+        network: createDepositDto.network,
+        destination: 'exchange-destination',
+      };
+
+      mockExchangeDepositService.deposit.mockResolvedValue(depositResponse);
+
+      const result = await controller.exchangeDeposit(createDepositDto);
+
+      expect(mockExchangeDepositService.deposit).toHaveBeenCalledWith(expect.objectContaining(createDepositDto));
+      expect(result).toEqual(depositResponse);
+    });
+  });
+
+  describe('exchangeWithdraw', () => {
+    it('should execute an exchange withdraw transaction', async () => {
+      const createWithdrawalDto: CreateWithdrawalDto = {
+        exchangeName: 'Binance',
+        symbol: 'BTC',
+        network: 'BTC',
+        address: 'some-address',
+        tag: 'some-tag',
+        amount: 0.01,
+      };
+
+      const withdrawResponse = {
+        transactionHash: 'exchangeTransactionHash',
+        snapshotId: 'exchangeSnapshotId',
+      };
+
+      mockExchangeWithdrawService.withdraw.mockResolvedValue(withdrawResponse);
+
+      const result = await controller.exchangeWithdraw(createWithdrawalDto);
+
+      expect(mockExchangeWithdrawService.withdraw).toHaveBeenCalledWith(expect.objectContaining(createWithdrawalDto));
       expect(result).toEqual(withdrawResponse);
     });
   });

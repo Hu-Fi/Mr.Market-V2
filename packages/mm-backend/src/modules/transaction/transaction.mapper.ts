@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
 import { DepositCommand, DepositDto } from './mixin-deposit/model/deposit.model';
 import { WithdrawCommand, WithdrawDto } from './mixin-withdraw/model/withdraw.model';
+import { CreateDepositCommand, CreateDepositDto } from './exchange-deposit/model/exchange-deposit.model';
+import { CreateWithdrawalCommand, CreateWithdrawalDto } from './exchange-withdraw/model/exchange-withdrawal.model';
 
 @Injectable()
 export class TransactionProfile extends AutomapperProfile {
@@ -14,6 +16,8 @@ export class TransactionProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(mapper, DepositDto, DepositCommand);
       createMap(mapper, WithdrawDto, WithdrawCommand);
+      createMap(mapper, CreateDepositDto, CreateDepositCommand);
+      createMap(mapper, CreateWithdrawalDto, CreateWithdrawalCommand);
     };
   }
 }

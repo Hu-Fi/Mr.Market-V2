@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ExchangeDepositService } from './exchange-deposit.service';
-import { ExchangeDepositProfile } from './exchange-deposit.mapper';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
+import { TransactionProfile } from '../transaction.mapper';
 
 @Module({
   imports: [HttpModule],
   providers: [
     ExchangeDepositService,
-    ExchangeDepositProfile,
+    TransactionProfile,
     ConfigService
   ],
   exports: [ExchangeDepositService]
