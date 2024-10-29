@@ -11,7 +11,7 @@ import {
 import { MarketMakingStrategy } from './market-making.strategy';
 
 @ApiTags('trading-strategy')
-@Controller('market-making')
+@Controller('trading-strategy')
 export class MarketMakingController {
   constructor(
     private readonly service: MarketMakingStrategy,
