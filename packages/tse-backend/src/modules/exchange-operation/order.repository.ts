@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '../../common/entities/order.entity';
@@ -24,5 +24,9 @@ export class OrderRepository {
 
   async save(data: Partial<Order>) {
     return await this.repository.save(data);
+  }
+
+  async find(query: FindManyOptions) {
+    return await this.repository.find(query);
   }
 }

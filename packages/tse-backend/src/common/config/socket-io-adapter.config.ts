@@ -11,14 +11,17 @@ export class CustomAdapter extends IoAdapter {
     super(app);
   }
 
-  create(_port: number, options?: ServerOptions): Server {
-    const port = this.configService.get<number>('WS_PORT', _port);
+  createIOServer(_port: number, options?: ServerOptions): Server {
+    const wsPort = this.configService.get<number>('WS_PORT', _port);
     const origin = this.configService.get<string>('WS_CORS_ORIGIN', '*');
     const namespace = this.configService.get<string>('WS_NAMESPACE', '/events');
-    return super.create(port, {
+
+    const serverOptions = {
       ...options,
       cors: { origin },
       namespace,
-    });
+    };
+
+    return super.createIOServer(wsPort, serverOptions);
   }
 }
