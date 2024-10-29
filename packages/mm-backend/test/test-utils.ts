@@ -74,7 +74,7 @@ export async function calculateLiquidityScore(payload: any) {
 
 export async function createStrategyByUser(payload: any) {
   return await axios.post(
-    `${TSE_APP_API}/arbitrage/create-arbitrage`,
+    `${TSE_APP_API}/trading-strategy/create-arbitrage`,
     payload,
     {
       headers: {
