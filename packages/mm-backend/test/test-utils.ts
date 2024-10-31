@@ -3,7 +3,7 @@ import {
   CAMPAIGN_LAUNCHER_API,
   RECORDING_ORACLE_API,
   RECORDING_ORACLE_API_KEY,
-  TRUSTED_ADDRESS_PRIVATE_KEY, TRUSTED_ADDRESS, TSE_APP_API, REPUTATION_ORACLE_API,
+  TRUSTED_ADDRESS_PRIVATE_KEY, TRUSTED_ADDRESS, TSE_APP_API, REPUTATION_ORACLE_API, CAMPAIGN_LAUNCHER_API_KEY,
 } from './fixtures';
 import * as dotenv from 'dotenv';
 import { ethers } from 'ethers';
@@ -18,15 +18,14 @@ export async function fetchCampaignsByChainId(chainId: number): Promise<any> {
   return response.data;
 }
 
-export async function registerUserToCampaign(payload: any) {
-  const authRequest = await handleUserAuthentication();
+export async function registerUserToCampaign(payload: any, bearerToken: string) {
   return await axios.post(
     `${RECORDING_ORACLE_API}/user/campaign`,
     payload,
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + authRequest.data.access_token,
+        Authorization: 'Bearer ' + bearerToken,
       },
     }
   );
@@ -45,14 +44,13 @@ export async function registerBotToCampaign(payload: any) {
   );
 }
 
-export async function checkIfUserIsRegisteredToTheCampaign(address: string) {
-  const authRequest = await handleUserAuthentication();
+export async function checkIfUserIsRegisteredToTheCampaign(address: string, bearerToken: string) {
   const response = await axios.get(
     `${RECORDING_ORACLE_API}/user/campaign/${address}`,
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + authRequest.data.access_token,
+        Authorization: 'Bearer ' + bearerToken,
       },
     }
   );
@@ -113,4 +111,30 @@ export async function handleUserAuthentication() {
 
 export async function manuallyExecutePayouts() {
   return await axios.post(`${REPUTATION_ORACLE_API}/payout/manual-payout`);
+}
+
+export async function uploadManifest(payload: any) {
+  return await axios.post(
+    `${CAMPAIGN_LAUNCHER_API}/manifest/upload`,
+    payload,
+    {
+      headers: {
+        'x-api-key': CAMPAIGN_LAUNCHER_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+}
+
+export async function createCampaign(payload: any) {
+  return await axios.post(
+    `${CAMPAIGN_LAUNCHER_API}/campaign`,
+    payload,
+    {
+      headers: {
+        'x-api-key': CAMPAIGN_LAUNCHER_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 }

@@ -11,6 +11,7 @@ import { Wait } from 'testcontainers';
 import { DepositService } from '../src/modules/transaction/deposit/deposit.service';
 import { MixinGateway } from '../src/integrations/mixin.gateway';
 import { DepositRepository } from '../src/modules/transaction/deposit/deposit.repository';
+import { handleUserAuthentication } from './test-utils';
 
 export let app: INestApplication;
 export let dataSource: DataSource;
@@ -56,7 +57,7 @@ export const setupTestApp = async () => {
     providers: [
       DepositService,
       { provide: MixinGateway, useValue: mockMixinGateway },
-      DepositRepository
+      DepositRepository,
     ]
   }).compile();
 
@@ -72,3 +73,8 @@ export const shutdownServices = async () => {
   await postgresContainer.stop();
   await redisContainer.stop();
 };
+
+export const signinToRecordingOracleApi = async () => {
+  const authRequest = await handleUserAuthentication();
+  return authRequest.data.access_token;
+}

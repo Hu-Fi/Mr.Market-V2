@@ -29,15 +29,15 @@ export const campaignPayload = {
   requesterAddress: TRUSTED_ADDRESS,
   exchangeName: EXCHANGE_NAME,
   token: TOKEN,
-  startDate: "2024-10-15T13:35:36.226Z",
+  startDate: Date.now(),
   duration: 86400,
   fundAmount: "100000000000000",
   additionalData: "",
 };
 
-export const joinCampaignPayload = (foundId: string) => ({
+export const joinCampaignPayload = (address: string) => ({
   chain_id: Number(CHAIN_ID),
-  address: foundId,
+  address: address,
 });
 
 export const calculateLiquidityPayload = (campaignAddress: string) => ({
@@ -70,3 +70,11 @@ export const depositPayload = {
   assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
   chainId: '43d61dcd-e413-450d-80b8-101d5e903357',
 };
+
+export const newCampaignPayload = {
+  chainId: CHAIN_ID,
+  manifestUrl: null,
+  manifestHash: null,
+  tokenAddress: "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+  fundAmount: "0.0001"
+}
