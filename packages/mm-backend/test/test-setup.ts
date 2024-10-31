@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -22,7 +25,9 @@ export let depositService: DepositService;
 export const setupTestApp = async () => {
   postgresContainer = await new PostgreSqlContainer()
     .withExposedPorts(5432)
-    .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections'))
+    .withWaitStrategy(
+      Wait.forLogMessage('database system is ready to accept connections'),
+    )
     .start();
 
   redisContainer = await new RedisContainer()
@@ -58,7 +63,7 @@ export const setupTestApp = async () => {
       DepositService,
       { provide: MixinGateway, useValue: mockMixinGateway },
       DepositRepository,
-    ]
+    ],
   }).compile();
 
   app = moduleRef.createNestApplication();
@@ -77,4 +82,4 @@ export const shutdownServices = async () => {
 export const signinToRecordingOracleApi = async () => {
   const authRequest = await handleUserAuthentication();
   return authRequest.data.access_token;
-}
+};

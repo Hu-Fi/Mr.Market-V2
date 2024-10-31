@@ -2,8 +2,10 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 // API Keys
-export const CAMPAIGN_LAUNCHER_API_KEY = process.env.E2E_CAMPAIGN_LAUNCHER_API_KEY;
-export const RECORDING_ORACLE_API_KEY = process.env.E2E_RECORDING_ORACLE_API_KEY;
+export const CAMPAIGN_LAUNCHER_API_KEY =
+  process.env.E2E_CAMPAIGN_LAUNCHER_API_KEY;
+export const RECORDING_ORACLE_API_KEY =
+  process.env.E2E_RECORDING_ORACLE_API_KEY;
 export const EXCHANGE_API_KEY = process.env.E2E_EXCHANGE_API_KEY;
 export const EXCHANGE_SECRET = process.env.E2E_EXCHANGE_SECRET;
 
@@ -20,7 +22,8 @@ export const TOKEN = 'XIN/USDT';
 
 // Addresses
 export const TRUSTED_ADDRESS = process.env.E2E_TRUSTED_ADDRESS;
-export const TRUSTED_ADDRESS_PRIVATE_KEY = process.env.E2E_TRUSTED_ADDRESS_PRIVATE_KEY;
+export const TRUSTED_ADDRESS_PRIVATE_KEY =
+  process.env.E2E_TRUSTED_ADDRESS_PRIVATE_KEY;
 export const BOT_ADDRESS = process.env.E2E_BOT_ADDRESS;
 
 // Payloads
@@ -31,8 +34,8 @@ export const campaignPayload = {
   token: TOKEN,
   startDate: Date.now(),
   duration: 86400,
-  fundAmount: "100000000000000",
-  additionalData: "",
+  fundAmount: '100000000000000',
+  additionalData: '',
 };
 
 export const joinCampaignPayload = (address: string) => ({
@@ -62,7 +65,7 @@ export const userStrategyPayload = {
   minProfitability: 0.01,
   exchangeAName: 'binance',
   exchangeBName: 'gate',
-  checkIntervalSeconds: 10
+  checkIntervalSeconds: 10,
 };
 
 export const depositPayload = {
@@ -75,6 +78,6 @@ export const newCampaignPayload = {
   chainId: CHAIN_ID,
   manifestUrl: null,
   manifestHash: null,
-  tokenAddress: "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
-  fundAmount: "0.0001"
-}
+  tokenAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+  fundAmount: '0.0001',
+};
