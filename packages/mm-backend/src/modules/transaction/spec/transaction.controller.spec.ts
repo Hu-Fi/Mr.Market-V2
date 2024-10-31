@@ -135,7 +135,10 @@ describe('TransactionController', () => {
 
       mockExchangeDepositService.deposit.mockResolvedValue(depositResponse);
 
-      const result = await controller.exchangeDeposit(createDepositDto);
+      const userId = 'user-id-123';
+      const req = { user: { userId } };
+
+      const result = await controller.exchangeDeposit(createDepositDto, req);
 
       expect(mockExchangeDepositService.deposit).toHaveBeenCalledWith(expect.objectContaining(createDepositDto));
       expect(result).toEqual(depositResponse);
@@ -160,7 +163,10 @@ describe('TransactionController', () => {
 
       mockExchangeWithdrawService.withdraw.mockResolvedValue(withdrawResponse);
 
-      const result = await controller.exchangeWithdraw(createWithdrawalDto);
+      const userId = 'user-id-123';
+      const req = { user: { userId } };
+
+      const result = await controller.exchangeWithdraw(createWithdrawalDto, req);
 
       expect(mockExchangeWithdrawService.withdraw).toHaveBeenCalledWith(expect.objectContaining(createWithdrawalDto));
       expect(result).toEqual(withdrawResponse);

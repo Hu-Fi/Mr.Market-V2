@@ -20,6 +20,7 @@ export class CreateDepositDto {
 }
 
 export class CreateDepositCommand {
+  userId: string;
   @AutoMap()
   exchangeName: string;
 

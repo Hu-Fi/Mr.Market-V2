@@ -54,16 +54,18 @@ export class TransactionController {
   @Roles(Role.USER)
   @Post('exchange-deposit')
   @ApiOperation({ summary: 'Create address for a deposit' })
-  async exchangeDeposit(@Body() dto: CreateDepositDto){
+  async exchangeDeposit(@Body() dto: CreateDepositDto, @Request() req){
     const command = this.mapper.map(dto, CreateDepositDto, CreateDepositCommand);
+    command.userId = req.user.userId;
     return this.exchangeDepositService.deposit(command);
   }
 
   @Roles(Role.USER)
   @Post('exchange-withdraw')
   @ApiOperation({ summary: 'Execute a withdraw transaction' })
-  async exchangeWithdraw(@Body() dto: CreateWithdrawalDto) {
+  async exchangeWithdraw(@Body() dto: CreateWithdrawalDto, @Request() req) {
     const command = this.mapper.map(dto, CreateWithdrawalDto, CreateWithdrawalCommand);
+    command.userId = req.user.userId;
     return this.exchangeWithdrawService.withdraw(command);
   }
 }

@@ -9,8 +9,8 @@ import { mockDeposits } from './transaction.fixtures';
 import { WithdrawService } from '../mixin-withdraw/withdraw.service';
 import { UserBalanceService } from '../../user-balance/user-balance.service';
 import {
-  DepositStatus,
-  WithdrawalStatus,
+  MixinDepositStatus,
+  MixinWithdrawalStatus,
 } from '../../../common/enums/transaction.enum';
 
 const mockDepositService = {
@@ -126,7 +126,7 @@ describe('TransactionService', () => {
       });
       expect(mockDepositService.updateDepositStatus).toHaveBeenCalledWith(
         mockDeposits[0].id,
-        DepositStatus.CONFIRMED,
+        MixinDepositStatus.CONFIRMED,
       );
       expect(
         mockDepositService.updateDepositTransactionHash,
@@ -176,7 +176,7 @@ describe('TransactionService', () => {
       };
       mockWithdrawService.getSignedWithdrawals.mockResolvedValue([withdrawal]);
       mockMixinGateway.fetchTransactionDetails.mockResolvedValue({
-        state: WithdrawalStatus.SPENT,
+        state: MixinWithdrawalStatus.SPENT,
       });
 
       await transactionService.processWithdrawals();
@@ -187,7 +187,7 @@ describe('TransactionService', () => {
       );
       expect(mockWithdrawService.updateWithdrawalStatus).toHaveBeenCalledWith(
         withdrawal.id,
-        WithdrawalStatus.SPENT,
+        MixinWithdrawalStatus.SPENT,
       );
       expect(mockUserBalanceService.updateUserBalance).toHaveBeenCalledWith({
         userId: withdrawal.userId,

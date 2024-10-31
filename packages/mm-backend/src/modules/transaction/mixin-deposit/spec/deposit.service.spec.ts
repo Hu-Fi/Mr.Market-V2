@@ -5,7 +5,7 @@ import { MixinGateway } from '../../../../integrations/mixin.gateway';
 import { DepositCommand } from '../model/deposit.model';
 import { DepositResponse } from '../../../../common/interfaces/transaction.interfaces';
 import { Deposit } from '../../../../common/entities/deposit.entity';
-import { DepositStatus } from '../../../../common/enums/transaction.enum';
+import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -83,7 +83,7 @@ describe('DepositService', () => {
       expect(mixinGateway.createDepositAddress).toHaveBeenCalledWith(command);
       expect(transactionRepository.save).toHaveBeenCalledWith({
         ...command,
-        status: DepositStatus.PENDING,
+        status: MixinDepositStatus.PENDING,
         destination,
       });
       expect(result).toEqual(depositResponse);
@@ -99,7 +99,7 @@ describe('DepositService', () => {
           amount: 100,
           assetId: 'asset-id-456',
           chainId: 'chain-id-789',
-          status: DepositStatus.PENDING,
+          status: MixinDepositStatus.PENDING,
           transactionHash: 'transaction-hash',
           destination: 'destination-address',
           createdAt: new Date(),
@@ -112,7 +112,7 @@ describe('DepositService', () => {
       const result = await service.getPendingDeposits();
 
       expect(transactionRepository.findByStatus).toHaveBeenCalledWith(
-        DepositStatus.PENDING,
+        MixinDepositStatus.PENDING,
       );
       expect(result).toEqual(pendingDeposits);
     });
@@ -121,7 +121,7 @@ describe('DepositService', () => {
   describe('updateDepositStatus', () => {
     it('should update the deposit status', async () => {
       const depositId = 1;
-      const status = DepositStatus.CONFIRMED;
+      const status = MixinDepositStatus.CONFIRMED;
 
       await service.updateDepositStatus(depositId, status);
 

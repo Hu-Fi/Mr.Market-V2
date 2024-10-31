@@ -93,7 +93,7 @@ describe('GlobalExceptionFilter', () => {
     );
 
     expect(Logger.prototype.error).toHaveBeenCalledWith(
-      'Non-Http Exception: Unknown error',
+      'Error: Unknown error',
       expect.any(String),
     );
   });
@@ -122,10 +122,42 @@ describe('GlobalExceptionFilter', () => {
       },
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
+  });
+
+  it('should handle Axios error format and log the error', () => {
+    const exception = {
+      response: {
+        data: {
+          message: 'Axios specific error message',
+        },
+      },
+    };
+    const host = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getResponse: jest.fn(),
+        getRequest: jest.fn(),
+      }),
+    } as unknown as ArgumentsHost;
+
+    filter.catch(exception, host);
+
+    expect(mockHttpAdapter.getRequestUrl).toHaveBeenCalledWith(
+      host.switchToHttp().getRequest(),
+    );
+    expect(mockHttpAdapter.reply).toHaveBeenCalledWith(
+      host.switchToHttp().getResponse(),
+      {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        timestamp: expect.any(String),
+        path: '/test-url',
+        message: 'Axios specific error message',
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
 
     expect(Logger.prototype.error).toHaveBeenCalledWith(
-      'Non-Http Exception: An unexpected error occurred',
-      '',
+      'Axios Error: Axios specific error message',
+      'Axios specific error message',
     );
   });
 });

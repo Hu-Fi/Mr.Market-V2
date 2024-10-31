@@ -6,11 +6,25 @@ import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ExchangeWithdrawService } from '../exchange-withdraw.service';
 import { CreateWithdrawalCommand } from '../model/exchange-withdrawal.model';
+import { WithdrawRepository } from '../../mixin-withdraw/withdraw.repository';
+
+jest.mock('typeorm-transactional', () => ({
+  Transactional: () =>
+    jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
+      return descriptor;
+    }),
+  initializeTransactionalContext: jest.fn(),
+  addTransactionalDataSource: jest.fn(),
+}));
 
 describe('ExchangeWithdrawService', () => {
   let service: ExchangeWithdrawService;
   let httpService: HttpService;
-  let configService: ConfigService;
+
+  const mockWithdrawRepository = {
+    save: jest.fn().mockResolvedValue({ id: 1 }),
+    updateTransactionHashById: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,87 +42,89 @@ describe('ExchangeWithdrawService', () => {
             post: jest.fn(),
           },
         },
+        {
+          provide: WithdrawRepository,
+          useValue: mockWithdrawRepository,
+        },
       ],
     }).compile();
 
     service = module.get<ExchangeWithdrawService>(ExchangeWithdrawService);
     httpService = module.get<HttpService>(HttpService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should call the correct URL and payload when withdrawing', async () => {
+  it('should create a withdrawal, make an HTTP request, and update transaction hash', async () => {
     const command: CreateWithdrawalCommand = {
-      exchangeName: 'Binance',
-      symbol: 'BTC',
-      network: 'BTC',
-      address: 'mock-address',
-      tag: 'mock-tag',
-      amount: 0.1,
+      userId: 'user123',
+      symbol: 'ETH',
+      address: 'sample-address',
+      amount: 0.01,
+      exchangeName: 'binance',
+      network: 'ETH',
+      tag: ''
     };
-    const response: AxiosResponse = {
-      config: undefined,
-      data: { status: 'success' },
-      status: 200,
-      statusText: 'OK',
-      headers: {}
-    };
+    const transactionDetails = { id: 'transaction123' };
+    const axiosResponse: Partial<AxiosResponse> = { data: transactionDetails };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(of(response));
+    jest.spyOn(httpService, 'post').mockReturnValue(of(axiosResponse as AxiosResponse));
 
     const result = await service.withdraw(command);
-    expect(result).toEqual(response.data);
+
+    expect(mockWithdrawRepository.save).toHaveBeenCalledWith({
+      userId: command.userId,
+      assetId: command.symbol,
+      destination: command.address,
+      amount: command.amount,
+      status: 'pending',
+    });
     expect(httpService.post).toHaveBeenCalledWith(
       'http://mock-tse-api-url/exchange-withdrawal',
       command,
     );
+    expect(mockWithdrawRepository.updateTransactionHashById).toHaveBeenCalledWith(
+      1,
+      transactionDetails.id,
+    );
+    expect(result).toEqual(transactionDetails.id);
   });
 
-  it('should throw HttpException when HttpService returns an error', async () => {
+  it('should throw an error if the HTTP request fails', async () => {
     const command: CreateWithdrawalCommand = {
-      exchangeName: 'Binance',
-      symbol: 'BTC',
-      network: 'BTC',
-      address: 'mock-address',
-      tag: 'mock-tag',
-      amount: 0.1,
-    };
-    const errorResponse = {
-      response: {
-        status: HttpStatus.BAD_REQUEST,
-        data: { message: 'Invalid withdrawal request' },
-      },
+      userId: 'user123',
+      symbol: 'ETH',
+      address: 'sample-address',
+      amount: 0.01,
+      exchangeName: 'binance',
+      network: 'ETH',
+      tag: ''
     };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => errorResponse));
+    jest.spyOn(httpService, 'post').mockReturnValue(
+      throwError(() => new HttpException('Service Unavailable', HttpStatus.SERVICE_UNAVAILABLE)),
+    );
 
     await expect(service.withdraw(command)).rejects.toThrow(
-      new HttpException('Invalid withdrawal request', HttpStatus.BAD_REQUEST),
+      HttpException,
     );
   });
 
-  it('should throw internal server error when error response is missing status', async () => {
+  it('should throw an error if save fails in the repository', async () => {
     const command: CreateWithdrawalCommand = {
-      exchangeName: 'Binance',
-      symbol: 'BTC',
-      network: 'BTC',
-      address: 'mock-address',
-      tag: 'mock-tag',
-      amount: 0.1,
+      userId: 'user123',
+      symbol: 'ETH',
+      address: 'sample-address',
+      amount: 0.01,
+      exchangeName: 'binance',
+      network: 'ETH',
+      tag: ''
     };
-    const errorResponse = { response: {} };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => errorResponse));
+    mockWithdrawRepository.save.mockRejectedValue(new Error('Repository Error'));
 
-    await expect(service.withdraw(command)).rejects.toThrow(
-      new HttpException('Failed to process withdrawal request', HttpStatus.INTERNAL_SERVER_ERROR),
-    );
-  });
-
-  it('should use the correct API URL from config', () => {
-    expect(configService.get).toHaveBeenCalledWith('TRADING_STRATEGY_EXECUTION_API');
+    await expect(service.withdraw(command)).rejects.toThrow('Repository Error');
   });
 });

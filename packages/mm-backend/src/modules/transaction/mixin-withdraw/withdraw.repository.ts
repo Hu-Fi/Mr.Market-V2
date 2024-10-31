@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WithdrawData } from '../../../common/interfaces/transaction.interfaces';
 import { Withdraw } from '../../../common/entities/withdraw.entity';
-import { WithdrawalStatus } from '../../../common/enums/transaction.enum';
+import { MixinWithdrawalStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
 export class WithdrawRepository {
@@ -16,11 +16,11 @@ export class WithdrawRepository {
     return await this.repository.save(data);
   }
 
-  async findWithdrawalsByStatus(status: WithdrawalStatus) {
+  async findWithdrawalsByStatus(status: MixinWithdrawalStatus) {
     return await this.repository.find({ where: { status } });
   }
 
-  async updateStatusById(withdrawalId: number, status: WithdrawalStatus) {
+  async updateStatusById(withdrawalId: number, status: MixinWithdrawalStatus) {
     return await this.repository.update({ id: withdrawalId }, { status });
   }
 

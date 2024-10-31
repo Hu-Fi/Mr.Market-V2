@@ -5,8 +5,8 @@ import { DepositService } from './mixin-deposit/deposit.service';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { Deposit } from '../../common/entities/deposit.entity';
 import {
-  DepositStatus,
-  WithdrawalStatus,
+  MixinDepositStatus,
+  MixinWithdrawalStatus,
 } from '../../common/enums/transaction.enum';
 import { UserBalanceService } from '../user-balance/user-balance.service';
 import { WithdrawService } from './mixin-withdraw/withdraw.service';
@@ -59,10 +59,10 @@ export class TransactionService {
       const { transactionHash, id } = withdrawal;
       const transactionDetails =
         await this.mixinGateway.fetchTransactionDetails(transactionHash);
-      if (transactionDetails.state === WithdrawalStatus.SPENT) {
+      if (transactionDetails.state === MixinWithdrawalStatus.SPENT) {
         await this.withdrawService.updateWithdrawalStatus(
           id,
-          WithdrawalStatus.SPENT,
+          MixinWithdrawalStatus.SPENT,
         );
         await this.userBalanceService.updateUserBalance({
           userId: withdrawal.userId,
@@ -103,7 +103,7 @@ export class TransactionService {
         });
         await this.depositService.updateDepositStatus(
           deposit.id,
-          DepositStatus.CONFIRMED,
+          MixinDepositStatus.CONFIRMED,
         );
         await this.depositService.updateDepositTransactionHash(
           deposit.id,

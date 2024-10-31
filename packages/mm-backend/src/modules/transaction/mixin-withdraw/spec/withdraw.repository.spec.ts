@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Withdraw } from '../../../../common/entities/withdraw.entity';
 import { WithdrawRepository } from '../withdraw.repository';
 import { WithdrawData } from '../../../../common/interfaces/transaction.interfaces';
-import { WithdrawalStatus } from '../../../../common/enums/transaction.enum';
+import { MixinWithdrawalStatus } from '../../../../common/enums/transaction.enum';
 
 const mockRepository = {
   save: jest.fn(),
@@ -38,7 +38,7 @@ describe('WithdrawRepository', () => {
       assetId: 'asset1',
       amount: 100,
       destination: 'address1',
-      status: WithdrawalStatus.SIGNED,
+      status: MixinWithdrawalStatus.SIGNED,
     };
 
     await withdrawRepository.save(data);
@@ -48,7 +48,7 @@ describe('WithdrawRepository', () => {
 
   describe('findWithdrawalsByStatus', () => {
     it('should return withdrawals with the specified status', async () => {
-      const status = WithdrawalStatus.SIGNED;
+      const status = MixinWithdrawalStatus.SIGNED;
       const withdrawals = [
         {
           id: 1,
@@ -72,7 +72,7 @@ describe('WithdrawRepository', () => {
   describe('updateStatusById', () => {
     it('should update the status of a withdrawal by ID', async () => {
       const withdrawalId = 1;
-      const status = WithdrawalStatus.SPENT;
+      const status = MixinWithdrawalStatus.SPENT;
 
       await withdrawRepository.updateStatusById(withdrawalId, status);
 

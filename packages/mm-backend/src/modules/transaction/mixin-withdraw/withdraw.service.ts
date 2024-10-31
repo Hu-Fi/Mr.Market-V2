@@ -4,7 +4,7 @@ import { Transactional } from 'typeorm-transactional';
 import { WithdrawResponse } from '../../../common/interfaces/transaction.interfaces';
 import { WithdrawCommand } from './model/withdraw.model';
 import { WithdrawRepository } from './withdraw.repository';
-import { WithdrawalStatus } from '../../../common/enums/transaction.enum';
+import { MixinWithdrawalStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
 export class WithdrawService {
@@ -18,7 +18,7 @@ export class WithdrawService {
     const withdrawal = await this.repository.save({
       ...command,
       amount: Number(command.amount),
-      status: WithdrawalStatus.SIGNED,
+      status: MixinWithdrawalStatus.SIGNED,
     });
 
     const withdrawalResult = await this.mixinGateway.handleWithdrawal(command);
@@ -36,11 +36,11 @@ export class WithdrawService {
 
   async getSignedWithdrawals() {
     return await this.repository.findWithdrawalsByStatus(
-      WithdrawalStatus.SIGNED,
+      MixinWithdrawalStatus.SIGNED,
     );
   }
 
-  async updateWithdrawalStatus(withdrawalId: number, status: WithdrawalStatus) {
+  async updateWithdrawalStatus(withdrawalId: number, status: MixinWithdrawalStatus) {
     await this.repository.updateStatusById(withdrawalId, status);
   }
 

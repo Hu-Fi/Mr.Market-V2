@@ -35,6 +35,7 @@ export class CreateWithdrawalDto {
 }
 
 export class CreateWithdrawalCommand {
+  userId: string;
   @AutoMap()
   exchangeName: string;
   @AutoMap()

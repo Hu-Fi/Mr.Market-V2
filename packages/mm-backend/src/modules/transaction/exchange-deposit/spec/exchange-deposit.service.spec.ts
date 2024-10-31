@@ -6,11 +6,24 @@ import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ExchangeDepositService } from '../exchange-deposit.service';
 import { CreateDepositCommand } from '../model/exchange-deposit.model';
+import { DepositRepository } from '../../mixin-deposit/deposit.repository';
+
+jest.mock('typeorm-transactional', () => ({
+  Transactional: () =>
+    jest.fn((_target: any, _key: string, descriptor: PropertyDescriptor) => {
+      return descriptor;
+    }),
+  initializeTransactionalContext: jest.fn(),
+  addTransactionalDataSource: jest.fn(),
+}));
 
 describe('ExchangeDepositService', () => {
   let service: ExchangeDepositService;
   let httpService: HttpService;
-  let configService: ConfigService;
+
+  const mockDepositRepository = {
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,78 +41,78 @@ describe('ExchangeDepositService', () => {
             post: jest.fn(),
           },
         },
+        {
+          provide: DepositRepository,
+          useValue: mockDepositRepository,
+        },
       ],
     }).compile();
 
     service = module.get<ExchangeDepositService>(ExchangeDepositService);
     httpService = module.get<HttpService>(HttpService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should call the correct URL and payload when depositing', async () => {
+  it('should make an HTTP request and save deposit transaction', async () => {
     const command: CreateDepositCommand = {
-      exchangeName: 'Binance',
+      userId: 'user123',
       symbol: 'BTC',
       network: 'BTC',
+      exchangeName: 'binance'
     };
-    const response: AxiosResponse = {
-      data: { status: 'success' },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: undefined,
-    };
+    const transaction = { address: 'deposit-address', amount: 0.05 };
+    const axiosResponse: Partial<AxiosResponse> = { data: transaction };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(of(response));
+    jest.spyOn(httpService, 'post').mockReturnValue(of(axiosResponse as AxiosResponse));
 
     const result = await service.deposit(command);
-    expect(result).toEqual(response.data);
+
     expect(httpService.post).toHaveBeenCalledWith(
       'http://mock-tse-api-url/exchange-deposit',
       command,
     );
+    expect(mockDepositRepository.save).toHaveBeenCalledWith({
+      userId: command.userId,
+      assetId: command.symbol,
+      destination: transaction.address,
+      chainId: command.network,
+      amount: transaction.amount,
+      status: 'pending',
+    });
+    expect(result).toEqual(transaction);
   });
 
-  it('should throw HttpException when HttpService returns an error', async () => {
+  it('should throw an error if the HTTP request fails', async () => {
     const command: CreateDepositCommand = {
-      exchangeName: 'Binance',
+      userId: 'user123',
       symbol: 'BTC',
       network: 'BTC',
-    };
-    const errorResponse = {
-      response: {
-        status: HttpStatus.BAD_REQUEST,
-        data: { message: 'Invalid deposit request' },
-      },
+      exchangeName: 'binance'
     };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => errorResponse));
-
-    await expect(service.deposit(command)).rejects.toThrow(
-      new HttpException('Invalid deposit request', HttpStatus.BAD_REQUEST),
+    jest.spyOn(httpService, 'post').mockReturnValue(
+      throwError(() => new HttpException('Service Unavailable', HttpStatus.SERVICE_UNAVAILABLE)),
     );
+
+    await expect(service.deposit(command)).rejects.toThrow(HttpException);
   });
 
-  it('should throw internal server error when error response is missing status', async () => {
+  it('should throw an error if saving deposit transaction fails', async () => {
     const command: CreateDepositCommand = {
-      exchangeName: 'Binance',
+      userId: 'user123',
       symbol: 'BTC',
       network: 'BTC',
+      exchangeName: 'binance'
     };
-    const errorResponse = { response: {} };
+    const transaction = { address: 'deposit-address', amount: 0.05 };
+    const axiosResponse: Partial<AxiosResponse> = { data: transaction };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => errorResponse));
+    jest.spyOn(httpService, 'post').mockReturnValue(of(axiosResponse as AxiosResponse));
+    mockDepositRepository.save.mockRejectedValue(new Error('Repository Error'));
 
-    await expect(service.deposit(command)).rejects.toThrow(
-      new HttpException('Failed to process deposit request', HttpStatus.INTERNAL_SERVER_ERROR),
-    );
-  });
-
-  it('should use the correct API URL from config', () => {
-    expect(configService.get).toHaveBeenCalledWith('TRADING_STRATEGY_EXECUTION_API');
+    await expect(service.deposit(command)).rejects.toThrow('Repository Error');
   });
 });
