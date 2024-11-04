@@ -17,8 +17,11 @@ export const TSE_APP_API = process.env.E2E_TSE_APP_API;
 
 // Constants
 export const CHAIN_ID = 80002;
-export const EXCHANGE_NAME = 'mexc';
-export const TOKEN = 'XIN/USDT';
+export const EXCHANGE_NAME_A = 'mexc';
+export const EXCHANGE_NAME_B = 'gate';
+export const TOKEN = 'HMT/USDT';
+export const FOUND_AMOUNT_IN_WEI = '1000000000000';
+export const FOUND_AMOUNT_IN_ETHERS = '0.000001'
 
 // Addresses
 export const TRUSTED_ADDRESS = process.env.E2E_TRUSTED_ADDRESS;
@@ -30,11 +33,11 @@ export const BOT_ADDRESS = process.env.E2E_BOT_ADDRESS;
 export const campaignPayload = {
   chainId: CHAIN_ID,
   requesterAddress: TRUSTED_ADDRESS,
-  exchangeName: EXCHANGE_NAME,
+  exchangeName: EXCHANGE_NAME_A,
   token: TOKEN,
   startDate: Date.now(),
   duration: 86400,
-  fundAmount: '100000000000000',
+  fundAmount: FOUND_AMOUNT_IN_WEI,
   additionalData: '',
 };
 
@@ -52,7 +55,7 @@ export const botJoinCampaignPayload = (testedCampaign: string) => ({
   wallet_address: BOT_ADDRESS,
   chain_id: CHAIN_ID,
   address: testedCampaign,
-  exchange_name: EXCHANGE_NAME,
+  exchange_name: EXCHANGE_NAME_A,
   api_key: EXCHANGE_API_KEY,
   secret: EXCHANGE_SECRET,
 });
@@ -60,11 +63,11 @@ export const botJoinCampaignPayload = (testedCampaign: string) => ({
 export const userStrategyPayload = {
   userId: '123',
   clientId: '456',
-  pair: 'ETH/USDT',
+  pair: TOKEN,
   amountToTrade: 1.0,
-  minProfitability: 0.01,
-  exchangeAName: 'binance',
-  exchangeBName: 'gate',
+  minProfitability: 1.00,
+  exchangeAName: EXCHANGE_NAME_A,
+  exchangeBName: EXCHANGE_NAME_B,
   checkIntervalSeconds: 10,
 };
 
@@ -79,5 +82,5 @@ export const newCampaignPayload = {
   manifestUrl: null,
   manifestHash: null,
   tokenAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
-  fundAmount: '0.0001',
+  fundAmount: FOUND_AMOUNT_IN_ETHERS,
 };

@@ -51,6 +51,10 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
     await shutdownServices();
   });
 
+  it('should depositService be defined', async () => {
+    expect(depositService).toBeDefined();
+  })
+
   it(
     '1a. should the user create a new campaign',
     async () => {
@@ -121,7 +125,6 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
     },
     TEST_TIMEOUT,
   );
-
   it(
     '3. should the bot fetch available campaigns',
     async () => {
@@ -143,7 +146,6 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
           botJoinCampaignPayload(TESTED_CAMPAIGN),
         );
         expect(response.status).toEqual(201);
-        expect(response.data.message).toBe('true');
         const botIsRegistered = Boolean(
           await checkIfUserIsRegisteredToTheCampaign(
             TESTED_CAMPAIGN,

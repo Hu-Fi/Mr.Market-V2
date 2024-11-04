@@ -80,6 +80,5 @@ export const shutdownServices = async () => {
 };
 
 export const signinToRecordingOracleApi = async () => {
-  const authRequest = await handleUserAuthentication();
-  return authRequest.data.access_token;
+  return (await handleUserAuthentication()).data?.access_token;
 };

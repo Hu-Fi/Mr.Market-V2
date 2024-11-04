@@ -89,10 +89,57 @@ export async function createStrategyByUser(payload: any) {
 }
 
 export async function handleUserAuthentication() {
-  const prepareSignaturePayload = { address: TRUSTED_ADDRESS, type: 'SIGNIN' };
+  const authDetails = await signup();
+  if (!authDetails?.data?.access_token) {
+    return await signin();
+  }
+}
+
+async function signup() {
+  const signaturePayload = { address: TRUSTED_ADDRESS, type: 'SIGNUP' };
+  try {
+    const signature = await prepareSignature(signaturePayload);
+    const signupPayload = { address: TRUSTED_ADDRESS, signature: signature };
+    return await axios.post(
+      `${RECORDING_ORACLE_API}/auth/web3/signup`,
+      signupPayload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+  }
+  catch (e) {
+    console.error(e.status);
+  }
+}
+
+async function signin() {
+  const signaturePayload = { address: TRUSTED_ADDRESS, type: "SIGNIN" };
+  try {
+    const signature = await prepareSignature(signaturePayload);
+    const signupPayload = JSON.stringify({ address: TRUSTED_ADDRESS, signature });
+    return await axios.post(
+      'https://hufi-recording-oracle-testnet.onrender.com/auth/web3/signin',
+      JSON.parse(signupPayload),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+        },
+    );
+  }
+  catch (e) {
+    console.error(e.status);
+  }
+}
+
+async function prepareSignature(payload: any) {
   const response = await axios.post(
     `${RECORDING_ORACLE_API}/auth/prepare-signature`,
-    prepareSignaturePayload,
+    payload,
     {
       headers: {
         'Content-Type': 'application/json',
@@ -102,17 +149,7 @@ export async function handleUserAuthentication() {
 
   const message = JSON.stringify(response.data);
   const wallet = new ethers.Wallet(TRUSTED_ADDRESS_PRIVATE_KEY);
-  const signature = await wallet.signMessage(message);
-  const signinPayload = { address: TRUSTED_ADDRESS, signature: signature };
-  return await axios.post(
-    `${RECORDING_ORACLE_API}/auth/web3/signin`,
-    signinPayload,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
+  return await wallet.signMessage(message);
 }
 
 export async function manuallyExecutePayouts() {
