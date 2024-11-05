@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +14,7 @@ import { Wait } from 'testcontainers';
 import { DepositService } from '../src/modules/transaction/deposit/deposit.service';
 import { MixinGateway } from '../src/integrations/mixin.gateway';
 import { DepositRepository } from '../src/modules/transaction/deposit/deposit.repository';
+import { handleUserAuthentication } from './test-utils';
 
 export let app: INestApplication;
 export let dataSource: DataSource;
@@ -21,7 +25,9 @@ export let depositService: DepositService;
 export const setupTestApp = async () => {
   postgresContainer = await new PostgreSqlContainer()
     .withExposedPorts(5432)
-    .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections'))
+    .withWaitStrategy(
+      Wait.forLogMessage('database system is ready to accept connections'),
+    )
     .start();
 
   redisContainer = await new RedisContainer()
@@ -56,8 +62,8 @@ export const setupTestApp = async () => {
     providers: [
       DepositService,
       { provide: MixinGateway, useValue: mockMixinGateway },
-      DepositRepository
-    ]
+      DepositRepository,
+    ],
   }).compile();
 
   app = moduleRef.createNestApplication();
@@ -71,4 +77,8 @@ export const shutdownServices = async () => {
   await app.close();
   await postgresContainer.stop();
   await redisContainer.stop();
+};
+
+export const signinToRecordingOracleApi = async () => {
+  return (await handleUserAuthentication()).data?.access_token;
 };
