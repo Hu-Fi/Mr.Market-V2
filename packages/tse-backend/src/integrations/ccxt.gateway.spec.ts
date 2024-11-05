@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as ccxt from 'ccxt';
 import { CcxtGateway } from './ccxt.gateway';
 import { CustomLogger } from '../modules/logger/logger.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('ccxt', () => {
   const mockBinance = jest.fn().mockImplementation(({ apiKey, secret }) => ({
     apiKey,
     secret,
     loadMarkets: jest.fn().mockResolvedValue(true),
+    setSandboxMode: jest.fn(),
   }));
 
   return {
@@ -23,15 +25,25 @@ const mockLogger = {
   warn: jest.fn(),
 };
 
+const mockConfigService = {
+  get: jest.fn((key: string) => process.env[key]),
+};
+
 describe('CcxtGateway', () => {
   let gateway: CcxtGateway;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CcxtGateway, { provide: CustomLogger, useValue: mockLogger }],
+      providers: [
+        CcxtGateway,
+        { provide: CustomLogger, useValue: mockLogger },
+        { provide: ConfigService, useValue: mockConfigService },
+      ],
     }).compile();
 
     gateway = module.get<CcxtGateway>(CcxtGateway);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
