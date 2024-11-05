@@ -116,7 +116,7 @@ describe('TransactionService', () => {
       );
       mockDepositService.getPendingDeposits.mockResolvedValue(mockDeposits);
 
-      await transactionService.processDeposits();
+      await transactionService.processMixinDeposits();
 
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).toHaveBeenCalledWith({
@@ -140,7 +140,7 @@ describe('TransactionService', () => {
       mockMixinGateway.getUnspentTransactionOutputs.mockResolvedValue([]);
       mockDepositService.getPendingDeposits.mockResolvedValue([]);
 
-      await transactionService.processDeposits();
+      await transactionService.processMixinDeposits();
 
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).not.toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('TransactionService', () => {
       mockMixinGateway.getUnspentTransactionOutputs.mockResolvedValue([]);
       mockDepositService.getPendingDeposits.mockResolvedValue(mockDeposits);
 
-      await transactionService.processDeposits();
+      await transactionService.processMixinDeposits();
 
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe('TransactionService', () => {
         state: MixinWithdrawalStatus.SPENT,
       });
 
-      await transactionService.processWithdrawals();
+      await transactionService.processMixinWithdrawals();
 
       expect(mockWithdrawService.getSignedWithdrawals).toHaveBeenCalled();
       expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(
@@ -206,7 +206,7 @@ describe('TransactionService', () => {
         state: 'SIGNED',
       });
 
-      await transactionService.processWithdrawals();
+      await transactionService.processMixinWithdrawals();
 
       expect(mockWithdrawService.getSignedWithdrawals).toHaveBeenCalled();
       expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(

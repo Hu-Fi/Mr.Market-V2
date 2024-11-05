@@ -36,11 +36,11 @@ export class TransactionService {
 
   private async processData() {
     this.logger.debug('Worker checking transactions in progress started');
-    await this.processDeposits();
-    await this.processWithdrawals();
+    await this.processMixinDeposits();
+    await this.processMixinWithdrawals();
   }
 
-  async processDeposits() {
+  async processMixinDeposits() {
     const outputs = await this.mixinGateway.getUnspentTransactionOutputs();
     const pendingDeposits = await this.getPendingDeposits();
     if (
@@ -53,7 +53,7 @@ export class TransactionService {
     }
   }
 
-  async processWithdrawals() {
+  async processMixinWithdrawals() {
     const signedWithdrawals = await this.withdrawService.getSignedWithdrawals();
     for (const withdrawal of signedWithdrawals) {
       const { transactionHash, id } = withdrawal;
