@@ -27,7 +27,7 @@ export class NetworkErrorException extends HttpException {
 export class ExchangeErrorException extends HttpException {
   constructor(exchange: string, originalError: Error) {
     super(
-      `Exchange error while attempting withdrawal on ${exchange}: ${originalError.message}`,
+      `Exchange error on ${exchange}: ${originalError.message}`,
       HttpStatus.BAD_REQUEST,
     );
   }
