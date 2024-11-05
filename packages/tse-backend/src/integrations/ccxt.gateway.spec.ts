@@ -31,7 +31,6 @@ const mockConfigService = {
 
 describe('CcxtGateway', () => {
   let gateway: CcxtGateway;
-  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,7 +42,6 @@ describe('CcxtGateway', () => {
     }).compile();
 
     gateway = module.get<CcxtGateway>(CcxtGateway);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
