@@ -1,7 +1,10 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
-import { CreateDepositCommand, CreateDepositDto } from './model/exchange-deposit.model';
+import {
+  CreateDepositCommand,
+  CreateDepositDto,
+} from './model/exchange-deposit.model';
 
 @Injectable()
 export class ExchangeDepositProfile extends AutomapperProfile {

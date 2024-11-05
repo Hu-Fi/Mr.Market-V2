@@ -61,12 +61,14 @@ describe('ExchangeDepositService', () => {
       userId: 'user123',
       symbol: 'BTC',
       network: 'BTC',
-      exchangeName: 'binance'
+      exchangeName: 'binance',
     };
     const transaction = { address: 'deposit-address', amount: 0.05 };
     const axiosResponse: Partial<AxiosResponse> = { data: transaction };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(of(axiosResponse as AxiosResponse));
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(of(axiosResponse as AxiosResponse));
 
     const result = await service.deposit(command);
 
@@ -90,12 +92,20 @@ describe('ExchangeDepositService', () => {
       userId: 'user123',
       symbol: 'BTC',
       network: 'BTC',
-      exchangeName: 'binance'
+      exchangeName: 'binance',
     };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(
-      throwError(() => new HttpException('Service Unavailable', HttpStatus.SERVICE_UNAVAILABLE)),
-    );
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(
+        throwError(
+          () =>
+            new HttpException(
+              'Service Unavailable',
+              HttpStatus.SERVICE_UNAVAILABLE,
+            ),
+        ),
+      );
 
     await expect(service.deposit(command)).rejects.toThrow(HttpException);
   });
@@ -105,12 +115,14 @@ describe('ExchangeDepositService', () => {
       userId: 'user123',
       symbol: 'BTC',
       network: 'BTC',
-      exchangeName: 'binance'
+      exchangeName: 'binance',
     };
     const transaction = { address: 'deposit-address', amount: 0.05 };
     const axiosResponse: Partial<AxiosResponse> = { data: transaction };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(of(axiosResponse as AxiosResponse));
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(of(axiosResponse as AxiosResponse));
     mockDepositRepository.save.mockRejectedValue(new Error('Repository Error'));
 
     await expect(service.deposit(command)).rejects.toThrow('Repository Error');

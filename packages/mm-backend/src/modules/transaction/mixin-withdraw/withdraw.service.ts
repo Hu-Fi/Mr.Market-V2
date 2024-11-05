@@ -40,7 +40,10 @@ export class WithdrawService {
     );
   }
 
-  async updateWithdrawalStatus(withdrawalId: number, status: MixinWithdrawalStatus) {
+  async updateWithdrawalStatus(
+    withdrawalId: number,
+    status: MixinWithdrawalStatus,
+  ) {
     await this.repository.updateStatusById(withdrawalId, status);
   }
 

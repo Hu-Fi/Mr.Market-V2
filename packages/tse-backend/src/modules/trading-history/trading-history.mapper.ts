@@ -4,7 +4,8 @@ import { createMap, Mapper } from '@automapper/core';
 import {
   GetUserTradingHistoryParamsCommand,
   GetUserTradingHistoryParamsDto,
-  GetUserTradingHistoryQueryCommand, GetUserTradingHistoryQueryDto,
+  GetUserTradingHistoryQueryCommand,
+  GetUserTradingHistoryQueryDto,
 } from './model/trading-history.model';
 
 @Injectable()

@@ -1,7 +1,10 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
-import { CreateWithdrawalCommand, CreateWithdrawalDto } from './model/exchange-withdrawal.model';
+import {
+  CreateWithdrawalCommand,
+  CreateWithdrawalDto,
+} from './model/exchange-withdrawal.model';
 
 @Injectable()
 export class ExchangeWithdrawalProfile extends AutomapperProfile {

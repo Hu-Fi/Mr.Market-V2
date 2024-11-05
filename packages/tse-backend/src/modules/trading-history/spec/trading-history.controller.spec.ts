@@ -4,8 +4,15 @@ import { TradingHistoryService } from '../trading-history.service';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { TradingHistoryProfile } from '../trading-history.mapper';
-import { GetUserTradingHistoryParamsDto, GetUserTradingHistoryQueryDto } from '../model/trading-history.model';
-import { MarketOrderType, OrderStatus, TradeSideType } from '../../../common/enums/exchange-operation.enums';
+import {
+  GetUserTradingHistoryParamsDto,
+  GetUserTradingHistoryQueryDto,
+} from '../model/trading-history.model';
+import {
+  MarketOrderType,
+  OrderStatus,
+  TradeSideType,
+} from '../../../common/enums/exchange-operation.enums';
 
 describe('TradingHistoryController', () => {
   let controller: TradingHistoryController;
@@ -51,9 +58,14 @@ describe('TradingHistoryController', () => {
     };
 
     it('should call service with mapped params and query', async () => {
-      mockTradingHistoryService.getUserTradingHistory.mockResolvedValue([{id: 1}]);
+      mockTradingHistoryService.getUserTradingHistory.mockResolvedValue([
+        { id: 1 },
+      ]);
 
-      const result = await controller.getUserTradingHistory(paramsDto, queryDto);
+      const result = await controller.getUserTradingHistory(
+        paramsDto,
+        queryDto,
+      );
 
       expect(service.getUserTradingHistory).toHaveBeenCalledWith(
         expect.objectContaining({ userId: 1 }),
@@ -69,7 +81,7 @@ describe('TradingHistoryController', () => {
         }),
       );
 
-      expect(result).toEqual([{id: 1}]);
+      expect(result).toEqual([{ id: 1 }]);
     });
   });
 });

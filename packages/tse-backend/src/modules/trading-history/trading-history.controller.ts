@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { TradingHistoryService } from './trading-history.service';
 import {
@@ -17,8 +24,7 @@ export class TradingHistoryController {
   constructor(
     private readonly service: TradingHistoryService,
     @InjectMapper() private readonly mapper: Mapper,
-  ) {
-  }
+  ) {}
 
   @Get('/user/:userId')
   @ApiOperation({ summary: 'Retrieve user trading history' })
@@ -29,12 +35,12 @@ export class TradingHistoryController {
     const paramsCommand = this.mapper.map(
       params,
       GetUserTradingHistoryParamsDto,
-      GetUserTradingHistoryParamsCommand
+      GetUserTradingHistoryParamsCommand,
     );
     const queryCommand = this.mapper.map(
       query,
       GetUserTradingHistoryQueryDto,
-      GetUserTradingHistoryQueryCommand
+      GetUserTradingHistoryQueryCommand,
     );
 
     return this.service.getUserTradingHistory(paramsCommand, queryCommand);

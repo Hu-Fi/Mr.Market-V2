@@ -8,13 +8,13 @@ import { Withdraw } from '../../../common/entities/withdraw.entity';
 import { WithdrawRepository } from '../mixin-withdraw/withdraw.repository';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Withdraw]),],
+  imports: [HttpModule, TypeOrmModule.forFeature([Withdraw])],
   providers: [
     ExchangeWithdrawService,
     TransactionProfile,
     ConfigService,
-    WithdrawRepository
+    WithdrawRepository,
   ],
-  exports: [ExchangeWithdrawService]
+  exports: [ExchangeWithdrawService],
 })
 export class ExchangeWithdrawModule {}

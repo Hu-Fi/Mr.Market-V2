@@ -50,7 +50,7 @@ describe('ExchangeDepositService', () => {
     });
 
     it('should throw DepositAddressFetchException if fetchDepositAddress is not supported', async () => {
-      const mockExchange = { has: { 'fetchDepositAddress': false } };
+      const mockExchange = { has: { fetchDepositAddress: false } };
       mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
 
       await expect(service.handleDeposit(createDepositCommand)).rejects.toThrow(
@@ -60,8 +60,10 @@ describe('ExchangeDepositService', () => {
 
     it('should return deposit address if fetchDepositAddress is successful', async () => {
       const mockExchange = {
-        has: { 'fetchDepositAddress': true },
-        fetchDepositAddress: jest.fn().mockResolvedValue({ address: '0xABC', tag: 'memo' }),
+        has: { fetchDepositAddress: true },
+        fetchDepositAddress: jest
+          .fn()
+          .mockResolvedValue({ address: '0xABC', tag: 'memo' }),
       };
       mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
 
@@ -71,11 +73,19 @@ describe('ExchangeDepositService', () => {
 
     it('should throw DepositAddressFetchException if fetchDepositAddress fails and createDepositAddress is not supported', async () => {
       const mockExchange = {
-        has: { 'fetchDepositAddress': true, 'createDepositAddress': false },
-        fetchDepositAddress: jest.fn().mockRejectedValue(new Error('fetch error')),
+        has: { fetchDepositAddress: true, createDepositAddress: false },
+        fetchDepositAddress: jest
+          .fn()
+          .mockRejectedValue(new Error('fetch error')),
       };
       mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
-      mockCcxtGateway.interpretError.mockReturnValue(new DepositAddressFetchException('binance', 'ETH', new Error('fetch error')));
+      mockCcxtGateway.interpretError.mockReturnValue(
+        new DepositAddressFetchException(
+          'binance',
+          'ETH',
+          new Error('fetch error'),
+        ),
+      );
 
       await expect(service.handleDeposit(createDepositCommand)).rejects.toThrow(
         DepositAddressFetchException,
@@ -87,12 +97,17 @@ describe('ExchangeDepositService', () => {
     it('should create a deposit address successfully', async () => {
       const mockExchange = {
         createDepositAddress: jest.fn().mockResolvedValue(true),
-        fetchDepositAddress: jest.fn().mockResolvedValue({ address: '0xGHI', tag: 'memo' }),
+        fetchDepositAddress: jest
+          .fn()
+          .mockResolvedValue({ address: '0xGHI', tag: 'memo' }),
       };
       const symbol = 'ETH';
       mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
 
-      const result = await service['createDepositAddress'](mockExchange, symbol);
+      const result = await service['createDepositAddress'](
+        mockExchange,
+        symbol,
+      );
       expect(result).toEqual({ address: '0xGHI', tag: 'memo' });
       expect(mockExchange.fetchDepositAddress).toHaveBeenCalledWith(symbol);
     });
@@ -100,14 +115,24 @@ describe('ExchangeDepositService', () => {
     it('should throw DepositAddressCreateException if createDepositAddress fails', async () => {
       const mockExchange = {
         id: '1',
-        createDepositAddress: jest.fn().mockRejectedValue(new Error('create error')),
+        createDepositAddress: jest
+          .fn()
+          .mockRejectedValue(new Error('create error')),
       };
       const symbol = 'ETH';
       mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
-      mockCcxtGateway.interpretError.mockReturnValue(new Error('interpreted error'));
+      mockCcxtGateway.interpretError.mockReturnValue(
+        new Error('interpreted error'),
+      );
 
-      await expect(service['createDepositAddress'](mockExchange, symbol)).rejects.toThrow(
-        new DepositAddressCreateException(mockExchange.id, symbol, new Error('interpreted error')),
+      await expect(
+        service['createDepositAddress'](mockExchange, symbol),
+      ).rejects.toThrow(
+        new DepositAddressCreateException(
+          mockExchange.id,
+          symbol,
+          new Error('interpreted error'),
+        ),
       );
     });
   });

@@ -16,7 +16,9 @@ export class ExchangeWithdrawService {
     private readonly httpService: HttpService,
     private readonly repository: WithdrawRepository,
   ) {
-    this.tseApiUrl = this.configService.get<string>('TRADING_STRATEGY_EXECUTION_API');
+    this.tseApiUrl = this.configService.get<string>(
+      'TRADING_STRATEGY_EXECUTION_API',
+    );
   }
 
   @Transactional()
@@ -33,9 +35,7 @@ export class ExchangeWithdrawService {
     });
 
     const transactionDetails = await lastValueFrom(
-      this.httpService.post(url, payload).pipe(
-        map((res) => res.data),
-      )
+      this.httpService.post(url, payload).pipe(map((res) => res.data)),
     );
 
     await this.repository.updateTransactionHashById(

@@ -16,7 +16,9 @@ export class ExchangeDepositService {
     private readonly httpService: HttpService,
     private readonly repository: DepositRepository,
   ) {
-    this.tseApiUrl = this.configService.get<string>('TRADING_STRATEGY_EXECUTION_API');
+    this.tseApiUrl = this.configService.get<string>(
+      'TRADING_STRATEGY_EXECUTION_API',
+    );
   }
 
   @Transactional()
@@ -25,9 +27,7 @@ export class ExchangeDepositService {
     const payload = { ...command };
 
     const transaction = await lastValueFrom(
-      this.httpService.post(url, payload).pipe(
-        map((res) => res.data),
-      )
+      this.httpService.post(url, payload).pipe(map((res) => res.data)),
     );
 
     await this.repository.save({
@@ -37,7 +37,7 @@ export class ExchangeDepositService {
       chainId: command.network,
       amount: transaction.amount,
       status: TransactionStatus.PENDING,
-    })
+    });
 
     return transaction;
   }

@@ -7,6 +7,6 @@ import { ExchangeDepositProfile } from './exchange-deposit.mapper';
 @Module({
   imports: [IntegrationsModule],
   providers: [ExchangeDepositService, ExchangeDepositProfile],
-  controllers: [ExchangeDepositController]
+  controllers: [ExchangeDepositController],
 })
 export class ExchangeDepositModule {}

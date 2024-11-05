@@ -7,6 +7,6 @@ import { ExchangeWithdrawalProfile } from './exchange-withdrawal.mapper';
 @Module({
   imports: [IntegrationsModule],
   providers: [ExchangeWithdrawalService, ExchangeWithdrawalProfile],
-  controllers: [ExchangeWithdrawalController]
+  controllers: [ExchangeWithdrawalController],
 })
 export class ExchangeWithdrawalModule {}

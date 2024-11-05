@@ -8,7 +8,10 @@ export class ExchangeNotFoundException extends HttpException {
 
 export class WithdrawalNotSupportedException extends HttpException {
   constructor(exchange: string) {
-    super(`Exchange ${exchange} does not support withdrawals`, HttpStatus.BAD_REQUEST);
+    super(
+      `Exchange ${exchange} does not support withdrawals`,
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 

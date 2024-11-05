@@ -3,7 +3,10 @@ import { ExchangeWithdrawalController } from '../exchange-withdrawal.controller'
 import { ExchangeWithdrawalService } from '../exchange-withdrawal.service';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { CreateWithdrawalDto, CreateWithdrawalCommand } from '../model/exchange-withdrawal.model';
+import {
+  CreateWithdrawalDto,
+  CreateWithdrawalCommand,
+} from '../model/exchange-withdrawal.model';
 import { ExchangeWithdrawalProfile } from '../exchange-withdrawal.mapper';
 
 describe('ExchangeWithdrawalController', () => {
@@ -40,7 +43,9 @@ describe('ExchangeWithdrawalController', () => {
       ],
     }).compile();
 
-    controller = module.get<ExchangeWithdrawalController>(ExchangeWithdrawalController);
+    controller = module.get<ExchangeWithdrawalController>(
+      ExchangeWithdrawalController,
+    );
     service = module.get<ExchangeWithdrawalService>(ExchangeWithdrawalService);
   });
 

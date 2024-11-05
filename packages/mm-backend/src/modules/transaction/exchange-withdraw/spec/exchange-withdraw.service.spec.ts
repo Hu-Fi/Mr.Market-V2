@@ -65,12 +65,14 @@ describe('ExchangeWithdrawService', () => {
       amount: 0.01,
       exchangeName: 'binance',
       network: 'ETH',
-      tag: ''
+      tag: '',
     };
     const transactionDetails = { id: 'transaction123' };
     const axiosResponse: Partial<AxiosResponse> = { data: transactionDetails };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(of(axiosResponse as AxiosResponse));
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(of(axiosResponse as AxiosResponse));
 
     const result = await service.withdraw(command);
 
@@ -85,10 +87,9 @@ describe('ExchangeWithdrawService', () => {
       'http://mock-tse-api-url/exchange-withdrawal',
       command,
     );
-    expect(mockWithdrawRepository.updateTransactionHashById).toHaveBeenCalledWith(
-      1,
-      transactionDetails.id,
-    );
+    expect(
+      mockWithdrawRepository.updateTransactionHashById,
+    ).toHaveBeenCalledWith(1, transactionDetails.id);
     expect(result).toEqual(transactionDetails.id);
   });
 
@@ -100,16 +101,22 @@ describe('ExchangeWithdrawService', () => {
       amount: 0.01,
       exchangeName: 'binance',
       network: 'ETH',
-      tag: ''
+      tag: '',
     };
 
-    jest.spyOn(httpService, 'post').mockReturnValue(
-      throwError(() => new HttpException('Service Unavailable', HttpStatus.SERVICE_UNAVAILABLE)),
-    );
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(
+        throwError(
+          () =>
+            new HttpException(
+              'Service Unavailable',
+              HttpStatus.SERVICE_UNAVAILABLE,
+            ),
+        ),
+      );
 
-    await expect(service.withdraw(command)).rejects.toThrow(
-      HttpException,
-    );
+    await expect(service.withdraw(command)).rejects.toThrow(HttpException);
   });
 
   it('should throw an error if save fails in the repository', async () => {
@@ -120,10 +127,12 @@ describe('ExchangeWithdrawService', () => {
       amount: 0.01,
       exchangeName: 'binance',
       network: 'ETH',
-      tag: ''
+      tag: '',
     };
 
-    mockWithdrawRepository.save.mockRejectedValue(new Error('Repository Error'));
+    mockWithdrawRepository.save.mockRejectedValue(
+      new Error('Repository Error'),
+    );
 
     await expect(service.withdraw(command)).rejects.toThrow('Repository Error');
   });

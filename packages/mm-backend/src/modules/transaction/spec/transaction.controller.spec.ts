@@ -4,10 +4,16 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { TransactionProfile } from '../transaction.mapper';
 import { DepositService } from '../mixin-deposit/deposit.service';
-import { DepositCommand, DepositDto } from '../mixin-deposit/model/deposit.model';
+import {
+  DepositCommand,
+  DepositDto,
+} from '../mixin-deposit/model/deposit.model';
 import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
 import { WithdrawService } from '../mixin-withdraw/withdraw.service';
-import { WithdrawCommand, WithdrawDto } from '../mixin-withdraw/model/withdraw.model';
+import {
+  WithdrawCommand,
+  WithdrawDto,
+} from '../mixin-withdraw/model/withdraw.model';
 import { CreateWithdrawalDto } from '../exchange-withdraw/model/exchange-withdrawal.model';
 import { CreateDepositDto } from '../exchange-deposit/model/exchange-deposit.model';
 import { ExchangeDepositService } from '../exchange-deposit/exchange-deposit.service';
@@ -140,7 +146,9 @@ describe('TransactionController', () => {
 
       const result = await controller.exchangeDeposit(createDepositDto, req);
 
-      expect(mockExchangeDepositService.deposit).toHaveBeenCalledWith(expect.objectContaining(createDepositDto));
+      expect(mockExchangeDepositService.deposit).toHaveBeenCalledWith(
+        expect.objectContaining(createDepositDto),
+      );
       expect(result).toEqual(depositResponse);
     });
   });
@@ -166,9 +174,14 @@ describe('TransactionController', () => {
       const userId = 'user-id-123';
       const req = { user: { userId } };
 
-      const result = await controller.exchangeWithdraw(createWithdrawalDto, req);
+      const result = await controller.exchangeWithdraw(
+        createWithdrawalDto,
+        req,
+      );
 
-      expect(mockExchangeWithdrawService.withdraw).toHaveBeenCalledWith(expect.objectContaining(createWithdrawalDto));
+      expect(mockExchangeWithdrawService.withdraw).toHaveBeenCalledWith(
+        expect.objectContaining(createWithdrawalDto),
+      );
       expect(result).toEqual(withdrawResponse);
     });
   });

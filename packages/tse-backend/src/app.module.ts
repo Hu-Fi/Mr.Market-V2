@@ -49,7 +49,7 @@ import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange
     StrategyExecutionModule,
     TradingHistoryModule,
     ExchangeDepositModule,
-    ExchangeWithdrawalModule
+    ExchangeWithdrawalModule,
   ],
   controllers: [],
   providers: [

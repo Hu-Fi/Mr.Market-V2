@@ -45,7 +45,10 @@ export class CcxtGateway {
   interpretError(error: Error, exchangeName: string) {
     const errorMap = new Map([
       [ccxt.NetworkError, () => new NetworkErrorException(exchangeName, error)],
-      [ccxt.ExchangeError, () => new ExchangeErrorException(exchangeName, error)],
+      [
+        ccxt.ExchangeError,
+        () => new ExchangeErrorException(exchangeName, error),
+      ],
     ]);
 
     const ExceptionClass = errorMap.get(error.constructor as any);

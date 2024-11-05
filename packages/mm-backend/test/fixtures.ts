@@ -21,7 +21,7 @@ export const EXCHANGE_NAME_A = 'mexc';
 export const EXCHANGE_NAME_B = 'gate';
 export const TOKEN = 'HMT/USDT';
 export const FOUND_AMOUNT_IN_WEI = '1000000000000';
-export const FOUND_AMOUNT_IN_ETHERS = '0.000001'
+export const FOUND_AMOUNT_IN_ETHERS = '0.000001';
 
 // Addresses
 export const TRUSTED_ADDRESS = process.env.E2E_TRUSTED_ADDRESS;
@@ -65,7 +65,7 @@ export const userStrategyPayload = {
   clientId: '456',
   pair: TOKEN,
   amountToTrade: 1.0,
-  minProfitability: 1.00,
+  minProfitability: 1.0,
   exchangeAName: EXCHANGE_NAME_A,
   exchangeBName: EXCHANGE_NAME_B,
   checkIntervalSeconds: 10,

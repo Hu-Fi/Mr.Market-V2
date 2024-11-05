@@ -46,7 +46,9 @@ describe('ExchangeWithdrawalService', () => {
 
     mockCcxtGateway.getExchange.mockReturnValue(null);
 
-    await expect(service.handleWithdrawal(command)).rejects.toThrow(ExchangeNotFoundException);
+    await expect(service.handleWithdrawal(command)).rejects.toThrow(
+      ExchangeNotFoundException,
+    );
     expect(mockCcxtGateway.getExchange).toHaveBeenCalledWith('binance');
   });
 
@@ -67,7 +69,9 @@ describe('ExchangeWithdrawalService', () => {
 
     mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
 
-    await expect(service.handleWithdrawal(command)).rejects.toThrow(WithdrawalNotSupportedException);
+    await expect(service.handleWithdrawal(command)).rejects.toThrow(
+      WithdrawalNotSupportedException,
+    );
     expect(mockCcxtGateway.getExchange).toHaveBeenCalledWith('binance');
   });
 
@@ -91,7 +95,13 @@ describe('ExchangeWithdrawalService', () => {
 
     const result = await service.handleWithdrawal(command);
 
-    expect(mockExchange.withdraw).toHaveBeenCalledWith('ETH', 1, '0x123', 'tag', { network: 'eth' });
+    expect(mockExchange.withdraw).toHaveBeenCalledWith(
+      'ETH',
+      1,
+      '0x123',
+      'tag',
+      { network: 'eth' },
+    );
     expect(result).toBe('withdrawalSuccess');
   });
 
@@ -112,7 +122,9 @@ describe('ExchangeWithdrawalService', () => {
     };
 
     mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
-    mockCcxtGateway.interpretError.mockReturnValue(new Error('interpreted error'));
+    mockCcxtGateway.interpretError.mockReturnValue(
+      new Error('interpreted error'),
+    );
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(Error);
     expect(mockCcxtGateway.interpretError).toHaveBeenCalled();

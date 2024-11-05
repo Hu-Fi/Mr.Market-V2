@@ -8,13 +8,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Deposit } from '../../../common/entities/deposit.entity';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Deposit]),],
+  imports: [HttpModule, TypeOrmModule.forFeature([Deposit])],
   providers: [
     ExchangeDepositService,
     TransactionProfile,
     ConfigService,
-    DepositRepository
+    DepositRepository,
   ],
-  exports: [ExchangeDepositService]
+  exports: [ExchangeDepositService],
 })
 export class ExchangeDepositModule {}

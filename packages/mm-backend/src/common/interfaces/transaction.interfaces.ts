@@ -1,7 +1,4 @@
-import {
-  DepositStatus,
-  WithdrawalStatus,
-} from '../enums/transaction.enum';
+import { DepositStatus, WithdrawalStatus } from '../enums/transaction.enum';
 
 export interface TransactionBalance {
   userId: string;

@@ -3,7 +3,10 @@ import { ExchangeDepositController } from '../exchange-deposit.controller';
 import { ExchangeDepositService } from '../exchange-deposit.service';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { CreateDepositDto, CreateDepositCommand } from '../model/exchange-deposit.model';
+import {
+  CreateDepositDto,
+  CreateDepositCommand,
+} from '../model/exchange-deposit.model';
 import { ExchangeDepositProfile } from '../exchange-deposit.mapper';
 
 describe('ExchangeDepositController', () => {
@@ -33,11 +36,13 @@ describe('ExchangeDepositController', () => {
           provide: ExchangeDepositService,
           useValue: mockExchangeDepositService,
         },
-        ExchangeDepositProfile
+        ExchangeDepositProfile,
       ],
     }).compile();
 
-    controller = module.get<ExchangeDepositController>(ExchangeDepositController);
+    controller = module.get<ExchangeDepositController>(
+      ExchangeDepositController,
+    );
     service = module.get<ExchangeDepositService>(ExchangeDepositService);
   });
 

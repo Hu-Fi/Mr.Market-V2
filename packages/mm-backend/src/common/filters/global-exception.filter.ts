@@ -59,14 +59,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         (exception as any).response.data.message,
       );
     } else if (exception instanceof Error) {
-      this.logger.error(
-        `Error: ${responseBody.message}`,
-        exception.stack,
-      );
+      this.logger.error(`Error: ${responseBody.message}`, exception.stack);
     } else {
-      this.logger.error(
-        `Unknown error: ${JSON.stringify(responseBody)}`,
-      );
+      this.logger.error(`Unknown error: ${JSON.stringify(responseBody)}`);
     }
   }
 }

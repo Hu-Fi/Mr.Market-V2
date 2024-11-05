@@ -24,23 +24,33 @@ export class ExchangeDepositService {
       throw new DepositAddressFetchException(
         exchangeName,
         symbol,
-        new Error('fetchDepositAddress not supported')
+        new Error('fetchDepositAddress not supported'),
       );
     }
 
     try {
-      const depositAddress = await exchange.fetchDepositAddress(symbol, { network });
+      const depositAddress = await exchange.fetchDepositAddress(symbol, {
+        network,
+      });
       return {
         address: depositAddress['address'],
         memo: depositAddress['tag'] || '',
       };
     } catch (error) {
-      const interpretedError = this.ccxtGateway.interpretError(error, exchangeName);
-      if (interpretedError instanceof DepositAddressFetchException && exchange.has['createDepositAddress']) {
+      const interpretedError = this.ccxtGateway.interpretError(
+        error,
+        exchangeName,
+      );
+      if (
+        interpretedError instanceof DepositAddressFetchException &&
+        exchange.has['createDepositAddress']
+      ) {
         return this.createDepositAddress(exchange, symbol);
       }
 
-      this.logger.error(`Error fetching deposit address: ${interpretedError.message}`);
+      this.logger.error(
+        `Error fetching deposit address: ${interpretedError.message}`,
+      );
       throw interpretedError;
     }
   }
@@ -53,9 +63,18 @@ export class ExchangeDepositService {
         return await exchange.fetchDepositAddress(symbol);
       }
     } catch (error) {
-      const interpretedError = this.ccxtGateway.interpretError(error, exchange.id);
-      this.logger.error(`Failed to create deposit address: ${interpretedError.message}`);
-      throw new DepositAddressCreateException(exchange.id, symbol, interpretedError);
+      const interpretedError = this.ccxtGateway.interpretError(
+        error,
+        exchange.id,
+      );
+      this.logger.error(
+        `Failed to create deposit address: ${interpretedError.message}`,
+      );
+      throw new DepositAddressCreateException(
+        exchange.id,
+        symbol,
+        interpretedError,
+      );
     }
   }
 }
