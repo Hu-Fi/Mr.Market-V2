@@ -8,6 +8,7 @@ services:
     ports:
       - '${TSE_BE_PORT}:${TSE_BE_PORT}'
     environment:
+      SANDBOX: ${SANDBOX}
       CORS_ORIGIN: ${CORS_ORIGIN}
       TSE_BE_PORT: ${TSE_BE_PORT}
       DATABASE_PORT: ${DATABASE_PORT}

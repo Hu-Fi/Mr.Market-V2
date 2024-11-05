@@ -4,9 +4,11 @@ import {
   ExchangeErrorException,
   NetworkErrorException,
 } from '../common/filters/withdrawal.exception.filter';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CcxtGateway {
+  constructor(private readonly configService: ConfigService) {}
   private readonly exchanges = new Map<string, ccxt.Exchange>();
 
   addExchange(name: string, exchange: ccxt.Exchange): void {
@@ -35,6 +37,8 @@ export class CcxtGateway {
         apiKey,
         secret,
       });
+      const isSandbox = this.configService.get('SANDBOX', false) === 'true';
+      exchange.setSandboxMode(isSandbox);
       await exchange.loadMarkets();
       return exchange;
     } catch (error) {
