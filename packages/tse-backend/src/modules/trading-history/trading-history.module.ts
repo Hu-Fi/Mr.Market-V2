@@ -9,6 +9,6 @@ import { TradingHistoryProfile } from './trading-history.mapper';
 @Module({
   imports: [TypeOrmModule.forFeature([Order])],
   providers: [TradingHistoryService, OrderRepository, TradingHistoryProfile],
-  controllers: [TradingHistoryController]
+  controllers: [TradingHistoryController],
 })
 export class TradingHistoryModule {}

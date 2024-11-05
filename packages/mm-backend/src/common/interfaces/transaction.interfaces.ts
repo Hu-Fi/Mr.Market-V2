@@ -13,6 +13,7 @@ export interface DepositData {
   amount: number;
   destination: string;
   status: DepositStatus;
+  transactionHash?: string;
 }
 
 export interface WithdrawData {

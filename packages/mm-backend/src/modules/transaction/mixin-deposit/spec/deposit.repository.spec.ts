@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DepositRepository } from '../deposit.repository';
 import { Deposit } from '../../../../common/entities/deposit.entity';
-import { DepositStatus } from '../../../../common/enums/transaction.enum';
+import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
 
 const mockRepository = {
   save: jest.fn(),
@@ -37,7 +37,7 @@ describe('DepositRepository', () => {
         userId: 'user-123',
         amount: 100,
         assetId: 'asset-456',
-        status: DepositStatus.PENDING,
+        status: MixinDepositStatus.PENDING,
         chainId: 'chainId-123',
         destination: 'dest-123',
       };
@@ -54,7 +54,7 @@ describe('DepositRepository', () => {
 
   describe('findByStatus', () => {
     it('should return deposits with the specified status', async () => {
-      const status = DepositStatus.PENDING;
+      const status = MixinDepositStatus.PENDING;
       const deposits = [
         {
           id: 1,
@@ -77,7 +77,7 @@ describe('DepositRepository', () => {
   describe('updateStatusById', () => {
     it('should update the status of a deposit', async () => {
       const depositId = 1;
-      const status = DepositStatus.CONFIRMED;
+      const status = MixinDepositStatus.CONFIRMED;
 
       mockRepository.update.mockResolvedValue({ affected: 1 });
 

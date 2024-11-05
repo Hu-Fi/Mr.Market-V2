@@ -38,6 +38,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       return exception.message;
     }
+    if ((exception as any).response?.data?.message) {
+      return (exception as any).response.data.message;
+    }
     if (exception instanceof Error) {
       return exception.message || 'An unknown error occurred';
     }
@@ -50,11 +53,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `Http Status: ${responseBody.statusCode}, Error Message: ${responseBody.message}`,
         exception.stack,
       );
-    } else {
+    } else if ((exception as any).response?.data?.message) {
       this.logger.error(
-        `Non-Http Exception: ${responseBody.message}`,
-        exception instanceof Error ? exception.stack : '',
+        `Axios Error: ${responseBody.message}`,
+        (exception as any).response.data.message,
       );
+    } else if (exception instanceof Error) {
+      this.logger.error(`Error: ${responseBody.message}`, exception.stack);
+    } else {
+      this.logger.error(`Unknown error: ${JSON.stringify(responseBody)}`);
     }
   }
 }

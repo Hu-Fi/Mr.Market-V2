@@ -2,8 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TradingHistoryService } from '../trading-history.service';
 import { OrderRepository } from '../../exchange-operation/order.repository';
 import { Between } from 'typeorm';
-import { GetUserTradingHistoryParamsCommand, GetUserTradingHistoryQueryCommand } from '../model/trading-history.model';
-import { MarketOrderType, OrderStatus, TradeSideType } from '../../../common/enums/exchange-operation.enums';
+import {
+  GetUserTradingHistoryParamsCommand,
+  GetUserTradingHistoryQueryCommand,
+} from '../model/trading-history.model';
+import {
+  MarketOrderType,
+  OrderStatus,
+  TradeSideType,
+} from '../../../common/enums/exchange-operation.enums';
 
 describe('TradingHistoryService', () => {
   let service: TradingHistoryService;
@@ -46,7 +53,7 @@ describe('TradingHistoryService', () => {
     };
 
     it('should call repository with correct query filters', async () => {
-      mockOrderRepository.find.mockResolvedValue([{id: 1}]);
+      mockOrderRepository.find.mockResolvedValue([{ id: 1 }]);
 
       const result = await service.getUserTradingHistory(params, queries);
 
@@ -67,11 +74,17 @@ describe('TradingHistoryService', () => {
         },
       });
 
-      expect(result).toEqual([{id: 1}]);
+      expect(result).toEqual([{ id: 1 }]);
     });
 
     it('should apply pagination and sorting', async () => {
-      const paginatedQueries = { ...queries, page: 2, limit: 5, sortBy: 'price', sortOrder: 'ASC' };
+      const paginatedQueries = {
+        ...queries,
+        page: 2,
+        limit: 5,
+        sortBy: 'price',
+        sortOrder: 'ASC',
+      };
 
       await service.getUserTradingHistory(params, paginatedQueries);
 

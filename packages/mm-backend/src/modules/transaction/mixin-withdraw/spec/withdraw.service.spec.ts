@@ -3,7 +3,7 @@ import { MixinGateway } from '../../../../integrations/mixin.gateway';
 import { WithdrawRepository } from '../withdraw.repository';
 import { WithdrawService } from '../withdraw.service';
 import { WithdrawCommand } from '../model/withdraw.model';
-import { WithdrawalStatus } from '../../../../common/enums/transaction.enum';
+import { MixinWithdrawalStatus } from '../../../../common/enums/transaction.enum';
 import { WithdrawResponse } from '../../../../common/interfaces/transaction.interfaces';
 
 jest.mock('typeorm-transactional', () => ({
@@ -68,7 +68,7 @@ describe('WithdrawService', () => {
       expect(mockWithdrawRepository.save).toHaveBeenCalledWith({
         ...command,
         amount: Number(command.amount),
-        status: WithdrawalStatus.SIGNED,
+        status: MixinWithdrawalStatus.SIGNED,
       });
 
       expect(mockMixinGateway.handleWithdrawal).toHaveBeenCalledWith(command);
@@ -101,14 +101,14 @@ describe('WithdrawService', () => {
 
       expect(
         mockWithdrawRepository.findWithdrawalsByStatus,
-      ).toHaveBeenCalledWith(WithdrawalStatus.SIGNED);
+      ).toHaveBeenCalledWith(MixinWithdrawalStatus.SIGNED);
     });
   });
 
   describe('updateWithdrawalStatus', () => {
     it('should update the withdrawal status by ID', async () => {
       const withdrawalId = 1;
-      const status = WithdrawalStatus.SPENT;
+      const status = MixinWithdrawalStatus.SPENT;
 
       await service.updateWithdrawalStatus(withdrawalId, status);
 

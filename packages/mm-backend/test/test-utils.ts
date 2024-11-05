@@ -109,29 +109,30 @@ async function signup() {
         },
       },
     );
-  }
-  catch (e) {
+  } catch (e) {
     console.error(e.status);
   }
 }
 
 async function signin() {
-  const signaturePayload = { address: TRUSTED_ADDRESS, type: "SIGNIN" };
+  const signaturePayload = { address: TRUSTED_ADDRESS, type: 'SIGNIN' };
   try {
     const signature = await prepareSignature(signaturePayload);
-    const signupPayload = JSON.stringify({ address: TRUSTED_ADDRESS, signature });
+    const signupPayload = JSON.stringify({
+      address: TRUSTED_ADDRESS,
+      signature,
+    });
     return await axios.post(
       'https://hufi-recording-oracle-testnet.onrender.com/auth/web3/signin',
       JSON.parse(signupPayload),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
+      },
     );
-  }
-  catch (e) {
+  } catch (e) {
     console.error(e.status);
   }
 }

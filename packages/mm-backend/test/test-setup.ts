@@ -11,9 +11,9 @@ import { DataSource } from 'typeorm';
 import { Deposit } from '../src/common/entities/deposit.entity';
 import { Withdraw } from '../src/common/entities/withdraw.entity';
 import { Wait } from 'testcontainers';
-import { DepositService } from '../src/modules/transaction/deposit/deposit.service';
 import { MixinGateway } from '../src/integrations/mixin.gateway';
-import { DepositRepository } from '../src/modules/transaction/deposit/deposit.repository';
+import { DepositService } from '../src/modules/transaction/mixin-deposit/deposit.service';
+import { DepositRepository } from '../src/modules/transaction/mixin-deposit/deposit.repository';
 import { handleUserAuthentication } from './test-utils';
 
 export let app: INestApplication;

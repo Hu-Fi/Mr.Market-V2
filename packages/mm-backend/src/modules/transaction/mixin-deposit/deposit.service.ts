@@ -5,7 +5,7 @@ import { DepositRepository } from './deposit.repository';
 import { DepositCommand } from './model/deposit.model';
 import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
 import { Deposit } from '../../../common/entities/deposit.entity';
-import { DepositStatus } from '../../../common/enums/transaction.enum';
+import { MixinDepositStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
 export class DepositService {
@@ -19,7 +19,7 @@ export class DepositService {
     const destination = await this.mixinGateway.createDepositAddress(command);
     await this.repository.save({
       ...command,
-      status: DepositStatus.PENDING,
+      status: MixinDepositStatus.PENDING,
       destination,
     });
 
@@ -31,10 +31,10 @@ export class DepositService {
   }
 
   async getPendingDeposits(): Promise<Deposit[]> {
-    return await this.repository.findByStatus(DepositStatus.PENDING);
+    return await this.repository.findByStatus(MixinDepositStatus.PENDING);
   }
 
-  async updateDepositStatus(depositId: number, status: DepositStatus) {
+  async updateDepositStatus(depositId: number, status: MixinDepositStatus) {
     await this.repository.updateStatusById(depositId, status);
   }
 

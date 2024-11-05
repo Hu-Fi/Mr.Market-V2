@@ -17,6 +17,8 @@ import { TradingStrategyModule } from './modules/trading-strategy/trading-strate
 import { ScheduleModule } from '@nestjs/schedule';
 import { StrategyExecutionModule } from './modules/strategy-execution/strategy-execution.module';
 import { TradingHistoryModule } from './modules/trading-history/trading-history.module';
+import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-deposit.module';
+import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange-withdrawal.module';
 
 @Module({
   imports: [
@@ -45,7 +47,9 @@ import { TradingHistoryModule } from './modules/trading-history/trading-history.
     HealthModule,
     TradingStrategyModule,
     StrategyExecutionModule,
-    TradingHistoryModule
+    TradingHistoryModule,
+    ExchangeDepositModule,
+    ExchangeWithdrawalModule,
   ],
   controllers: [],
   providers: [

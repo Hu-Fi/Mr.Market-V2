@@ -2,15 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { TransactionService } from '../transaction.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from '../deposit/deposit.service';
+import { DepositService } from '../mixin-deposit/deposit.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { SchedulerUtil } from '../../../common/utils/scheduler.utils';
 import { mockDeposits } from './transaction.fixtures';
-import { WithdrawService } from '../withdraw/withdraw.service';
+import { WithdrawService } from '../mixin-withdraw/withdraw.service';
 import { UserBalanceService } from '../../user-balance/user-balance.service';
 import {
-  DepositStatus,
-  WithdrawalStatus,
+  MixinDepositStatus,
+  MixinWithdrawalStatus,
 } from '../../../common/enums/transaction.enum';
 
 const mockDepositService = {
@@ -116,7 +116,7 @@ describe('TransactionService', () => {
       );
       mockDepositService.getPendingDeposits.mockResolvedValue(mockDeposits);
 
-      await transactionService.processDeposits();
+      await transactionService.processMixinDeposits();
 
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).toHaveBeenCalledWith({
@@ -126,7 +126,7 @@ describe('TransactionService', () => {
       });
       expect(mockDepositService.updateDepositStatus).toHaveBeenCalledWith(
         mockDeposits[0].id,
-        DepositStatus.CONFIRMED,
+        MixinDepositStatus.CONFIRMED,
       );
       expect(
         mockDepositService.updateDepositTransactionHash,
@@ -140,7 +140,7 @@ describe('TransactionService', () => {
       mockMixinGateway.getUnspentTransactionOutputs.mockResolvedValue([]);
       mockDepositService.getPendingDeposits.mockResolvedValue([]);
 
-      await transactionService.processDeposits();
+      await transactionService.processMixinDeposits();
 
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).not.toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('TransactionService', () => {
       mockMixinGateway.getUnspentTransactionOutputs.mockResolvedValue([]);
       mockDepositService.getPendingDeposits.mockResolvedValue(mockDeposits);
 
-      await transactionService.processDeposits();
+      await transactionService.processMixinDeposits();
 
       expect(mockDepositService.getPendingDeposits).toHaveBeenCalled();
       expect(mockUserBalanceService.updateUserBalance).not.toHaveBeenCalled();
@@ -176,10 +176,10 @@ describe('TransactionService', () => {
       };
       mockWithdrawService.getSignedWithdrawals.mockResolvedValue([withdrawal]);
       mockMixinGateway.fetchTransactionDetails.mockResolvedValue({
-        state: WithdrawalStatus.SPENT,
+        state: MixinWithdrawalStatus.SPENT,
       });
 
-      await transactionService.processWithdrawals();
+      await transactionService.processMixinWithdrawals();
 
       expect(mockWithdrawService.getSignedWithdrawals).toHaveBeenCalled();
       expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(
@@ -187,7 +187,7 @@ describe('TransactionService', () => {
       );
       expect(mockWithdrawService.updateWithdrawalStatus).toHaveBeenCalledWith(
         withdrawal.id,
-        WithdrawalStatus.SPENT,
+        MixinWithdrawalStatus.SPENT,
       );
       expect(mockUserBalanceService.updateUserBalance).toHaveBeenCalledWith({
         userId: withdrawal.userId,
@@ -206,7 +206,7 @@ describe('TransactionService', () => {
         state: 'SIGNED',
       });
 
-      await transactionService.processWithdrawals();
+      await transactionService.processMixinWithdrawals();
 
       expect(mockWithdrawService.getSignedWithdrawals).toHaveBeenCalled();
       expect(mockMixinGateway.fetchTransactionDetails).toHaveBeenCalledWith(

@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from './deposit/deposit.service';
+import { DepositService } from './mixin-deposit/deposit.service';
 import { MixinGateway } from '../../integrations/mixin.gateway';
 import { Deposit } from '../../common/entities/deposit.entity';
 import {
-  DepositStatus,
-  WithdrawalStatus,
+  MixinDepositStatus,
+  MixinWithdrawalStatus,
 } from '../../common/enums/transaction.enum';
 import { UserBalanceService } from '../user-balance/user-balance.service';
-import { WithdrawService } from './withdraw/withdraw.service';
+import { WithdrawService } from './mixin-withdraw/withdraw.service';
 
 @Injectable()
 export class TransactionService {
@@ -36,11 +36,11 @@ export class TransactionService {
 
   private async processData() {
     this.logger.debug('Worker checking transactions in progress started');
-    await this.processDeposits();
-    await this.processWithdrawals();
+    await this.processMixinDeposits();
+    await this.processMixinWithdrawals();
   }
 
-  async processDeposits() {
+  async processMixinDeposits() {
     const outputs = await this.mixinGateway.getUnspentTransactionOutputs();
     const pendingDeposits = await this.getPendingDeposits();
     if (
@@ -53,16 +53,16 @@ export class TransactionService {
     }
   }
 
-  async processWithdrawals() {
+  async processMixinWithdrawals() {
     const signedWithdrawals = await this.withdrawService.getSignedWithdrawals();
     for (const withdrawal of signedWithdrawals) {
       const { transactionHash, id } = withdrawal;
       const transactionDetails =
         await this.mixinGateway.fetchTransactionDetails(transactionHash);
-      if (transactionDetails.state === WithdrawalStatus.SPENT) {
+      if (transactionDetails.state === MixinWithdrawalStatus.SPENT) {
         await this.withdrawService.updateWithdrawalStatus(
           id,
-          WithdrawalStatus.SPENT,
+          MixinWithdrawalStatus.SPENT,
         );
         await this.userBalanceService.updateUserBalance({
           userId: withdrawal.userId,
@@ -103,7 +103,7 @@ export class TransactionService {
         });
         await this.depositService.updateDepositStatus(
           deposit.id,
-          DepositStatus.CONFIRMED,
+          MixinDepositStatus.CONFIRMED,
         );
         await this.depositService.updateDepositTransactionHash(
           deposit.id,
