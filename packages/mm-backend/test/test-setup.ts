@@ -8,19 +8,19 @@ import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { Deposit } from '../src/common/entities/deposit.entity';
-import { Withdraw } from '../src/common/entities/withdraw.entity';
+import { MixinDeposit } from '../src/common/entities/mixin-deposit.entity';
+import { MixinWithdrawal } from '../src/common/entities/mixin-withdrawal.entity';
 import { Wait } from 'testcontainers';
 import { MixinGateway } from '../src/integrations/mixin.gateway';
-import { DepositService } from '../src/modules/transaction/mixin-deposit/deposit.service';
-import { DepositRepository } from '../src/modules/transaction/mixin-deposit/deposit.repository';
+import { MixinDepositService } from '../src/modules/transaction/mixin-deposit/mixin-deposit.service';
+import { MixinDepositRepository } from '../src/modules/transaction/mixin-deposit/mixin-deposit.repository';
 import { handleUserAuthentication } from './test-utils';
 
 export let app: INestApplication;
 export let dataSource: DataSource;
 export let postgresContainer: StartedPostgreSqlContainer;
 export let redisContainer: StartedRedisContainer;
-export let depositService: DepositService;
+export let depositService: MixinDepositService;
 
 export const setupTestApp = async () => {
   postgresContainer = await new PostgreSqlContainer()
@@ -53,21 +53,21 @@ export const setupTestApp = async () => {
           username: postgresContainer.getUsername(),
           password: postgresContainer.getPassword(),
           database: postgresContainer.getDatabase(),
-          entities: [Deposit, Withdraw],
+          entities: [MixinDeposit, MixinWithdrawal],
           synchronize: true,
         }),
       }),
-      TypeOrmModule.forFeature([Deposit, Withdraw]),
+      TypeOrmModule.forFeature([MixinDeposit, MixinWithdrawal]),
     ],
     providers: [
-      DepositService,
+      MixinDepositService,
       { provide: MixinGateway, useValue: mockMixinGateway },
-      DepositRepository,
+      MixinDepositRepository,
     ],
   }).compile();
 
   app = moduleRef.createNestApplication();
-  depositService = moduleRef.get<DepositService>(DepositService);
+  depositService = moduleRef.get<MixinDepositService>(MixinDepositService);
   dataSource = moduleRef.get<DataSource>(DataSource);
   await app.init();
 };

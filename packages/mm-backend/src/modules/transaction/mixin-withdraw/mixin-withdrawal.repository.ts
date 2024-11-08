@@ -1,18 +1,18 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WithdrawData } from '../../../common/interfaces/transaction.interfaces';
-import { Withdraw } from '../../../common/entities/withdraw.entity';
+import { MixinWithdrawalData } from '../../../common/interfaces/transaction.interfaces';
+import { MixinWithdrawal } from '../../../common/entities/mixin-withdrawal.entity';
 import { MixinWithdrawalStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
-export class WithdrawRepository {
+export class MixinWithdrawalRepository {
   constructor(
-    @InjectRepository(Withdraw)
-    private readonly repository: Repository<Withdraw>,
+    @InjectRepository(MixinWithdrawal)
+    private readonly repository: Repository<MixinWithdrawal>,
   ) {}
 
-  async save(data: WithdrawData) {
+  async save(data: MixinWithdrawalData) {
     return await this.repository.save(data);
   }
 

@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { Transactional } from 'typeorm-transactional';
-import { DepositRepository } from './deposit.repository';
-import { DepositCommand } from './model/deposit.model';
-import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
-import { Deposit } from '../../../common/entities/deposit.entity';
+import { MixinDepositRepository } from './mixin-deposit.repository';
+import { DepositCommand } from './model/mixin-deposit.model';
+import { MixinDepositResponse } from '../../../common/interfaces/transaction.interfaces';
+import { MixinDeposit } from '../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
-export class DepositService {
+export class MixinDepositService {
   constructor(
     private readonly mixinGateway: MixinGateway,
-    private readonly repository: DepositRepository,
+    private readonly repository: MixinDepositRepository,
   ) {}
 
   @Transactional()
-  async deposit(command: DepositCommand): Promise<DepositResponse> {
+  async deposit(command: DepositCommand): Promise<MixinDepositResponse> {
     const destination = await this.mixinGateway.createDepositAddress(command);
     await this.repository.save({
       ...command,
@@ -27,10 +27,10 @@ export class DepositService {
       assetId: command.assetId,
       amount: command.amount,
       destination: destination,
-    } as DepositResponse;
+    } as MixinDepositResponse;
   }
 
-  async getPendingDeposits(): Promise<Deposit[]> {
+  async getPendingDeposits(): Promise<MixinDeposit[]> {
     return await this.repository.findByStatus(MixinDepositStatus.PENDING);
   }
 

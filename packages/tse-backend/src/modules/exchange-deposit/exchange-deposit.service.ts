@@ -77,4 +77,30 @@ export class ExchangeDepositService {
       );
     }
   }
+
+  async fetchDeposits(exchangeName: string, symbol: string) {
+    const exchange = this.ccxtGateway.getExchange(exchangeName);
+    if (!exchange) {
+      throw new ExchangeNotFoundException(exchangeName);
+    }
+
+    if (!exchange.has['fetchDeposits']) {
+      throw new DepositAddressFetchException(
+        exchangeName,
+        symbol,
+        new Error('fetchDeposits not supported'),
+      );
+    }
+
+    try {
+      return await exchange.fetchDeposits(symbol);
+    } catch (error) {
+      const interpretedError = this.ccxtGateway.interpretError(
+        error,
+        exchangeName,
+      );
+      this.logger.error(`Error fetching deposits: ${interpretedError.message}`);
+      throw interpretedError;
+    }
+  }
 }

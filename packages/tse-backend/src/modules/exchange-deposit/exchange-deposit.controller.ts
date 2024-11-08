@@ -4,8 +4,9 @@ import {
   UsePipes,
   ValidationPipe,
   Body,
+  Get,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ExchangeDepositService } from './exchange-deposit.service';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -13,10 +14,11 @@ import {
   CreateDepositCommand,
   CreateDepositDto,
 } from './model/exchange-deposit.model';
+import { ApiExcludeController } from '@nestjs/swagger';
 
-@ApiTags('exchange deposit')
 @UsePipes(new ValidationPipe())
 @Controller('exchange-deposit')
+@ApiExcludeController()
 export class ExchangeDepositController {
   constructor(
     private readonly exchangeDepositService: ExchangeDepositService,
@@ -24,10 +26,6 @@ export class ExchangeDepositController {
   ) {}
 
   @Post()
-  @ApiOperation({
-    summary:
-      'Create deposit address for a specific exchange, symbol, and network',
-  })
   async createDepositAddress(@Body() dto: CreateDepositDto) {
     const command = this.mapper.map(
       dto,
@@ -35,5 +33,16 @@ export class ExchangeDepositController {
       CreateDepositCommand,
     );
     return await this.exchangeDepositService.handleDeposit(command);
+  }
+
+  @Get()
+  async getDeposits(
+    @Query('exchangeName') exchangeName: string,
+    @Query('symbol') symbol: string,
+  ) {
+    return await this.exchangeDepositService.fetchDeposits(
+      exchangeName,
+      symbol,
+    );
   }
 }

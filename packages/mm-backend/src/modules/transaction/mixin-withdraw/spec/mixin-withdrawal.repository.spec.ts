@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Withdraw } from '../../../../common/entities/withdraw.entity';
-import { WithdrawRepository } from '../withdraw.repository';
-import { WithdrawData } from '../../../../common/interfaces/transaction.interfaces';
+import { MixinWithdrawal } from '../../../../common/entities/mixin-withdrawal.entity';
+import { MixinWithdrawalRepository } from '../mixin-withdrawal.repository';
+import { MixinWithdrawalData } from '../../../../common/interfaces/transaction.interfaces';
 import { MixinWithdrawalStatus } from '../../../../common/enums/transaction.enum';
 
 const mockRepository = {
@@ -12,20 +12,22 @@ const mockRepository = {
 };
 
 describe('WithdrawRepository', () => {
-  let withdrawRepository: WithdrawRepository;
+  let withdrawRepository: MixinWithdrawalRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WithdrawRepository,
+        MixinWithdrawalRepository,
         {
-          provide: getRepositoryToken(Withdraw),
+          provide: getRepositoryToken(MixinWithdrawal),
           useValue: mockRepository,
         },
       ],
     }).compile();
 
-    withdrawRepository = module.get<WithdrawRepository>(WithdrawRepository);
+    withdrawRepository = module.get<MixinWithdrawalRepository>(
+      MixinWithdrawalRepository,
+    );
   });
 
   it('should be defined', () => {
@@ -33,7 +35,7 @@ describe('WithdrawRepository', () => {
   });
 
   it('should call repository.save with correct data', async () => {
-    const data: WithdrawData = {
+    const data: MixinWithdrawalData = {
       userId: 'user1',
       assetId: 'asset1',
       amount: 100,

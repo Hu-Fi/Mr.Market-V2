@@ -34,4 +34,22 @@ export class ExchangeWithdrawalService {
       throw interpretedError;
     }
   }
+
+  async fetchWithdrawal(exchangeName: string, transactionHash: string) {
+    const exchange = this.ccxtGateway.getExchange(exchangeName);
+    if (!exchange) {
+      throw new ExchangeNotFoundException(exchangeName);
+    }
+
+    try {
+      return await exchange.fetchWithdrawals(transactionHash);
+    } catch (error) {
+      const interpretedError = this.ccxtGateway.interpretError(
+        error,
+        exchangeName,
+      );
+      this.logger.error(interpretedError.message);
+      throw interpretedError;
+    }
+  }
 }

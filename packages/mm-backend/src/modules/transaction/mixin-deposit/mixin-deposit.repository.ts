@@ -1,18 +1,18 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DepositData } from '../../../common/interfaces/transaction.interfaces';
-import { Deposit } from '../../../common/entities/deposit.entity';
+import { MixinDepositData } from '../../../common/interfaces/transaction.interfaces';
+import { MixinDeposit } from '../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
-export class DepositRepository {
+export class MixinDepositRepository {
   constructor(
-    @InjectRepository(Deposit)
-    private readonly repository: Repository<Deposit>,
+    @InjectRepository(MixinDeposit)
+    private readonly repository: Repository<MixinDeposit>,
   ) {}
 
-  async save(data: DepositData) {
+  async save(data: MixinDepositData) {
     return await this.repository.save(data);
   }
 

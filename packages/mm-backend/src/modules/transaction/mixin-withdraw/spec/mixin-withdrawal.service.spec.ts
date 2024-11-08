@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MixinGateway } from '../../../../integrations/mixin.gateway';
-import { WithdrawRepository } from '../withdraw.repository';
-import { WithdrawService } from '../withdraw.service';
-import { WithdrawCommand } from '../model/withdraw.model';
+import { MixinWithdrawalRepository } from '../mixin-withdrawal.repository';
+import { MixinWithdrawalService } from '../mixin-withdrawal.service';
+import { WithdrawCommand } from '../model/mixin-withdrawal.model';
 import { MixinWithdrawalStatus } from '../../../../common/enums/transaction.enum';
-import { WithdrawResponse } from '../../../../common/interfaces/transaction.interfaces';
+import { MixinWithdrawResponse } from '../../../../common/interfaces/transaction.interfaces';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -16,7 +16,7 @@ jest.mock('typeorm-transactional', () => ({
 }));
 
 describe('WithdrawService', () => {
-  let service: WithdrawService;
+  let service: MixinWithdrawalService;
 
   const mockMixinGateway = {
     handleWithdrawal: jest.fn().mockResolvedValue({
@@ -35,19 +35,19 @@ describe('WithdrawService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WithdrawService,
+        MixinWithdrawalService,
         {
           provide: MixinGateway,
           useValue: mockMixinGateway,
         },
         {
-          provide: WithdrawRepository,
+          provide: MixinWithdrawalRepository,
           useValue: mockWithdrawRepository,
         },
       ],
     }).compile();
 
-    service = module.get<WithdrawService>(WithdrawService);
+    service = module.get<MixinWithdrawalService>(MixinWithdrawalService);
   });
 
   it('should be defined', () => {
@@ -73,7 +73,7 @@ describe('WithdrawService', () => {
 
       expect(mockMixinGateway.handleWithdrawal).toHaveBeenCalledWith(command);
 
-      expect(result).toEqual<WithdrawResponse>({
+      expect(result).toEqual<MixinWithdrawResponse>({
         transactionHash: 'mockTransactionHash',
         snapshotId: 'mockSnapshotId',
       });

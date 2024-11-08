@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DepositRepository } from '../deposit.repository';
-import { Deposit } from '../../../../common/entities/deposit.entity';
+import { MixinDepositRepository } from '../mixin-deposit.repository';
+import { MixinDeposit } from '../../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
 
 const mockRepository = {
@@ -11,20 +11,22 @@ const mockRepository = {
 };
 
 describe('DepositRepository', () => {
-  let depositRepository: DepositRepository;
+  let depositRepository: MixinDepositRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DepositRepository,
+        MixinDepositRepository,
         {
-          provide: getRepositoryToken(Deposit),
+          provide: getRepositoryToken(MixinDeposit),
           useValue: mockRepository,
         },
       ],
     }).compile();
 
-    depositRepository = module.get<DepositRepository>(DepositRepository);
+    depositRepository = module.get<MixinDepositRepository>(
+      MixinDepositRepository,
+    );
   });
 
   it('should be defined', () => {

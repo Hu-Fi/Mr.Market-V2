@@ -6,7 +6,7 @@ import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ExchangeDepositService } from '../exchange-deposit.service';
 import { CreateDepositCommand } from '../model/exchange-deposit.model';
-import { DepositRepository } from '../../mixin-deposit/deposit.repository';
+import { ExchangeDepositRepository } from '../exchange-deposit.repository';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -42,7 +42,7 @@ describe('ExchangeDepositService', () => {
           },
         },
         {
-          provide: DepositRepository,
+          provide: ExchangeDepositRepository,
           useValue: mockDepositRepository,
         },
       ],
@@ -59,6 +59,7 @@ describe('ExchangeDepositService', () => {
   it('should make an HTTP request and save deposit transaction', async () => {
     const command: CreateDepositCommand = {
       userId: 'user123',
+      amount: 0.05,
       symbol: 'BTC',
       network: 'BTC',
       exchangeName: 'binance',
@@ -83,6 +84,7 @@ describe('ExchangeDepositService', () => {
       chainId: command.network,
       amount: transaction.amount,
       status: 'pending',
+      exchangeName: 'binance',
     });
     expect(result).toEqual(transaction);
   });
@@ -90,6 +92,7 @@ describe('ExchangeDepositService', () => {
   it('should throw an error if the HTTP request fails', async () => {
     const command: CreateDepositCommand = {
       userId: 'user123',
+      amount: 1,
       symbol: 'BTC',
       network: 'BTC',
       exchangeName: 'binance',
@@ -113,6 +116,7 @@ describe('ExchangeDepositService', () => {
   it('should throw an error if saving deposit transaction fails', async () => {
     const command: CreateDepositCommand = {
       userId: 'user123',
+      amount: 1,
       symbol: 'BTC',
       network: 'BTC',
       exchangeName: 'binance',

@@ -3,21 +3,22 @@ import { TransactionController } from '../transaction.controller';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { TransactionProfile } from '../transaction.mapper';
-import { DepositService } from '../mixin-deposit/deposit.service';
+import { MixinDepositService } from '../mixin-deposit/mixin-deposit.service';
 import {
   DepositCommand,
   DepositDto,
-} from '../mixin-deposit/model/deposit.model';
-import { DepositResponse } from '../../../common/interfaces/transaction.interfaces';
-import { WithdrawService } from '../mixin-withdraw/withdraw.service';
+} from '../mixin-deposit/model/mixin-deposit.model';
+import { MixinDepositResponse } from '../../../common/interfaces/transaction.interfaces';
+import { MixinWithdrawalService } from '../mixin-withdraw/mixin-withdrawal.service';
 import {
   WithdrawCommand,
   WithdrawDto,
-} from '../mixin-withdraw/model/withdraw.model';
+} from '../mixin-withdraw/model/mixin-withdrawal.model';
 import { CreateWithdrawalDto } from '../exchange-withdraw/model/exchange-withdrawal.model';
 import { CreateDepositDto } from '../exchange-deposit/model/exchange-deposit.model';
 import { ExchangeDepositService } from '../exchange-deposit/exchange-deposit.service';
-import { ExchangeWithdrawService } from '../exchange-withdraw/exchange-withdraw.service';
+import { ExchangeWithdrawalService } from '../exchange-withdraw/exchange-withdrawal.service';
+import { ExchangeNetwork } from '../../../common/enums/exchange.enum';
 
 describe('TransactionController', () => {
   let controller: TransactionController;
@@ -45,11 +46,11 @@ describe('TransactionController', () => {
       ],
       providers: [
         {
-          provide: DepositService,
+          provide: MixinDepositService,
           useValue: mockDepositService,
         },
         {
-          provide: WithdrawService,
+          provide: MixinWithdrawalService,
           useValue: mockWithdrawService,
         },
         {
@@ -57,7 +58,7 @@ describe('TransactionController', () => {
           useValue: mockExchangeDepositService,
         },
         {
-          provide: ExchangeWithdrawService,
+          provide: ExchangeWithdrawalService,
           useValue: mockExchangeWithdrawService,
         },
         TransactionProfile,
@@ -81,7 +82,7 @@ describe('TransactionController', () => {
 
       const userId = 'user-id-123';
       const command: DepositCommand = { userId, ...depositDto };
-      const depositResponse: DepositResponse = {
+      const depositResponse: MixinDepositResponse = {
         assetId: depositDto.assetId,
         amount: depositDto.amount,
         destination: 'some-destination',
@@ -129,7 +130,8 @@ describe('TransactionController', () => {
       const createDepositDto: CreateDepositDto = {
         exchangeName: 'Binance',
         symbol: 'BTC',
-        network: 'BTC',
+        network: ExchangeNetwork.ERC20,
+        amount: 0.001,
       };
 
       const depositResponse = {

@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Withdraw {
+export class MixinWithdrawal {
   @PrimaryGeneratedColumn()
   id: number;
 

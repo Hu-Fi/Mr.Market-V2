@@ -4,9 +4,9 @@ import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { ExchangeWithdrawService } from '../exchange-withdraw.service';
+import { ExchangeWithdrawalService } from '../exchange-withdrawal.service';
 import { CreateWithdrawalCommand } from '../model/exchange-withdrawal.model';
-import { WithdrawRepository } from '../../mixin-withdraw/withdraw.repository';
+import { ExchangeWithdrawalRepository } from '../exchange-withdrawal.repository';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -18,7 +18,7 @@ jest.mock('typeorm-transactional', () => ({
 }));
 
 describe('ExchangeWithdrawService', () => {
-  let service: ExchangeWithdrawService;
+  let service: ExchangeWithdrawalService;
   let httpService: HttpService;
 
   const mockWithdrawRepository = {
@@ -29,7 +29,7 @@ describe('ExchangeWithdrawService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ExchangeWithdrawService,
+        ExchangeWithdrawalService,
         {
           provide: ConfigService,
           useValue: {
@@ -43,13 +43,13 @@ describe('ExchangeWithdrawService', () => {
           },
         },
         {
-          provide: WithdrawRepository,
+          provide: ExchangeWithdrawalRepository,
           useValue: mockWithdrawRepository,
         },
       ],
     }).compile();
 
-    service = module.get<ExchangeWithdrawService>(ExchangeWithdrawService);
+    service = module.get<ExchangeWithdrawalService>(ExchangeWithdrawalService);
     httpService = module.get<HttpService>(HttpService);
   });
 
@@ -82,6 +82,7 @@ describe('ExchangeWithdrawService', () => {
       destination: command.address,
       amount: command.amount,
       status: 'pending',
+      exchangeName: 'binance',
     });
     expect(httpService.post).toHaveBeenCalledWith(
       'http://mock-tse-api-url/exchange-withdrawal',
