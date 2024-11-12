@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
 import { Transactional } from 'typeorm-transactional';
-import { WithdrawResponse } from '../../../common/interfaces/transaction.interfaces';
-import { WithdrawCommand } from './model/withdraw.model';
-import { WithdrawRepository } from './withdraw.repository';
+import { MixinWithdrawResponse } from '../../../common/interfaces/transaction.interfaces';
+import { WithdrawCommand } from './model/mixin-withdrawal.model';
+import { MixinWithdrawalRepository } from './mixin-withdrawal.repository';
 import { MixinWithdrawalStatus } from '../../../common/enums/transaction.enum';
 
 @Injectable()
-export class WithdrawService {
+export class MixinWithdrawalService {
   constructor(
     private readonly mixinGateway: MixinGateway,
-    private readonly repository: WithdrawRepository,
+    private readonly repository: MixinWithdrawalRepository,
   ) {}
 
   @Transactional()
@@ -31,7 +31,7 @@ export class WithdrawService {
     return {
       transactionHash: withdrawalResult.transaction_hash,
       snapshotId: withdrawalResult.snapshot_id,
-    } as WithdrawResponse;
+    } as MixinWithdrawResponse;
   }
 
   async getSignedWithdrawals() {

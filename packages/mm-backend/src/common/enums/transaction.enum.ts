@@ -8,12 +8,16 @@ export enum MixinWithdrawalStatus {
   SPENT = 'spent',
 }
 
-export enum TransactionStatus {
+export enum ExchangeDepositStatus {
   PENDING = 'pending',
   OK = 'ok',
   CANCELLED = 'cancelled',
   FAILED = 'failed',
 }
 
-export type WithdrawalStatus = MixinWithdrawalStatus | TransactionStatus;
-export type DepositStatus = MixinDepositStatus | TransactionStatus;
+export enum ExchangeWithdrawalStatus {
+  PENDING = 'pending',
+  OK = 'ok',
+  CANCELLED = 'cancelled',
+  FAILED = 'failed',
+}

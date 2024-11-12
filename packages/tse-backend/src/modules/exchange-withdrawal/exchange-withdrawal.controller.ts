@@ -4,8 +4,9 @@ import {
   Body,
   UsePipes,
   ValidationPipe,
+  Get,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ExchangeWithdrawalService } from './exchange-withdrawal.service';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -13,10 +14,11 @@ import {
   CreateWithdrawalCommand,
   CreateWithdrawalDto,
 } from './model/exchange-withdrawal.model';
+import { ApiExcludeController } from '@nestjs/swagger';
 
-@ApiTags('exchange withdrawal')
 @UsePipes(new ValidationPipe())
 @Controller('exchange-withdrawal')
+@ApiExcludeController()
 export class ExchangeWithdrawalController {
   constructor(
     private readonly exchangeWithdrawalService: ExchangeWithdrawalService,
@@ -24,10 +26,6 @@ export class ExchangeWithdrawalController {
   ) {}
 
   @Post()
-  @ApiOperation({
-    summary:
-      'Initiate a withdrawal for a specific exchange, symbol, and network',
-  })
   async createWithdrawal(@Body() dto: CreateWithdrawalDto) {
     const command = this.mapper.map(
       dto,
@@ -35,5 +33,16 @@ export class ExchangeWithdrawalController {
       CreateWithdrawalCommand,
     );
     return await this.exchangeWithdrawalService.handleWithdrawal(command);
+  }
+
+  @Get()
+  async getWithdrawal(
+    @Query('exchangeName') exchangeName: string,
+    @Query('transactionHash') transactionHash: string,
+  ) {
+    return await this.exchangeWithdrawalService.fetchWithdrawal(
+      exchangeName,
+      transactionHash,
+    );
   }
 }

@@ -4,8 +4,8 @@ import { HttpService } from '@nestjs/axios';
 import { CreateDepositCommand } from './model/exchange-deposit.model';
 import { lastValueFrom, map } from 'rxjs';
 import { Transactional } from 'typeorm-transactional';
-import { DepositRepository } from '../mixin-deposit/deposit.repository';
-import { TransactionStatus } from '../../../common/enums/transaction.enum';
+import { ExchangeDepositStatus } from '../../../common/enums/transaction.enum';
+import { ExchangeDepositRepository } from './exchange-deposit.repository';
 
 @Injectable()
 export class ExchangeDepositService {
@@ -14,7 +14,7 @@ export class ExchangeDepositService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-    private readonly repository: DepositRepository,
+    private readonly repository: ExchangeDepositRepository,
   ) {
     this.tseApiUrl = this.configService.get<string>(
       'TRADING_STRATEGY_EXECUTION_API',
@@ -32,13 +32,34 @@ export class ExchangeDepositService {
 
     await this.repository.save({
       userId: command.userId,
+      exchangeName: command.exchangeName,
       assetId: command.symbol,
       destination: transaction.address,
       chainId: command.network,
-      amount: transaction.amount,
-      status: TransactionStatus.PENDING,
+      amount: command.amount,
+      status: ExchangeDepositStatus.PENDING,
     });
 
     return transaction;
+  }
+
+  async getDeposits(exchangeName: string, symbol: string) {
+    const query = `?exchangeName=${exchangeName}&symbol=${symbol}`;
+    const url = `${this.tseApiUrl}/exchange-deposit${query}`;
+    return await lastValueFrom(
+      this.httpService.get(url).pipe(map((res) => res.data)),
+    );
+  }
+
+  async getPendingDeposits() {
+    return await this.repository.findByStatus(ExchangeDepositStatus.PENDING);
+  }
+
+  async updateDepositStatus(depositId: number, status: ExchangeDepositStatus) {
+    await this.repository.updateStatusById(depositId, status);
+  }
+
+  async updateDepositTransactionHash(depositId: number, txHash: string) {
+    await this.repository.updateTransactionHashById(depositId, txHash);
   }
 }

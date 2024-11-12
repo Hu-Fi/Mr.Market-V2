@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Deposit {
+export class MixinDeposit {
   @PrimaryGeneratedColumn()
   id: number;
 

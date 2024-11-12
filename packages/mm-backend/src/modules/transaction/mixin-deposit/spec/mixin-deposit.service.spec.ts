@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DepositService } from '../deposit.service';
-import { DepositRepository } from '../deposit.repository';
+import { MixinDepositService } from '../mixin-deposit.service';
+import { MixinDepositRepository } from '../mixin-deposit.repository';
 import { MixinGateway } from '../../../../integrations/mixin.gateway';
-import { DepositCommand } from '../model/deposit.model';
-import { DepositResponse } from '../../../../common/interfaces/transaction.interfaces';
-import { Deposit } from '../../../../common/entities/deposit.entity';
+import { DepositCommand } from '../model/mixin-deposit.model';
+import { MixinDepositResponse } from '../../../../common/interfaces/transaction.interfaces';
+import { MixinDeposit } from '../../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
 
 jest.mock('typeorm-transactional', () => ({
@@ -17,9 +17,9 @@ jest.mock('typeorm-transactional', () => ({
 }));
 
 describe('DepositService', () => {
-  let service: DepositService;
+  let service: MixinDepositService;
   let mixinGateway: MixinGateway;
-  let transactionRepository: DepositRepository;
+  let transactionRepository: MixinDepositRepository;
 
   const mockMixinGateway = {
     fetchTransactionDetails: jest.fn(),
@@ -38,21 +38,23 @@ describe('DepositService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DepositService,
+        MixinDepositService,
         {
           provide: MixinGateway,
           useValue: mockMixinGateway,
         },
         {
-          provide: DepositRepository,
+          provide: MixinDepositRepository,
           useValue: mockDepositRepository,
         },
       ],
     }).compile();
 
-    service = module.get<DepositService>(DepositService);
+    service = module.get<MixinDepositService>(MixinDepositService);
     mixinGateway = module.get<MixinGateway>(MixinGateway);
-    transactionRepository = module.get<DepositRepository>(DepositRepository);
+    transactionRepository = module.get<MixinDepositRepository>(
+      MixinDepositRepository,
+    );
   });
 
   it('should be defined', () => {
@@ -69,7 +71,7 @@ describe('DepositService', () => {
       };
 
       const destination = 'destination-address';
-      const depositResponse: DepositResponse = {
+      const depositResponse: MixinDepositResponse = {
         assetId: command.assetId,
         amount: command.amount,
         destination: destination,
@@ -92,7 +94,7 @@ describe('DepositService', () => {
 
   describe('getPendingDeposits', () => {
     it('should return pending deposits', async () => {
-      const pendingDeposits: Deposit[] = [
+      const pendingDeposits: MixinDeposit[] = [
         {
           id: 1,
           userId: 'user-id-123',

@@ -1,15 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { DepositService } from './mixin-deposit/deposit.service';
 import { MixinGateway } from '../../integrations/mixin.gateway';
-import { Deposit } from '../../common/entities/deposit.entity';
 import {
-  MixinDepositStatus,
+  ExchangeDepositStatus,
+  ExchangeWithdrawalStatus,
   MixinWithdrawalStatus,
 } from '../../common/enums/transaction.enum';
-import { UserBalanceService } from '../user-balance/user-balance.service';
-import { WithdrawService } from './mixin-withdraw/withdraw.service';
+import { MixinTransactionUtils } from './utils/mixin-transaction.utils';
+import { ExchangeTransactionUtils } from './utils/exchange-transaction.utils';
 
 @Injectable()
 export class TransactionService {
@@ -19,10 +18,9 @@ export class TransactionService {
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly schedulerUtils: SchedulerUtil,
-    private readonly depositService: DepositService,
-    private readonly withdrawService: WithdrawService,
     private readonly mixinGateway: MixinGateway,
-    private readonly userBalanceService: UserBalanceService,
+    private readonly mixinTransactionUtils: MixinTransactionUtils,
+    private readonly exchangeTransactionUtils: ExchangeTransactionUtils,
   ) {}
 
   onModuleInit() {
@@ -38,79 +36,47 @@ export class TransactionService {
     this.logger.debug('Worker checking transactions in progress started');
     await this.processMixinDeposits();
     await this.processMixinWithdrawals();
+
+    await this.processExchangeDeposits();
+    await this.processExchangeWithdrawals();
   }
 
   async processMixinDeposits() {
     const outputs = await this.mixinGateway.getUnspentTransactionOutputs();
-    const pendingDeposits = await this.getPendingDeposits();
+    const pendingDeposits =
+      await this.mixinTransactionUtils.getPendingDeposits();
     if (
       outputs &&
       outputs.length > 0 &&
       pendingDeposits &&
       pendingDeposits.length > 0
     ) {
-      await this.findMatchingDeposit(outputs, pendingDeposits);
+      await this.mixinTransactionUtils.findAndProcessMatchingDeposits(
+        outputs,
+        pendingDeposits,
+      );
     }
   }
 
   async processMixinWithdrawals() {
-    const signedWithdrawals = await this.withdrawService.getSignedWithdrawals();
+    const signedWithdrawals =
+      await this.mixinTransactionUtils.getSignedWithdrawals();
     for (const withdrawal of signedWithdrawals) {
       const { transactionHash, id } = withdrawal;
       const transactionDetails =
         await this.mixinGateway.fetchTransactionDetails(transactionHash);
       if (transactionDetails.state === MixinWithdrawalStatus.SPENT) {
-        await this.withdrawService.updateWithdrawalStatus(
+        await this.mixinTransactionUtils.updateWithdrawalStatus(
           id,
           MixinWithdrawalStatus.SPENT,
         );
-        await this.userBalanceService.updateUserBalance({
+        await this.mixinTransactionUtils.updateUserBalance({
           userId: withdrawal.userId,
           assetId: withdrawal.assetId,
           amount: -withdrawal.amount,
         });
         this.logger.debug(
           `Withdrawal ${withdrawal.id} confirmed and updated to spent`,
-        );
-      }
-    }
-  }
-
-  private async getPendingDeposits(): Promise<Deposit[]> {
-    const pendingDeposits = await this.depositService.getPendingDeposits();
-    return pendingDeposits && pendingDeposits.length > 0
-      ? pendingDeposits
-      : null;
-  }
-
-  private async findMatchingDeposit(
-    outputs: any[],
-    pendingDeposits: Deposit[],
-  ) {
-    for (const deposit of pendingDeposits) {
-      const matchingOutput = outputs.find(
-        (output) =>
-          output.asset_id === deposit.assetId &&
-          parseFloat(output.amount) === parseFloat(String(deposit.amount)) &&
-          new Date(output.created_at) > new Date(deposit.createdAt),
-      );
-
-      if (matchingOutput) {
-        await this.userBalanceService.updateUserBalance({
-          userId: deposit.userId,
-          assetId: deposit.assetId,
-          amount: deposit.amount,
-        });
-        await this.depositService.updateDepositStatus(
-          deposit.id,
-          MixinDepositStatus.CONFIRMED,
-        );
-        await this.depositService.updateDepositTransactionHash(
-          deposit.id,
-          matchingOutput.transaction_hash,
-        );
-        this.logger.debug(
-          `Deposit ${deposit.id} confirmed with transaction hash ${matchingOutput.transaction_hash}`,
         );
       }
     }
@@ -128,6 +94,65 @@ export class TransactionService {
       this.logger.error('Error processing data', error.stack);
     } finally {
       this.isJobRunning = false;
+    }
+  }
+
+  private async processExchangeDeposits() {
+    const pendingDeposits =
+      await this.exchangeTransactionUtils.getPendingDeposits();
+    for (const pendingDeposit of pendingDeposits) {
+      const { id, userId, exchangeName, assetId, amount, destination } =
+        pendingDeposit;
+      const exchangeDeposits = await this.exchangeTransactionUtils.getDeposits(
+        exchangeName,
+        assetId,
+      );
+      for (const exchangeDeposit of exchangeDeposits) {
+        if (
+          exchangeDeposit.amount == amount &&
+          exchangeDeposit.addressTo == destination
+        ) {
+          await this.exchangeTransactionUtils.updateDepositStatus(
+            id,
+            ExchangeDepositStatus.OK,
+          );
+          await this.exchangeTransactionUtils.updateDepositTransactionHash(
+            id,
+            exchangeDeposit.txid,
+          );
+          await this.exchangeTransactionUtils.updateUserBalance({
+            userId,
+            assetId,
+            amount,
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  private async processExchangeWithdrawals() {
+    const pendingWithdrawals =
+      await this.exchangeTransactionUtils.getPendingWithdrawals();
+    for (const pendingWithdrawal of pendingWithdrawals) {
+      const { transactionHash, exchangeName, userId, assetId, amount } =
+        pendingWithdrawal;
+      const txDetails = await this.exchangeTransactionUtils.getWithdrawal(
+        exchangeName,
+        transactionHash,
+      );
+      if (txDetails.status == ExchangeWithdrawalStatus.OK) {
+        await this.exchangeTransactionUtils.updateWithdrawalStatus(
+          pendingWithdrawal.id,
+          ExchangeWithdrawalStatus.OK,
+        );
+        await this.mixinTransactionUtils.updateUserBalance({
+          userId,
+          assetId,
+          amount: -amount,
+        });
+        break;
+      }
     }
   }
 }

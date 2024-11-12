@@ -3,17 +3,17 @@ import { ExchangeDepositService } from './exchange-deposit.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { TransactionProfile } from '../transaction.mapper';
-import { DepositRepository } from '../mixin-deposit/deposit.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Deposit } from '../../../common/entities/deposit.entity';
+import { ExchangeDepositRepository } from './exchange-deposit.repository';
+import { ExchangeDeposit } from '../../../common/entities/exchange-deposit.entity';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Deposit])],
+  imports: [HttpModule, TypeOrmModule.forFeature([ExchangeDeposit])],
   providers: [
     ExchangeDepositService,
+    ExchangeDepositRepository,
     TransactionProfile,
     ConfigService,
-    DepositRepository,
   ],
   exports: [ExchangeDepositService],
 })

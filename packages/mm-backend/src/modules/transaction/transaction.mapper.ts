@@ -4,11 +4,11 @@ import { createMap, Mapper } from '@automapper/core';
 import {
   DepositCommand,
   DepositDto,
-} from './mixin-deposit/model/deposit.model';
+} from './mixin-deposit/model/mixin-deposit.model';
 import {
   WithdrawCommand,
   WithdrawDto,
-} from './mixin-withdraw/model/withdraw.model';
+} from './mixin-withdraw/model/mixin-withdrawal.model';
 import {
   CreateDepositCommand,
   CreateDepositDto,
