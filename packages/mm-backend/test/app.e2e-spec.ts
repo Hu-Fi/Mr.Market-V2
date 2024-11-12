@@ -84,8 +84,7 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
   it(
     '1b. should the user join an existing campaign',
     async () => {
-      if (!TESTED_CAMPAIGN) return true;
-
+      if (!TESTED_CAMPAIGN) return true; //insufficient
       try {
         const response = await registerUserToCampaign(
           joinCampaignPayload(TESTED_CAMPAIGN),
@@ -120,7 +119,7 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
     '2. should the recording oracle calculate the liquidity score for this campaign',
     async () => {
       try {
-        if (!TESTED_CAMPAIGN) return true;
+        if (!TESTED_CAMPAIGN) return true; //insufficient
 
         const response = await calculateLiquidityScore(
           calculateLiquidityPayload(TESTED_CAMPAIGN),
@@ -156,7 +155,7 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
   it(
     '4. should the bot join a campaign',
     async () => {
-      if (!TESTED_CAMPAIGN) return true;
+      if (!TESTED_CAMPAIGN) return true; //insufficient
       // MrMarket V2 does not implement this functionality at the moment. Therefore, only the request to the external service is checked, as if the bot were doing it.
       try {
         const response = await registerBotToCampaign(
