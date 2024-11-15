@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { MixinGateway } from '../../integrations/mixin.gateway';
@@ -8,6 +8,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthProfile } from './auth.mapper';
 import { UserModule } from '../user/user.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MixinAuthSession } from '../../common/entities/mixin-auth-session.entity';
+import { AuthSessionRepository } from './auth-session.repository';
 
 @Module({
   imports: [
@@ -21,9 +24,17 @@ import { UserModule } from '../user/user.module';
       inject: [ConfigService],
     }),
     ConfigModule,
-    UserModule,
+    forwardRef(() => UserModule),
+    TypeOrmModule.forFeature([MixinAuthSession]),
   ],
-  providers: [AuthService, MixinGateway, JwtStrategy, AuthProfile],
+  providers: [
+    AuthService,
+    MixinGateway,
+    JwtStrategy,
+    AuthProfile,
+    AuthSessionRepository,
+  ],
+  exports: [AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}

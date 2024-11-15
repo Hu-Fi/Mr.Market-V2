@@ -7,6 +7,7 @@ import { MixinDeposit } from '../entities/mixin-deposit.entity';
 import { MixinWithdrawal } from '../entities/mixin-withdrawal.entity';
 import { ExchangeDeposit } from '../entities/exchange-deposit.entity';
 import { ExchangeWithdrawal } from '../entities/exchange-withdrawal.entity';
+import { MixinAuthSession } from '../entities/mixin-auth-session.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -39,6 +40,7 @@ export class TypeormConfig {
         MixinWithdrawal,
         ExchangeDeposit,
         ExchangeWithdrawal,
+        MixinAuthSession,
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,

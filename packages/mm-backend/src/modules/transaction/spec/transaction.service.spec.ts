@@ -49,7 +49,10 @@ describe('TransactionService', () => {
         { provide: SchedulerRegistry, useValue: {} },
         { provide: SchedulerUtil, useValue: mockSchedulerUtils },
         { provide: MixinTransactionUtils, useValue: mockMixinTransactionUtils },
-        { provide: ExchangeTransactionUtils, useValue: mockExchangeTransactionUtils },
+        {
+          provide: ExchangeTransactionUtils,
+          useValue: mockExchangeTransactionUtils,
+        },
       ],
     }).compile();
 
@@ -83,7 +86,9 @@ describe('TransactionService', () => {
       await transactionService.handleCron();
 
       expect(loggerSpy).toHaveBeenCalledWith('Job still running, skipping');
-      expect(mockMixinTransactionUtils.getPendingDeposits).not.toHaveBeenCalled();
+      expect(
+        mockMixinTransactionUtils.getPendingDeposits,
+      ).not.toHaveBeenCalled();
     });
   });
 });

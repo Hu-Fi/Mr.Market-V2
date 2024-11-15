@@ -13,14 +13,26 @@ import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
 import {
   adminLoginCommandFixture,
   mixinOAuthCommandFixture,
+  oauthResponseFixture,
 } from './auth.fixtures';
 import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 import { UserService } from '../../user/user.service';
+import { AuthSessionRepository } from '../auth-session.repository';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
   let adminLoginResponse: JwtResponse;
   let userLoginResponse: JwtResponse;
+
+  const mockAuthSessionRepository = {
+    findByUserId: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+  };
+
+  const mockUserService = {
+    createUser: jest.fn(),
+  };
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,19 +48,17 @@ describe('RolesGuard', () => {
       controllers: [MockController],
       providers: [
         Reflector,
-        AuthService,
-        JwtStrategy,
         {
           provide: 'APP_GUARD',
           useClass: JwtAuthGuard,
         },
+        JwtStrategy,
+        AuthService,
         RolesGuard,
         {
           provide: MixinGateway,
           useValue: {
-            oauthHandler: jest.fn().mockReturnValue({
-              clientId: 'clientId',
-            }),
+            oauthHandler: jest.fn().mockReturnValue(oauthResponseFixture),
           },
         },
         {
@@ -68,9 +78,11 @@ describe('RolesGuard', () => {
         },
         {
           provide: UserService,
-          useValue: {
-            createUser: jest.fn(),
-          },
+          useValue: mockUserService,
+        },
+        {
+          provide: AuthSessionRepository,
+          useValue: mockAuthSessionRepository,
         },
       ],
     }).compile();
@@ -79,6 +91,10 @@ describe('RolesGuard', () => {
     await app.init();
 
     const authService = module.get<AuthService>(AuthService);
+
+    jest.spyOn(authService, 'saveUserToDatabase').mockResolvedValue(undefined);
+    jest.spyOn(authService, 'findAndUpdateAuthId').mockResolvedValue(undefined);
+
     adminLoginResponse = await authService.validateUser(
       adminLoginCommandFixture,
     );
