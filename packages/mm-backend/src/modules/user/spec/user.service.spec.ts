@@ -1,15 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../user.service';
 import { UserRepository } from '../user.repository';
+import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { AuthService } from '../../auth/auth.service';
 import { User } from '../../../common/entities/user.entity';
 import { Role } from '../../../common/enums/role.enum';
+import { ClientSession } from '../../../common/interfaces/auth.interfaces';
 
 describe('UserService', () => {
   let service: UserService;
   let repository: UserRepository;
+  let authService: AuthService;
+  let mixinGateway: MixinGateway;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const testingModule: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
         {
@@ -18,11 +23,25 @@ describe('UserService', () => {
             create: jest.fn(),
           },
         },
+        {
+          provide: MixinGateway,
+          useValue: {
+            fetchUserBalanceDetails: jest.fn(),
+          },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            getMixinUserAuthSession: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
-    service = module.get<UserService>(UserService);
-    repository = module.get<UserRepository>(UserRepository);
+    service = testingModule.get<UserService>(UserService);
+    repository = testingModule.get<UserRepository>(UserRepository);
+    authService = testingModule.get<AuthService>(AuthService);
+    mixinGateway = testingModule.get<MixinGateway>(MixinGateway);
   });
 
   it('should be defined', () => {
@@ -46,6 +65,37 @@ describe('UserService', () => {
 
       expect(repository.create).toHaveBeenCalledWith(user);
       expect(repository.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getMixinUserBalance', () => {
+    it('should fetch user balance details', async () => {
+      const userId = 'some-user-id';
+      const clientSession: ClientSession = {
+        authorizationId: 'auth-id',
+        privateKey: 'private-key',
+        publicKey: 'public-key',
+      };
+      const balanceDetails = {
+        balances: [],
+        totalUSDBalance: '0',
+        totalBTCBalance: '0',
+      };
+
+      jest
+        .spyOn(authService, 'getMixinUserAuthSession')
+        .mockResolvedValue(clientSession);
+      jest
+        .spyOn(mixinGateway, 'fetchUserBalanceDetails')
+        .mockResolvedValue(balanceDetails);
+
+      const result = await service.getMixinUserBalance(userId);
+
+      expect(authService.getMixinUserAuthSession).toHaveBeenCalledWith(userId);
+      expect(mixinGateway.fetchUserBalanceDetails).toHaveBeenCalledWith(
+        clientSession,
+      );
+      expect(result).toEqual(balanceDetails);
     });
   });
 });

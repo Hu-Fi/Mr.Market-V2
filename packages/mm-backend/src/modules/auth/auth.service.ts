@@ -72,9 +72,7 @@ export class AuthService {
     return { accessToken: this.jwtService.sign(payload) };
   }
 
-  private async saveUserToDatabase(
-    clientDetails: ClientDetails,
-  ): Promise<void> {
+  async saveUserToDatabase(clientDetails: ClientDetails): Promise<void> {
     try {
       await this.userService.createUser({
         userId: clientDetails.clientId,
@@ -118,6 +116,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    return mixinAuthSession;
+    const { authorizationId, privateKey, publicKey } = mixinAuthSession;
+    return { authorizationId, privateKey, publicKey } as ClientSession;
   }
 }

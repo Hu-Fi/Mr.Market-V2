@@ -5,7 +5,10 @@ import {
   MixinOAuthDto,
 } from '../model/auth.model';
 import { createHash } from 'crypto';
-import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
+import {
+  JwtResponse,
+  OAuthResponse,
+} from '../../../common/interfaces/auth.interfaces';
 
 const OAUTH_CODE = 'a'.repeat(64);
 const HASHED_ADMIN_PASSWORD = createHash('sha3-256')
@@ -34,4 +37,19 @@ export const adminLoginResponseFixture: JwtResponse = {
 
 export const mixinOAuthResponseFixture: JwtResponse = {
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+};
+
+export const oauthResponseFixture: OAuthResponse = {
+  clientDetails: {
+    clientId: 'clientId',
+    type: 'type',
+    identityNumber: 'identityNumber',
+    fullName: 'fullName',
+    avatarUrl: 'avatarUrl',
+  },
+  clientSession: {
+    authorizationId: 'authorization_id',
+    privateKey: 'privateKey',
+    publicKey: 'publicKey',
+  },
 };

@@ -1,20 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import {
-  UnauthorizedException,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
   adminLoginCommandFixture,
   adminLoginResponseFixture,
   mixinOAuthCommandFixture,
   mixinOAuthResponseFixture,
+  oauthResponseFixture,
 } from './auth.fixtures';
 import { UserService } from '../../user/user.service';
+import { ConfigService } from '@nestjs/config';
+import { AuthSessionRepository } from '../auth-session.repository';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -22,9 +20,19 @@ describe('AuthService', () => {
   let jwtService: JwtService;
 
   beforeEach(async () => {
+    const mockAuthSessionRepository = {
+      findByUserId: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        {
+          provide: AuthSessionRepository,
+          useValue: mockAuthSessionRepository,
+        },
         {
           provide: MixinGateway,
           useValue: {
@@ -40,15 +48,12 @@ describe('AuthService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockImplementation((key: string) => {
-              switch (key) {
-                case 'ADMIN_PASSWORD':
-                  return 'admin_password';
-                case 'JWT_SECRET':
-                  return 'jwt_secret';
-                default:
-                  return null;
-              }
+            get: jest.fn((key: string) => {
+              const config = {
+                ADMIN_PASSWORD: 'admin_password',
+                JWT_SECRET: 'jwt_secret',
+              };
+              return config[key] || null;
             }),
           },
         },
@@ -66,12 +71,8 @@ describe('AuthService', () => {
     jwtService = module.get<JwtService>(JwtService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('validateUser', () => {
-    it('should return a JWT token if the password is valid', async () => {
+    it('should return a JWT token if password is valid', async () => {
       const command = adminLoginCommandFixture;
       const response = adminLoginResponseFixture;
       jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
@@ -86,8 +87,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {
-      const command = adminLoginCommandFixture;
-      command.password = 'invalidPassword';
+      const command = { ...adminLoginCommandFixture, password: 'invalid' };
 
       await expect(service.validateUser(command)).rejects.toThrow(
         UnauthorizedException,
@@ -96,33 +96,25 @@ describe('AuthService', () => {
   });
 
   describe('mixinOauthHandler', () => {
-    it('should call mixinGateway.oauthHandler if code length is valid', async () => {
+    it('should call mixinGateway.oauthHandler and return JWT token', async () => {
       const command = mixinOAuthCommandFixture;
       const response = mixinOAuthResponseFixture;
       jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
-      jest.spyOn(mixinGateway, 'oauthHandler').mockResolvedValue({
-        clientId: 'clientId',
-        type: 'type',
-        identityNumber: 'identityNumber',
-        fullName: 'fullName',
-        avatarUrl: 'avatarUrl',
-      });
+      jest
+        .spyOn(mixinGateway, 'oauthHandler')
+        .mockResolvedValue(oauthResponseFixture);
 
       const result = await service.mixinOauthHandler(command);
 
-      expect(jwtService.sign).toHaveBeenCalledWith({
-        roles: ['User'],
-        sub: 'clientId',
-      });
+      expect(mixinGateway.oauthHandler).toHaveBeenCalledWith(command.code);
       expect(result).toStrictEqual(response);
     });
 
-    it('should throw HttpException if code length is invalid', async () => {
-      const command = mixinOAuthCommandFixture;
-      command.code = 'short_code';
+    it('should throw BadRequestException if code is invalid', async () => {
+      const command = { ...mixinOAuthCommandFixture, code: 'short_code' };
 
       await expect(service.mixinOauthHandler(command)).rejects.toThrow(
-        new HttpException('Invalid code length', HttpStatus.BAD_REQUEST),
+        BadRequestException,
       );
     });
   });
