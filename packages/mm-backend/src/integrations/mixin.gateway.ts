@@ -17,7 +17,7 @@ import {
 } from '@mixin.dev/mixin-node-sdk';
 import { ConfigService } from '@nestjs/config';
 import {
-  AuthorizationResponse,
+  ClientSession,
   OAuthResponse,
 } from '../common/interfaces/auth.interfaces';
 import { DepositCommand } from '../modules/transaction/mixin-deposit/model/mixin-deposit.model';
@@ -32,6 +32,7 @@ export class MixinGateway {
   private readonly _clientSecret: string;
   private _client: KeystoreClientReturnType;
   private readonly spendPrivateKey: string;
+  private readonly scope: string;
 
   constructor(private configService: ConfigService) {
     this.keystore = {
@@ -51,28 +52,51 @@ export class MixinGateway {
     this.spendPrivateKey = this.configService.get<string>(
       'MIXIN_SPEND_PRIVATE_KEY',
     );
+    this.scope = this.configService.get<string>('MIXIN_OAUTH_SCOPE');
   }
 
   async oauthHandler(code: string): Promise<OAuthResponse> {
-    const { publicKey } = getED25519KeyPair();
-    const tokenResponse = await this._client.oauth.getToken({
+    const { seed, publicKey } = getED25519KeyPair();
+    const encodedPublicKey = base64RawURLEncode(publicKey);
+    const encodedPrivateKey = Buffer.from(seed).toString('hex');
+
+    const { authorization_id } = await this._client.oauth.getToken({
       client_id: this.keystore.app_id,
       code: code,
-      ed25519: base64RawURLEncode(publicKey),
+      ed25519: encodedPublicKey,
       client_secret: this._clientSecret,
     });
 
-    const authorization = (await this._client.oauth.authorize({
-      authorization_id: tokenResponse.authorization_id,
-      scopes: ['PROFILE:READ'],
-    })) as unknown as AuthorizationResponse;
+    const userProfile = await this._client.user.profile();
+
     return {
-      clientId: authorization.user.user_id,
-      type: authorization.user.type,
-      identityNumber: authorization.user.identity_number,
-      fullName: authorization.user.full_name,
-      avatarUrl: authorization.user.avatar_url,
+      clientDetails: {
+        clientId: userProfile.user_id,
+        type: userProfile.type,
+        identityNumber: userProfile.identity_number,
+        fullName: userProfile.full_name,
+        avatarUrl: userProfile.avatar_url,
+      },
+      clientSession: {
+        authorizationId: authorization_id,
+        privateKey: encodedPrivateKey,
+        publicKey: encodedPublicKey,
+      },
     };
+  }
+
+  private async createMixinClientForUser(
+    clientSession: ClientSession,
+  ): Promise<KeystoreClientReturnType> {
+    const { authorizationId, privateKey } = clientSession;
+    const keystore = {
+      app_id: this.keystore.app_id,
+      scope: this.scope,
+      authorization_id: authorizationId,
+      session_private_key: privateKey,
+    };
+
+    return MixinApi({ keystore });
   }
 
   async createDepositAddress(command: DepositCommand) {
@@ -284,5 +308,93 @@ export class MixinGateway {
 
   async fetchTransactionDetails(txHash: string) {
     return await this._client.utxo.fetchTransaction(txHash);
+  }
+
+  async fetchUserBalanceDetails(clientSession: ClientSession) {
+    const client = await this.createMixinClientForUser(clientSession);
+
+    const utxoOutputs = await client.utxo.safeOutputs({ state: 'unspent' });
+    const groupedUTXOs = this.groupAndSumUTXOs(utxoOutputs);
+
+    const balanceSummary = await this.calculateBalances(client, groupedUTXOs);
+
+    return {
+      balances: balanceSummary.details,
+      totalUSDBalance: balanceSummary.totalUSD.toFixed(2),
+      totalBTCBalance: balanceSummary.totalBTC.toFixed(8),
+    };
+  }
+
+  private groupAndSumUTXOs(utxoOutputs: SafeUtxoOutput[]) {
+    return Object.values(
+      utxoOutputs.reduce(
+        (grouped, utxo) => {
+          if (!grouped[utxo.asset_id]) {
+            grouped[utxo.asset_id] = {
+              asset_id: utxo.asset_id,
+              amount: new BigNumber(0),
+            };
+          }
+          grouped[utxo.asset_id].amount = grouped[utxo.asset_id].amount.plus(
+            utxo.amount,
+          );
+          return grouped;
+        },
+        {} as Record<string, { asset_id: string; amount: BigNumber }>,
+      ),
+    );
+  }
+
+  private async calculateBalances(
+    client: any,
+    groupedUTXOs: { asset_id: string; amount: BigNumber }[],
+  ) {
+    let totalUSDBalance = new BigNumber(0);
+    let totalBTCBalance = new BigNumber(0);
+
+    const balanceDetails = await Promise.all(
+      groupedUTXOs.map(async ({ asset_id, amount }) => {
+        const asset = await client.safe.fetchAsset(asset_id);
+
+        const balanceUSD = this.calculateValueInCurrency(
+          amount,
+          asset.price_usd,
+        );
+        const balanceBTC = this.calculateValueInCurrency(
+          amount,
+          asset.price_btc,
+        );
+
+        totalUSDBalance = totalUSDBalance.plus(balanceUSD);
+        totalBTCBalance = totalBTCBalance.plus(balanceBTC);
+
+        return {
+          asset: asset.asset_id,
+          symbol: asset.symbol,
+          balance: this.roundToPrecision(amount, 8),
+          balanceUSD: this.roundToPrecision(balanceUSD, 2),
+          balanceBTC: this.roundToPrecision(balanceBTC, 8),
+        };
+      }),
+    );
+
+    return {
+      details: balanceDetails,
+      totalUSD: totalUSDBalance,
+      totalBTC: totalBTCBalance,
+    };
+  }
+
+  private calculateValueInCurrency(
+    amount: BigNumber,
+    price: string | number,
+  ): BigNumber {
+    return amount.multipliedBy(new BigNumber(price));
+  }
+
+  private roundToPrecision(value: BigNumber, precision: number): string {
+    return value
+      .decimalPlaces(precision, BigNumber.ROUND_HALF_UP)
+      .toFixed(precision);
   }
 }
