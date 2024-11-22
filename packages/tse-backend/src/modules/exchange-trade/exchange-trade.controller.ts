@@ -36,7 +36,7 @@ export class ExchangeTradeController {
 
   @Post('/limit')
   @ApiOperation({ summary: 'Execute a limit trade' })
-  async handleLimitTrade(@Body() dto: MarketTradeDto) {
+  async handleLimitTrade(@Body() dto: MarketLimitDto) {
     const command = this.mapper.map(dto, MarketLimitDto, MarketLimitCommand);
     return await this.tradeService.executeLimitTrade(command);
   }
