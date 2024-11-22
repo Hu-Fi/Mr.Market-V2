@@ -37,8 +37,12 @@ export class CcxtGateway {
         apiKey,
         secret,
       });
+
       const isSandbox = this.configService.get('SANDBOX', false) === 'true';
-      exchange.setSandboxMode(isSandbox);
+      if (exchange.has['sandbox']) {
+        exchange.setSandboxMode(isSandbox);
+      }
+
       await exchange.loadMarkets();
       return exchange;
     } catch (error) {
