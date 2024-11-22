@@ -10,6 +10,7 @@ jest.mock('ccxt', () => {
     secret,
     loadMarkets: jest.fn().mockResolvedValue(true),
     setSandboxMode: jest.fn(),
+    has: { sandbox: true}
   }));
 
   return {

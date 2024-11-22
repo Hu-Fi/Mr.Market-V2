@@ -32,7 +32,7 @@ export class ExchangeRegistryService {
         );
         if (exchange) {
           this.ccxtGateway.addExchange(config.name, exchange);
-          this.logger.log(`${config.name} initialized successfully.`);
+          this.logger.log(`${config.name} initialized successfully. ${exchange.has['sandbox'] ? '(sandbox mode)' : ''}`);
         } else {
           this.logger.warn(`Failed to initialize ${config.name}.`);
         }
