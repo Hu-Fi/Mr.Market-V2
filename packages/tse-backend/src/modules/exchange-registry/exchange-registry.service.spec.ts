@@ -37,7 +37,12 @@ describe('ExchangeRegistryService', () => {
           if (!apiKey || !secret) {
             return null;
           }
-          return { name, apiKey, secret };
+          return {
+            name,
+            apiKey,
+            secret,
+            has: { sandbox: true },
+          };
         },
       ),
     };
@@ -94,6 +99,7 @@ describe('ExchangeRegistryService', () => {
       name: 'binance',
       apiKey: 'test_binance_api_key',
       secret: 'test_binance_secret',
+      has: { sandbox: true },
     });
   });
 });

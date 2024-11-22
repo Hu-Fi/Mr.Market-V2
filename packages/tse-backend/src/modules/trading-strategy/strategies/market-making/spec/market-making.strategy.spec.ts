@@ -24,6 +24,8 @@ import {
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateOrderDetails: jest.fn(),
   getPriceSource: jest.fn(),
+  isExchangeSupported: jest.fn().mockReturnValue(true),
+  isPairSupported: jest.fn().mockReturnValue(true),
 }));
 
 describe('MarketMakingStrategy', () => {
@@ -40,6 +42,8 @@ describe('MarketMakingStrategy', () => {
           provide: ExchangeRegistryService,
           useValue: {
             getExchange: jest.fn(),
+            getSupportedExchanges: jest.fn().mockReturnValue(['exchangea']),
+            getSupportedPairs: jest.fn(),
           },
         },
         {

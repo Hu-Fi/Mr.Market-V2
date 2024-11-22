@@ -28,6 +28,7 @@ jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   getFee: jest.fn(),
   calculateProfitLoss: jest.fn(),
   isExchangeSupported: jest.fn(),
+  isPairSupported: jest.fn().mockReturnValue(true),
 }));
 
 describe('ArbitrageStrategy', () => {
@@ -47,6 +48,7 @@ describe('ArbitrageStrategy', () => {
             getSupportedExchanges: jest
               .fn()
               .mockReturnValue(['ExchangeA', 'ExchangeB']),
+            getSupportedPairs: jest.fn(),
           },
         },
         {

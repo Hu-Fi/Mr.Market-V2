@@ -22,6 +22,8 @@ import {
   calculateOrderDetails,
   createStrategyKey,
   getPriceSource,
+  isExchangeSupported,
+  isPairSupported,
 } from '../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
 
@@ -37,6 +39,8 @@ export class MarketMakingStrategy implements Strategy {
   ) {}
 
   async create(command: MarketMakingStrategyCommand): Promise<void> {
+    this.validateExchangesAndPairs(command);
+
     await this.marketMakingService.createStrategy({
       userId: command.userId,
       clientId: command.clientId,
@@ -55,6 +59,33 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice: command.floorPrice,
       status: StrategyInstanceStatus.RUNNING,
     });
+  }
+
+  private validateExchangesAndPairs(
+    command: MarketMakingStrategyCommand,
+  ): void {
+    const supportedExchanges =
+      this.exchangeRegistryService.getSupportedExchanges();
+
+    if (!isExchangeSupported(command.exchangeName, supportedExchanges)) {
+      throw new NotFoundException(
+        `Exchange ${command.exchangeName} is not supported`,
+      );
+    }
+
+    const supportedSymbolsExchangeA =
+      this.exchangeRegistryService.getSupportedPairs(command.exchangeName);
+
+    if (
+      !isPairSupported(
+        `${command.sideA}/${command.sideB}`,
+        supportedSymbolsExchangeA,
+      )
+    ) {
+      throw new NotFoundException(
+        `Symbol ${command.sideA}/${command.sideB} is not supported on exchange ${command.exchangeName}`,
+      );
+    }
   }
 
   async pause(command: MarketMakingStrategyActionCommand): Promise<void> {

@@ -17,8 +17,8 @@ export const TSE_APP_API = process.env.E2E_TSE_APP_API;
 
 // Constants
 export const CHAIN_ID = 80002;
-export const EXCHANGE_NAME_A = 'mexc';
-export const EXCHANGE_NAME_B = 'gate';
+export const EXCHANGE_NAME_A = 'bybit';
+export const EXCHANGE_NAME_B = 'mexc';
 export const TOKEN = 'HMT/USDT';
 export const FOUND_AMOUNT_IN_WEI = '1000000000000';
 export const FOUND_AMOUNT_IN_ETHERS = '0.000001';
@@ -64,11 +64,17 @@ export const userStrategyPayload = {
   userId: '123',
   clientId: '456',
   pair: TOKEN,
-  amountToTrade: 1.0,
-  minProfitability: 1.0,
-  exchangeAName: EXCHANGE_NAME_A,
-  exchangeBName: EXCHANGE_NAME_B,
+  exchangeName: EXCHANGE_NAME_B,
+  bidSpread: 0.1,
+  askSpread: 0.1,
+  orderAmount: 1,
   checkIntervalSeconds: 10,
+  numberOfLayers: 1,
+  priceSourceType: 'mid_price',
+  amountChangePerLayer: 1,
+  amountChangeType: 'percentage',
+  ceilingPrice: 0,
+  floorPrice: 0,
 };
 
 export const depositPayload = {

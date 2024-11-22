@@ -69,6 +69,10 @@ export const isExchangeSupported = (
   return supported.includes(exchangeName);
 };
 
+export const isPairSupported = (pair: string, supportedPairs: string[]) => {
+  return supportedPairs.includes(pair);
+};
+
 type PriceSourceFunction = (orderBook: any, ticker: any) => number;
 
 const priceSourceFunctions: Record<PriceSourceType, PriceSourceFunction> = {

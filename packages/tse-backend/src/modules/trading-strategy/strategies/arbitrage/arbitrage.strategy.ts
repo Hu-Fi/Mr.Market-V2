@@ -15,6 +15,7 @@ import {
   isArbitrageOpportunityBuyOnA,
   isArbitrageOpportunityBuyOnB,
   isExchangeSupported,
+  isPairSupported,
 } from '../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
 import {
@@ -40,18 +41,7 @@ export class ArbitrageStrategy implements Strategy {
   ) {}
 
   async create(command: ArbitrageStrategyCommand): Promise<void> {
-    const isExchangeAValid = isExchangeSupported(
-      command.exchangeAName,
-      this.exchangeRegistryService.getSupportedExchanges(),
-    );
-    const isExchangeBValid = isExchangeSupported(
-      command.exchangeBName,
-      this.exchangeRegistryService.getSupportedExchanges(),
-    );
-
-    if (!isExchangeAValid || !isExchangeBValid) {
-      throw new NotFoundException('Provided exchange is not supported');
-    }
+    this.validateExchangesAndPairs(command);
 
     await this.arbitrageService.createStrategy({
       userId: command.userId,
@@ -66,6 +56,50 @@ export class ArbitrageStrategy implements Strategy {
       maxOpenOrders: command.maxOpenOrders,
       status: StrategyInstanceStatus.CREATED,
     });
+  }
+
+  private validateExchangesAndPairs(command: ArbitrageStrategyCommand): void {
+    const supportedExchanges =
+      this.exchangeRegistryService.getSupportedExchanges();
+
+    if (!isExchangeSupported(command.exchangeAName, supportedExchanges)) {
+      throw new NotFoundException(
+        `Exchange ${command.exchangeAName} is not supported`,
+      );
+    }
+
+    if (!isExchangeSupported(command.exchangeBName, supportedExchanges)) {
+      throw new NotFoundException(
+        `Exchange ${command.exchangeBName} is not supported`,
+      );
+    }
+
+    const supportedSymbolsExchangeA =
+      this.exchangeRegistryService.getSupportedPairs(command.exchangeAName);
+    const supportedSymbolsExchangeB =
+      this.exchangeRegistryService.getSupportedPairs(command.exchangeBName);
+
+    if (
+      !isPairSupported(
+        `${command.sideA}/${command.sideB}`,
+        supportedSymbolsExchangeA,
+      )
+    ) {
+      throw new NotFoundException(
+        `Symbol ${command.sideA}/${command.sideB} is not supported on exchange ${command.exchangeAName}`,
+      );
+    }
+
+    if (
+      !isPairSupported(
+        `${command.sideA}/${command.sideB}`,
+        supportedSymbolsExchangeB,
+      )
+    ) {
+      throw new NotFoundException(
+        `Symbol ${command.sideA}/${command.sideB} is not supported on exchange ${command.exchangeBName}`,
+      );
+    }
   }
 
   async pause(command: ArbitrageStrategyActionCommand): Promise<void> {

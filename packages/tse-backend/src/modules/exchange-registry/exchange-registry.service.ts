@@ -32,7 +32,9 @@ export class ExchangeRegistryService {
         );
         if (exchange) {
           this.ccxtGateway.addExchange(config.name, exchange);
-          this.logger.log(`${config.name} initialized successfully. ${exchange.has['sandbox'] ? '(sandbox mode)' : ''}`);
+          this.logger.log(
+            `${config.name} initialized successfully. ${exchange.has['sandbox'] ? '(sandbox mode)' : ''}`,
+          );
         } else {
           this.logger.warn(`Failed to initialize ${config.name}.`);
         }
@@ -50,5 +52,14 @@ export class ExchangeRegistryService {
 
   getSupportedExchanges(): string[] {
     return Array.from(this.ccxtGateway.getExchangesNames());
+  }
+
+  getSupportedPairs(exchangeName: string) {
+    const exchange = this.getExchange(exchangeName);
+    if (!exchange) {
+      this.logger.error(`Exchange ${exchangeName} is not configured.`);
+      throw new Error('Exchange configuration error.');
+    }
+    return exchange.symbols;
   }
 }
