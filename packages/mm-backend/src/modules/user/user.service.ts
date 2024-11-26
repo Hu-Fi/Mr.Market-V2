@@ -1,14 +1,14 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { User } from '../../common/entities/user.entity';
-import { MixinGateway } from '../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
 import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private repository: UserRepository,
-    private readonly mixinGateway: MixinGateway,
+    private readonly mixinGateway: MixinIntegrationService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}

@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { MixinGateway } from '../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
 import { JwtStrategy } from '../../common/utils/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -29,7 +29,7 @@ import { AuthSessionRepository } from './auth-session.repository';
   ],
   providers: [
     AuthService,
-    MixinGateway,
+    MixinIntegrationService,
     JwtStrategy,
     AuthProfile,
     AuthSessionRepository,

@@ -27,7 +27,7 @@ import { Fee } from '../common/interfaces/mixin.interfaces';
 import { WithdrawCommand } from '../modules/transaction/mixin-withdraw/model/mixin-withdrawal.model';
 
 @Injectable()
-export class MixinGateway {
+export class MixinIntegrationService {
   private readonly keystore: Keystore;
   private readonly _clientSecret: string;
   private _client: KeystoreClientReturnType;

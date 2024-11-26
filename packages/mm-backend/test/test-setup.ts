@@ -11,7 +11,7 @@ import { DataSource } from 'typeorm';
 import { MixinDeposit } from '../src/common/entities/mixin-deposit.entity';
 import { MixinWithdrawal } from '../src/common/entities/mixin-withdrawal.entity';
 import { Wait } from 'testcontainers';
-import { MixinGateway } from '../src/integrations/mixin.gateway';
+import { MixinIntegrationService } from '../src/integrations/mixin.integration.service';
 import { MixinDepositService } from '../src/modules/transaction/mixin-deposit/mixin-deposit.service';
 import { MixinDepositRepository } from '../src/modules/transaction/mixin-deposit/mixin-deposit.repository';
 import { handleUserAuthentication } from './test-utils';
@@ -61,7 +61,7 @@ export const setupTestApp = async () => {
     ],
     providers: [
       MixinDepositService,
-      { provide: MixinGateway, useValue: mockMixinGateway },
+      { provide: MixinIntegrationService, useValue: mockMixinGateway },
       MixinDepositRepository,
     ],
   }).compile();
