@@ -38,6 +38,7 @@ export class TypeormConfig {
       migrationsRun:
         this.configService.get<string>('DATABASE_AUTO_RUN_MIGRATIONS') ===
         'true',
+      ssl: this.configService.get<string>('DATABASE_SSL', 'false') === 'true'
     };
   }
 }
