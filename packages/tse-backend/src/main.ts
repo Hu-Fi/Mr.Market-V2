@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { CustomAdapter } from './common/config/socket-io-adapter.config';
+import * as path from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
@@ -34,6 +36,14 @@ async function bootstrap() {
     .setVersion('0.0.1')
     .build();
   const document = SwaggerModule.createDocument(app, config);
+  const swaggerUiDistPath = path.join(
+    __dirname,
+    '..',
+    'node_modules',
+    'swagger-ui-dist',
+  );
+  app.use('/swagger-static', express.static(swaggerUiDistPath));
+  app.use('/api', express.static(swaggerUiDistPath, { index: false }));
   SwaggerModule.setup('api', app, document);
 
   app.useWebSocketAdapter(new CustomAdapter(app, configService));
