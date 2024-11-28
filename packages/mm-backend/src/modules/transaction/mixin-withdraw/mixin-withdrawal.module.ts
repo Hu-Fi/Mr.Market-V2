@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MixinWithdrawal } from '../../../common/entities/mixin-withdrawal.entity';
 import { MixinWithdrawalService } from './mixin-withdrawal.service';
 import { MixinWithdrawalRepository } from './mixin-withdrawal.repository';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 
 @Module({
   imports: [HttpModule, TypeOrmModule.forFeature([MixinWithdrawal])],
@@ -15,7 +15,7 @@ import { MixinGateway } from '../../../integrations/mixin.gateway';
     MixinWithdrawalRepository,
     TransactionProfile,
     ConfigService,
-    MixinGateway,
+    MixinIntegrationService,
   ],
   exports: [MixinWithdrawalService],
 })

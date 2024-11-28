@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeWithdrawalService } from '../exchange-withdrawal.service';
-import { CcxtGateway } from '../../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
 import { CreateWithdrawalCommand } from '../model/exchange-withdrawal.model';
 import {
   ExchangeNotFoundException,
@@ -21,7 +21,7 @@ describe('ExchangeWithdrawalService', () => {
       providers: [
         ExchangeWithdrawalService,
         {
-          provide: CcxtGateway,
+          provide: CcxtIntegrationService,
           useValue: mockCcxtGateway,
         },
       ],

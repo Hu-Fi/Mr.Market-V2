@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import { ExchangeConfig } from '../../common/interfaces/exchange-registry.interfaces';
 import { buildExchangeConfigs } from '../../common/utils/config-utils';
 
@@ -11,7 +11,7 @@ export class ExchangeRegistryService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly ccxtGateway: CcxtGateway,
+    private readonly ccxtGateway: CcxtIntegrationService,
   ) {}
 
   async initializeExchanges() {

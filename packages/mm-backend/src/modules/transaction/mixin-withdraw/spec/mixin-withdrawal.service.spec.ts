@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MixinGateway } from '../../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../../integrations/mixin.integration.service';
 import { MixinWithdrawalRepository } from '../mixin-withdrawal.repository';
 import { MixinWithdrawalService } from '../mixin-withdrawal.service';
 import { WithdrawCommand } from '../model/mixin-withdrawal.model';
@@ -37,7 +37,7 @@ describe('WithdrawService', () => {
       providers: [
         MixinWithdrawalService,
         {
-          provide: MixinGateway,
+          provide: MixinIntegrationService,
           useValue: mockMixinGateway,
         },
         {

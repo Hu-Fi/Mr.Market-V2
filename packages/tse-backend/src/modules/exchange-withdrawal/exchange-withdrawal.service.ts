@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import {
   ExchangeNotFoundException,
   WithdrawalNotSupportedException,
@@ -10,7 +10,7 @@ import { CreateWithdrawalCommand } from './model/exchange-withdrawal.model';
 export class ExchangeWithdrawalService {
   private readonly logger = new Logger(ExchangeWithdrawalService.name);
 
-  constructor(private readonly ccxtGateway: CcxtGateway) {}
+  constructor(private readonly ccxtGateway: CcxtIntegrationService) {}
 
   async handleWithdrawal(command: CreateWithdrawalCommand) {
     const { exchangeName, symbol, network, address, tag, amount } = command;

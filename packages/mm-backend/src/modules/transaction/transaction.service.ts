@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { MixinGateway } from '../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
 import {
   ExchangeDepositStatus,
   ExchangeWithdrawalStatus,
@@ -18,7 +18,7 @@ export class TransactionService {
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly schedulerUtils: SchedulerUtil,
-    private readonly mixinGateway: MixinGateway,
+    private readonly mixinGateway: MixinIntegrationService,
     private readonly mixinTransactionUtils: MixinTransactionUtils,
     private readonly exchangeTransactionUtils: ExchangeTransactionUtils,
   ) {}

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as ccxt from 'ccxt';
-import { CcxtGateway } from './ccxt.gateway';
+import { CcxtIntegrationService } from './ccxt.integration.service';
 import { CustomLogger } from '../modules/logger/logger.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -31,18 +31,18 @@ const mockConfigService = {
 };
 
 describe('CcxtGateway', () => {
-  let gateway: CcxtGateway;
+  let gateway: CcxtIntegrationService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CcxtGateway,
+        CcxtIntegrationService,
         { provide: CustomLogger, useValue: mockLogger },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
-    gateway = module.get<CcxtGateway>(CcxtGateway);
+    gateway = module.get<CcxtIntegrationService>(CcxtIntegrationService);
   });
 
   it('should be defined', () => {

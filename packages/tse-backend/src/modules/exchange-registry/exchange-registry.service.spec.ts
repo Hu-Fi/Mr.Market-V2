@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeRegistryService } from './exchange-registry.service';
 import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 
 describe('ExchangeRegistryService', () => {
   let service: ExchangeRegistryService;
   let configService: ConfigService;
-  let ccxtGateway: CcxtGateway;
+  let ccxtGateway: CcxtIntegrationService;
 
   beforeEach(async () => {
     jest.resetModules();
@@ -52,14 +52,14 @@ describe('ExchangeRegistryService', () => {
         ExchangeRegistryService,
         ConfigService,
         { provide: ConfigService, useValue: mockConfigService },
-        { provide: CcxtGateway, useValue: mockCcxtGateway },
+        { provide: CcxtIntegrationService, useValue: mockCcxtGateway },
         CustomLogger,
       ],
     }).compile();
 
     service = module.get<ExchangeRegistryService>(ExchangeRegistryService);
     configService = module.get<ConfigService>(ConfigService);
-    ccxtGateway = module.get<CcxtGateway>(CcxtGateway);
+    ccxtGateway = module.get<CcxtIntegrationService>(CcxtIntegrationService);
   });
 
   it('should be defined', () => {
