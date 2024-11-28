@@ -7,5 +7,6 @@ import { ConfigService } from '@nestjs/config';
 @Module({
   imports: [TradingStrategyModule],
   providers: [ExecutionWorkerService, ConfigService, SchedulerUtil],
+  exports: [ExecutionWorkerService],
 })
 export class StrategyExecutionModule {}

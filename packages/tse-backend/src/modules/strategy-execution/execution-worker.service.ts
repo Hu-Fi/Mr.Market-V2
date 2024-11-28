@@ -34,7 +34,7 @@ export class ExecutionWorkerService {
     );
   }
 
-  private async processData() {
+  async processData() {
     this.logger.debug('Strategy Execution Worker started');
     try {
       const arbitrageStrategies =

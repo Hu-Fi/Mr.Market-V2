@@ -19,6 +19,7 @@ import { StrategyExecutionModule } from './modules/strategy-execution/strategy-e
 import { TradingHistoryModule } from './modules/trading-history/trading-history.module';
 import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-deposit.module';
 import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange-withdrawal.module';
+import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange
     TradingHistoryModule,
     ExchangeDepositModule,
     ExchangeWithdrawalModule,
+    WebSchedulerModule,
   ],
   controllers: [],
   providers: [
