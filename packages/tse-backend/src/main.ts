@@ -47,7 +47,7 @@ async function bootstrap() {
 
   SwaggerModule.setup('', app, document);
 
-  app.useWebSocketAdapter(new CustomAdapter(app, configService));
+  // app.useWebSocketAdapter(new CustomAdapter(app, configService));
 
   const port = configService.get<number>('TSE_BE_PORT', 3001);
   await app.listen(port, async () => {

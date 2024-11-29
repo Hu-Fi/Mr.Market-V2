@@ -42,7 +42,7 @@ import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module
     ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
-    ExchangeDataModule,
+    // ExchangeDataModule,
     ExchangeOperationModule,
     ExchangeTradeModule,
     HealthModule,
