@@ -43,8 +43,9 @@ async function bootstrap() {
     'swagger-ui-dist',
   );
   app.use('/swagger-static', express.static(swaggerUiDistPath));
-  app.use('/api', express.static(swaggerUiDistPath, { index: false }));
-  SwaggerModule.setup('api', app, document);
+  app.use('/', express.static(swaggerUiDistPath, { index: false }));
+
+  SwaggerModule.setup('', app, document);
 
   app.useWebSocketAdapter(new CustomAdapter(app, configService));
 
