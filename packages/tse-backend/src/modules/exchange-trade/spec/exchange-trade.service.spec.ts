@@ -21,7 +21,7 @@ describe('ExchangeTradeService', () => {
   let service: ExchangeTradeService;
 
   const mockExchangeRegistryService = {
-    getExchange: jest.fn(),
+    getExchangeByName: jest.fn(),
   };
 
   const mockExchangeOperationService = {
@@ -73,7 +73,7 @@ describe('ExchangeTradeService', () => {
     };
 
     it('should execute market trade successfully', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
       mockExchangeOperationService.saveOrderData.mockResolvedValue({ id: 1 });
@@ -81,9 +81,9 @@ describe('ExchangeTradeService', () => {
 
       await service.executeMarketTrade(marketTradeCommand);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'binance',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -111,7 +111,7 @@ describe('ExchangeTradeService', () => {
     });
 
     it('should handle market trade error', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
       mockExchangeOperationService.saveOrderData.mockResolvedValue({ id: 1 });
@@ -123,9 +123,9 @@ describe('ExchangeTradeService', () => {
         service.executeMarketTrade(marketTradeCommand),
       ).rejects.toThrow('Trade failed');
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'binance',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -159,7 +159,7 @@ describe('ExchangeTradeService', () => {
     };
 
     it('should execute limit trade successfully', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
       mockExchangeOperationService.saveOrderData.mockResolvedValue({ id: 1 });
@@ -167,9 +167,9 @@ describe('ExchangeTradeService', () => {
 
       await service.executeLimitTrade(marketLimitCommand);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'binance',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -198,7 +198,7 @@ describe('ExchangeTradeService', () => {
     });
 
     it('should handle limit trade error', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
       mockExchangeOperationService.saveOrderData.mockResolvedValue({ id: 1 });
@@ -210,9 +210,9 @@ describe('ExchangeTradeService', () => {
         service.executeLimitTrade(marketLimitCommand),
       ).rejects.toThrow('Trade failed');
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'binance',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -242,16 +242,16 @@ describe('ExchangeTradeService', () => {
     };
 
     it('should cancel order successfully', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
       exchangeInstanceMock.cancelOrder.mockResolvedValue({ id: 'order123' });
 
       await service.cancelOrder(cancelOrderCommand);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'binance',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
       expect(exchangeInstanceMock.cancelOrder).toHaveBeenCalledWith(
         'order123',
         'BTC/USDT',
@@ -266,7 +266,7 @@ describe('ExchangeTradeService', () => {
     });
 
     it('should handle cancel order error', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
       exchangeInstanceMock.cancelOrder.mockRejectedValue(
@@ -277,9 +277,9 @@ describe('ExchangeTradeService', () => {
         'Cancel failed',
       );
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'binance',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
       expect(
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({

@@ -42,10 +42,10 @@ export class ExchangeRegistryService {
     );
   }
 
-  getExchange(exchangeName: string) {
-    const exchange = this.ccxtGateway.getExchange(exchangeName);
+  getExchangeByName(name: string) {
+    const exchange = this.ccxtGateway.getExchangeByName(name);
     if (!exchange) {
-      this.logger.error(`Exchange ${exchangeName} is not configured.`);
+      this.logger.error(`Exchange ${name} is not configured.`);
     }
     return exchange;
   }
@@ -55,7 +55,7 @@ export class ExchangeRegistryService {
   }
 
   getSupportedPairs(exchangeName: string) {
-    const exchange = this.getExchange(exchangeName);
+    const exchange = this.getExchangeByName(exchangeName);
     if (!exchange) {
       this.logger.error(`Exchange ${exchangeName} is not configured.`);
       throw new Error('Exchange configuration error.');

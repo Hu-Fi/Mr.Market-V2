@@ -124,10 +124,20 @@ export class MarketMakingStrategy implements Strategy {
       clearInterval(strategy.intervalId);
     }
 
-    await this.cancelActiveOrders();
+    const exchange = this.exchangeRegistryService.getExchangeByName(
+      strategyEntity.exchangeName,
+    );
+
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+
+    this.cancelUnfilledOrders(exchange, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchange.name}`,
+      );
+    });
 
     this.logger.debug(
-      'Stopped market making strategy, not filled orders have been canceled',
+      'Stopped market making strategy, unfilled orders have been canceled',
     );
   }
 
@@ -148,6 +158,18 @@ export class MarketMakingStrategy implements Strategy {
       clearInterval(strategy.intervalId);
       this.strategies.delete(strategyEntity.id);
     }
+
+    const exchange = this.exchangeRegistryService.getExchangeByName(
+      strategyEntity.exchangeName,
+    );
+
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+
+    this.cancelUnfilledOrders(exchange, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchange.name}`,
+      );
+    });
 
     this.logger.debug('Soft deleted market making strategy');
   }
@@ -195,11 +217,16 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice,
     } = command;
 
-    await this.cancelActiveOrders();
-
-    const exchange = this.exchangeRegistryService.getExchange(exchangeName);
-
+    const exchange =
+      this.exchangeRegistryService.getExchangeByName(exchangeName);
     const pair = `${sideA}/${sideB}`;
+
+    this.cancelUnfilledOrders(exchange, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchange.name}`,
+      );
+    });
+
     const priceSource = await getPriceSource(exchange, pair, priceSourceType);
 
     const orderDetails: OrderDetail[] = calculateOrderDetails(
@@ -236,8 +263,6 @@ export class MarketMakingStrategy implements Strategy {
         floorPrice,
       );
     }
-
-    //TODO: persist data to redis cache - to check last trade is filled
   }
 
   private async handleBuyOrder(
@@ -331,7 +356,20 @@ export class MarketMakingStrategy implements Strategy {
     );
   }
 
-  async cancelActiveOrders() {
-    //TODO: get last order from redis cache and if it is not filled then execute exchange.cancelOrder(orderId)
+  async cancelUnfilledOrders(exchange, pair: string) {
+    const openOrders = await exchange.fetchOpenOrders(pair);
+
+    const cancelPromises = openOrders.map(async (order) => {
+      try {
+        await exchange.cancelOrder(order.id, pair);
+        return true;
+      } catch (e) {
+        this.logger.error(`Error canceling order: ${e.message}`);
+        return false;
+      }
+    });
+
+    const results = await Promise.all(cancelPromises);
+    return results.filter((result) => result).length;
   }
 }

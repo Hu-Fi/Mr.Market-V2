@@ -3,9 +3,7 @@ import { ExecutionWorkerService } from '../strategy-execution/execution-worker.s
 
 @Injectable()
 export class WebSchedulerService {
-  constructor(
-    private readonly executionWorker: ExecutionWorkerService,
-  ) {}
+  constructor(private readonly executionWorker: ExecutionWorkerService) {}
 
   async triggerStrategyCronJob() {
     await this.executionWorker.processData();

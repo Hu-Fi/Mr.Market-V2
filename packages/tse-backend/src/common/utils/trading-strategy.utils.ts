@@ -133,9 +133,10 @@ export function adjustOrderAmount(
     return initialOrderAmount + (layer - 1) * amountChangePerLayer;
   }
 
-  return initialOrderAmount * Math.pow(1 + amountChangePerLayer / 100, layer - 1);
+  return (
+    initialOrderAmount * Math.pow(1 + amountChangePerLayer / 100, layer - 1)
+  );
 }
-
 
 export function calculatePrices(
   priceSource: number,

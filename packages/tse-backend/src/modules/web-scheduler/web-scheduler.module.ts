@@ -6,6 +6,6 @@ import { StrategyExecutionModule } from '../strategy-execution/strategy-executio
 @Module({
   imports: [StrategyExecutionModule],
   providers: [WebSchedulerService],
-  controllers: [WebSchedulerController]
+  controllers: [WebSchedulerController],
 })
 export class WebSchedulerModule {}

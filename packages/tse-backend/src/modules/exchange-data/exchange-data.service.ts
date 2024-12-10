@@ -28,7 +28,8 @@ export class ExchangeDataService {
 
   async getTickers(command: GetTickersCommand) {
     const { exchange, symbols } = command;
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance || !exchangeInstance.has.fetchTickers) {
       throw new Error(
         'Exchange does not support fetchTickers or is not configured.',
@@ -49,7 +50,8 @@ export class ExchangeDataService {
 
   async getOHLCVData(command: GetOHLCVCommand) {
     const { exchange, symbol, timeframe = '1m', since, limit = 30 } = command;
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance || !exchangeInstance.has.fetchOHLCV) {
       throw new Error(
         'Exchange does not support fetchOHLCV or is not configured.',
@@ -97,7 +99,8 @@ export class ExchangeDataService {
   }
 
   private async fetchPairsFromExchange(exchange: string, pairs: string[]) {
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     if (exchangeInstance && exchangeInstance.has.fetchTickers) {
       try {
         // TODO: cache the results of fetchTickers method
@@ -112,7 +115,8 @@ export class ExchangeDataService {
   async getTickerPrice(command: GetTickerPriceCommand) {
     const { exchange, symbol } = command;
     const upperCaseSymbol = symbol.toUpperCase();
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance || !exchangeInstance.has.fetchTicker) {
       throw new Error(
         'Exchange does not support fetchTicker or is not configured.',
@@ -168,7 +172,8 @@ export class ExchangeDataService {
 
   async getSupportedSymbols(command: GetSupportedSymbolsCommand) {
     const { exchange } = command;
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance) {
       throw new Error(`Exchange ${exchange} is not configured.`);
     }
@@ -193,7 +198,8 @@ export class ExchangeDataService {
     onData: (data: any) => void,
     extraParams: any = {},
   ): Promise<void> {
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     const methodName = `watch${type}`;
     const context = new CompositeKeyContext(type);
     const compositeKey = context.createCompositeKey(

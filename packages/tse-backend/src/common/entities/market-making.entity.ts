@@ -37,7 +37,7 @@ export class MarketMaking {
   @Column('decimal', { precision: 5, scale: 2 })
   askSpread: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 16, scale: 8 })
   orderAmount: number;
 
   @Column()

@@ -14,7 +14,7 @@ export class ExchangeWithdrawalService {
 
   async handleWithdrawal(command: CreateWithdrawalCommand) {
     const { exchangeName, symbol, network, address, tag, amount } = command;
-    const exchange = this.ccxtGateway.getExchange(exchangeName);
+    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
@@ -36,7 +36,7 @@ export class ExchangeWithdrawalService {
   }
 
   async fetchWithdrawal(exchangeName: string, transactionHash: string) {
-    const exchange = this.ccxtGateway.getExchange(exchangeName);
+    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
