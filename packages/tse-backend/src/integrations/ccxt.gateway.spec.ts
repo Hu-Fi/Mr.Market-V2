@@ -54,7 +54,7 @@ describe('CcxtGateway', () => {
       const exchange = new ccxt.binance({ apiKey: 'test', secret: 'test' });
       gateway.addExchange('binance', exchange);
 
-      expect(gateway.getExchange('binance')).toBe(exchange);
+      expect(gateway.getExchangeByName('binance')).toBe(exchange);
     });
   });
 
@@ -63,12 +63,12 @@ describe('CcxtGateway', () => {
       const exchange = new ccxt.binance({ apiKey: 'test', secret: 'test' });
       gateway.addExchange('binance', exchange);
 
-      const retrievedExchange = gateway.getExchange('binance');
+      const retrievedExchange = gateway.getExchangeByName('binance');
       expect(retrievedExchange).toBe(exchange);
     });
 
     it('should return undefined for a non-existing exchange', () => {
-      const retrievedExchange = gateway.getExchange('nonexistent');
+      const retrievedExchange = gateway.getExchangeByName('nonexistent');
       expect(retrievedExchange).toBeUndefined();
     });
   });

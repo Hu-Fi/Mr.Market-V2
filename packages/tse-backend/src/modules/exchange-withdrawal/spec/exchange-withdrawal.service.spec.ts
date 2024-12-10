@@ -13,7 +13,7 @@ describe('ExchangeWithdrawalService', () => {
 
   beforeEach(async () => {
     mockCcxtGateway = {
-      getExchange: jest.fn(),
+      getExchangeByName: jest.fn(),
       interpretError: jest.fn(),
     };
 
@@ -44,12 +44,12 @@ describe('ExchangeWithdrawalService', () => {
       amount: 1,
     };
 
-    mockCcxtGateway.getExchange.mockReturnValue(null);
+    mockCcxtGateway.getExchangeByName.mockReturnValue(null);
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(
       ExchangeNotFoundException,
     );
-    expect(mockCcxtGateway.getExchange).toHaveBeenCalledWith('binance');
+    expect(mockCcxtGateway.getExchangeByName).toHaveBeenCalledWith('binance');
   });
 
   it('should throw WithdrawalNotSupportedException if exchange does not support withdrawal', async () => {
@@ -67,12 +67,12 @@ describe('ExchangeWithdrawalService', () => {
       has: { withdraw: false },
     };
 
-    mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
+    mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(
       WithdrawalNotSupportedException,
     );
-    expect(mockCcxtGateway.getExchange).toHaveBeenCalledWith('binance');
+    expect(mockCcxtGateway.getExchangeByName).toHaveBeenCalledWith('binance');
   });
 
   it('should call withdraw method if withdrawal is supported', async () => {
@@ -91,7 +91,7 @@ describe('ExchangeWithdrawalService', () => {
       withdraw: jest.fn().mockResolvedValue('withdrawalSuccess'),
     };
 
-    mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
+    mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
 
     const result = await service.handleWithdrawal(command);
 
@@ -121,13 +121,13 @@ describe('ExchangeWithdrawalService', () => {
       withdraw: jest.fn().mockRejectedValue(new Error('withdraw error')),
     };
 
-    mockCcxtGateway.getExchange.mockReturnValue(mockExchange);
+    mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
     mockCcxtGateway.interpretError.mockReturnValue(
       new Error('interpreted error'),
     );
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(Error);
     expect(mockCcxtGateway.interpretError).toHaveBeenCalled();
-    expect(mockCcxtGateway.getExchange).toHaveBeenCalledWith('binance');
+    expect(mockCcxtGateway.getExchangeByName).toHaveBeenCalledWith('binance');
   });
 });
