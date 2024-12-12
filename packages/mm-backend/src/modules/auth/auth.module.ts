@@ -18,7 +18,7 @@ import { AuthSessionRepository } from './auth-session.repository';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('JWT_SECRET', 'secret'),
         signOptions: { expiresIn: '60m' },
       }),
       inject: [ConfigService],
