@@ -19,6 +19,7 @@ import {
   deleteDataSourceByName,
 } from 'typeorm-transactional';
 import { ScheduleModule } from '@nestjs/schedule';
+import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     HealthModule,
     UserBalanceModule,
     TransactionModule,
+    WebSchedulerModule,
   ],
   controllers: [],
   providers: [],

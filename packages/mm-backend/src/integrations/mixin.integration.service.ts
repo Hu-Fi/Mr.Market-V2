@@ -52,7 +52,7 @@ export class MixinIntegrationService {
     this.spendPrivateKey = this.configService.get<string>(
       'MIXIN_SPEND_PRIVATE_KEY',
     );
-    this.scope = this.configService.get<string>('MIXIN_OAUTH_SCOPE');
+    this.scope = this.configService.get<string>('MIXIN_OAUTH_SCOPE', 'PROFILE:READ ASSETS:READ SNAPSHOTS:READ');
   }
 
   async oauthHandler(code: string): Promise<OAuthResponse> {

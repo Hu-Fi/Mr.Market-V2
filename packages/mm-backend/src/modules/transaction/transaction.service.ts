@@ -32,7 +32,7 @@ export class TransactionService {
     );
   }
 
-  private async processData() {
+  async processData() {
     this.logger.debug('Worker checking transactions in progress started');
     await this.processMixinDeposits();
     await this.processMixinWithdrawals();

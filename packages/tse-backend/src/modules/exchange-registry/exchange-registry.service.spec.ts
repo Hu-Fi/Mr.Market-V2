@@ -28,7 +28,7 @@ describe('ExchangeRegistryService', () => {
       addExchange: jest.fn((name: string, exchange: any) => {
         mockCcxtGateway.exchanges.set(name, exchange);
       }),
-      getExchange: jest.fn((name: string) =>
+      getExchangeByName: jest.fn((name: string) =>
         mockCcxtGateway.exchanges.get(name),
       ),
       getExchangesNames: jest.fn(() => mockCcxtGateway.exchanges.keys()),
@@ -94,7 +94,7 @@ describe('ExchangeRegistryService', () => {
 
   it('should get an exchange by name', async () => {
     await service.initializeExchanges();
-    const binanceExchange = service.getExchange('binance');
+    const binanceExchange = service.getExchangeByName('binance');
     expect(binanceExchange).toEqual({
       name: 'binance',
       apiKey: 'test_binance_api_key',

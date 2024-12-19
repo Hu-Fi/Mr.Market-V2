@@ -15,7 +15,7 @@ export class CcxtIntegrationService {
     this.exchanges.set(name, exchange);
   }
 
-  getExchange(name: string): ccxt.Exchange {
+  getExchangeByName(name: string): ccxt.Exchange {
     return this.exchanges.get(name);
   }
 

@@ -15,7 +15,7 @@ export class ExchangeDepositService {
 
   async handleDeposit(command: CreateDepositCommand) {
     const { exchangeName, symbol, network } = command;
-    const exchange = this.ccxtGateway.getExchange(exchangeName);
+    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
@@ -79,7 +79,7 @@ export class ExchangeDepositService {
   }
 
   async fetchDeposits(exchangeName: string, symbol: string) {
-    const exchange = this.ccxtGateway.getExchange(exchangeName);
+    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }

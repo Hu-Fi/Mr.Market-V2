@@ -32,6 +32,22 @@ Below are links to the documentation files located in the `architecture/docs` fo
 - [HTTP_API.md](architecture/docs/HTTP_API.md)
 - [WEBSOCKET.md](architecture/docs/WEBSOCKET.md)
 
+## Vercel Deploy Button
+
+| Project     | Deploy                                                                                                                                                                                                                                                                                                                                                                  |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| mm-backend  | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Fmm-backend&env=CRON_SECRET,TRADING_STRATEGY_EXECUTION_API,ADMIN_PASSWORD,MIXIN_APP_ID,MIXIN_SESSION_ID,MIXIN_SERVER_PUBLIC_KEY,MIXIN_SESSION_PRIVATE_KEY,MIXIN_SPEND_PRIVATE_KEY,MIXIN_OAUTH_SECRET) |
+| tse-backend | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Ftse-backend&env=CRON_SECRET,EXCHANGE_BYBIT_API,EXCHANGE_BYBIT_SECRET)                                                                                                                              |
+
+1. Start the deployment
+- First, you should run the `tse-backend`, just click the deploy button.
+- Second you should run the mm-backend.
+2. Add storage
+- In the Add Storage section, select the Postgres Database option available to you. The Vercel integration will create and provision a Postgres database, and you should manually connect it to your new projects.
+- Do the same for Redis.
+3. Add environment variables
+- In this section, you will add the subsequent exchange credentials for the `tse-backend` application. (Project -> Settings -> Environment Variables)
+
 # License
 
 This project is licensed under the GNU Affero General Public License - see the [LICENSE.md](./LICENSE) file for details

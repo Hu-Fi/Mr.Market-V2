@@ -138,7 +138,24 @@ export class ArbitrageStrategy implements Strategy {
       clearInterval(strategy.intervalId);
     }
 
-    await this.cancelActiveOrders();
+    const exchangeA = this.exchangeRegistryService.getExchangeByName(
+      strategyEntity.exchangeAName,
+    );
+    const exchangeB = this.exchangeRegistryService.getExchangeByName(
+      strategyEntity.exchangeBName,
+    );
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+
+    this.cancelUnfilledOrders(exchangeA, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeA.name}`,
+      );
+    });
+    this.cancelUnfilledOrders(exchangeB, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeB.name}`,
+      );
+    });
 
     this.logger.debug(
       'Stopped arbitrage strategy, not filled orders have been canceled',
@@ -163,6 +180,25 @@ export class ArbitrageStrategy implements Strategy {
       this.strategies.delete(strategyEntity.id);
     }
 
+    const exchangeA = this.exchangeRegistryService.getExchangeByName(
+      strategyEntity.exchangeAName,
+    );
+    const exchangeB = this.exchangeRegistryService.getExchangeByName(
+      strategyEntity.exchangeBName,
+    );
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+
+    this.cancelUnfilledOrders(exchangeA, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeA.name}`,
+      );
+    });
+    this.cancelUnfilledOrders(exchangeB, pair).then((canceledCount) => {
+      this.logger.debug(
+        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeB.name}`,
+      );
+    });
+
     this.logger.debug('Soft deleted arbitrage strategy');
   }
 
@@ -175,7 +211,7 @@ export class ArbitrageStrategy implements Strategy {
       if (!this.strategies.get(strategy.id)) {
         const intervalId = setInterval(async () => {
           // TODO: control opened orders
-          //  quantity not filled orders yet get from redis cache cannot be more than strategy.maxOpenOrders
+          //  quantity of unfilled orders cannot be more than strategy.maxOpenOrders
           await this.evaluateArbitrage(strategy);
         }, strategy.checkIntervalSeconds * TimeUnit.MILLISECONDS);
 
@@ -194,7 +230,6 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async evaluateArbitrage(command: ArbitrageStrategyCommand): Promise<void> {
-    //TODO: get from redis cache last trade and check if it filled, if not then return
     const {
       userId,
       clientId,
@@ -206,8 +241,10 @@ export class ArbitrageStrategy implements Strategy {
       exchangeBName,
     } = command;
 
-    const exchangeA = this.exchangeRegistryService.getExchange(exchangeAName);
-    const exchangeB = this.exchangeRegistryService.getExchange(exchangeBName);
+    const exchangeA =
+      this.exchangeRegistryService.getExchangeByName(exchangeAName);
+    const exchangeB =
+      this.exchangeRegistryService.getExchangeByName(exchangeBName);
 
     const pair = `${sideA}/${sideB}`;
 
@@ -259,8 +296,6 @@ export class ArbitrageStrategy implements Strategy {
       this.logger.debug('No arbitrage opportunity found');
       return;
     }
-
-    //TODO: persist data to redis cache - to check last trade is filled
   }
 
   async executeArbitrageTrade(params: ArbitrageTradeParams) {
@@ -314,7 +349,20 @@ export class ArbitrageStrategy implements Strategy {
     }
   }
 
-  async cancelActiveOrders() {
-    //TODO: get last order from redis cache and if it is not filled then execute exchange.cancelOrder(orderId)
+  async cancelUnfilledOrders(exchange, pair: string) {
+    const openOrders = await exchange.fetchOpenOrders(pair);
+
+    const cancelPromises = openOrders.map(async (order) => {
+      try {
+        await exchange.cancelOrder(order.id, pair);
+        return true;
+      } catch (e) {
+        this.logger.error(`Error canceling order: ${e.message}`);
+        return false;
+      }
+    });
+
+    const results = await Promise.all(cancelPromises);
+    return results.filter((result) => result).length;
   }
 }

@@ -133,12 +133,9 @@ export function adjustOrderAmount(
     return initialOrderAmount + (layer - 1) * amountChangePerLayer;
   }
 
-  let adjustedAmount = initialOrderAmount;
-  for (let i = 1; i < layer; i++) {
-    adjustedAmount += adjustedAmount * (amountChangePerLayer / 100);
-  }
-
-  return adjustedAmount;
+  return (
+    initialOrderAmount * Math.pow(1 + amountChangePerLayer / 100, layer - 1)
+  );
 }
 
 export function calculatePrices(

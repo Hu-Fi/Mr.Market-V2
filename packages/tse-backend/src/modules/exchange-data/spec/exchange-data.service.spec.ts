@@ -16,7 +16,7 @@ describe('ExchangeDataService', () => {
   let service: ExchangeDataService;
 
   const mockExchangeRegistryService = {
-    getExchange: jest.fn(),
+    getExchangeByName: jest.fn(),
     getSupportedExchanges: jest.fn(),
   };
 
@@ -80,7 +80,7 @@ describe('ExchangeDataService', () => {
         exchange: 'mockExchange',
         symbols: ['ETH/USDT'],
       };
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockExchangeInstance.fetchTickers.mockResolvedValue({
@@ -89,9 +89,9 @@ describe('ExchangeDataService', () => {
 
       const result = await service.getTickers(command);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'mockExchange',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('mockExchange');
       expect(mockExchangeInstance.fetchTickers).toHaveBeenCalledWith([
         'ETH/USDT',
       ]);
@@ -107,7 +107,9 @@ describe('ExchangeDataService', () => {
         ...mockExchangeInstance,
         has: { fetchTickers: false },
       };
-      mockExchangeRegistryService.getExchange.mockReturnValue(exchangeInstance);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        exchangeInstance,
+      );
 
       await expect(service.getTickers(command)).rejects.toThrow(
         'Exchange does not support fetchTickers or is not configured.',
@@ -124,7 +126,7 @@ describe('ExchangeDataService', () => {
         since: 1609459200000,
         limit: 30,
       };
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockExchangeInstance.fetchOHLCV.mockResolvedValue([
@@ -133,9 +135,9 @@ describe('ExchangeDataService', () => {
 
       const result = await service.getOHLCVData(command);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'mockExchange',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('mockExchange');
       expect(mockExchangeInstance.fetchOHLCV).toHaveBeenCalledWith(
         'ETH/USDT',
         '1d',
@@ -166,7 +168,9 @@ describe('ExchangeDataService', () => {
         ...mockExchangeInstance,
         has: { fetchOHLCV: false },
       };
-      mockExchangeRegistryService.getExchange.mockReturnValue(exchangeInstance);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        exchangeInstance,
+      );
 
       await expect(service.getOHLCVData(command)).rejects.toThrow(
         'Exchange does not support fetchOHLCV or is not configured.',
@@ -179,7 +183,7 @@ describe('ExchangeDataService', () => {
       mockExchangeRegistryService.getSupportedExchanges.mockReturnValue([
         'mockExchange',
       ]);
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockExchangeInstance.fetchTickers.mockResolvedValue({
@@ -203,16 +207,16 @@ describe('ExchangeDataService', () => {
         exchange: 'mockExchange',
         symbol: 'ETH/USDT',
       };
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockExchangeInstance.fetchTicker.mockResolvedValue({ last: 100 });
 
       const result = await service.getTickerPrice(command);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'mockExchange',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('mockExchange');
       expect(mockExchangeInstance.fetchTicker).toHaveBeenCalledWith('ETH/USDT');
       expect(result).toEqual({ pair: 'ETH/USDT', price: 100 });
     });
@@ -226,7 +230,9 @@ describe('ExchangeDataService', () => {
         ...mockExchangeInstance,
         has: { fetchTicker: false },
       };
-      mockExchangeRegistryService.getExchange.mockReturnValue(exchangeInstance);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        exchangeInstance,
+      );
 
       await expect(service.getTickerPrice(command)).rejects.toThrow(
         'Exchange does not support fetchTicker or is not configured.',
@@ -272,23 +278,23 @@ describe('ExchangeDataService', () => {
   describe('getSupportedSymbols', () => {
     it('should fetch supported symbols and return them', async () => {
       const command: GetSupportedSymbolsCommand = { exchange: 'mockExchange' };
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockExchangeInstance.loadMarkets.mockResolvedValue(undefined);
 
       const result = await service.getSupportedSymbols(command);
 
-      expect(mockExchangeRegistryService.getExchange).toHaveBeenCalledWith(
-        'mockExchange',
-      );
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('mockExchange');
       expect(mockExchangeInstance.loadMarkets).toHaveBeenCalled();
       expect(result).toEqual(['ETH/USDT', 'BTC/USDT']);
     });
 
     it('should throw an error if exchange is not configured', async () => {
       const command: GetSupportedSymbolsCommand = { exchange: 'mockExchange' };
-      mockExchangeRegistryService.getExchange.mockReturnValue(undefined);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(undefined);
 
       await expect(service.getSupportedSymbols(command)).rejects.toThrow(
         'Exchange mockExchange is not configured.',
@@ -301,7 +307,7 @@ describe('ExchangeDataService', () => {
       const spyWatchMarketData = jest
         .spyOn(service as any, 'watchMarketData')
         .mockImplementation(() => Promise.resolve());
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockSubscriptionManager.isSubscribed.mockReturnValue(true);
@@ -324,7 +330,7 @@ describe('ExchangeDataService', () => {
       const spyWatchMarketData = jest
         .spyOn(service as any, 'watchMarketData')
         .mockImplementation(() => Promise.resolve());
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockSubscriptionManager.isSubscribed.mockReturnValue(true);
@@ -349,7 +355,7 @@ describe('ExchangeDataService', () => {
       const spyWatchMarketData = jest
         .spyOn(service as any, 'watchMarketData')
         .mockImplementation(() => Promise.resolve());
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockSubscriptionManager.isSubscribed.mockReturnValue(true);
@@ -381,7 +387,7 @@ describe('ExchangeDataService', () => {
       const spyWatchMarketData = jest
         .spyOn(service as any, 'watchMarketData')
         .mockImplementation(() => Promise.resolve());
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockSubscriptionManager.isSubscribed.mockReturnValue(true);
@@ -405,7 +411,7 @@ describe('ExchangeDataService', () => {
       const spyWatchMarketData = jest
         .spyOn(service as any, 'watchMarketData')
         .mockImplementation(() => Promise.resolve());
-      mockExchangeRegistryService.getExchange.mockReturnValue(
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         mockExchangeInstance,
       );
       mockSubscriptionManager.isSubscribed.mockReturnValue(true);
@@ -426,7 +432,7 @@ describe('ExchangeDataService', () => {
 
   describe('watchMarketData', () => {
     it('should throw an error if the exchange does not support the method', async () => {
-      mockExchangeRegistryService.getExchange.mockReturnValue({
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue({
         has: { watchOrderBook: false },
       });
 

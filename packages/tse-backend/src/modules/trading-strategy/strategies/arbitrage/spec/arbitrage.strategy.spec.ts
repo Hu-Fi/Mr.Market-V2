@@ -44,7 +44,7 @@ describe('ArbitrageStrategy', () => {
         {
           provide: ExchangeRegistryService,
           useValue: {
-            getExchange: jest.fn(),
+            getExchangeByName: jest.fn().mockReturnValue({ name: '' }),
             getSupportedExchanges: jest
               .fn()
               .mockReturnValue(['ExchangeA', 'ExchangeB']),
@@ -157,7 +157,7 @@ describe('ArbitrageStrategy', () => {
       jest
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
         .mockResolvedValue(strategyData);
-      jest.spyOn(strategy, 'cancelActiveOrders').mockResolvedValue();
+      jest.spyOn(strategy, 'cancelUnfilledOrders').mockResolvedValue(0);
 
       await strategy.stop(command);
 
@@ -165,7 +165,7 @@ describe('ArbitrageStrategy', () => {
         1,
         StrategyInstanceStatus.STOPPED,
       );
-      expect(strategy.cancelActiveOrders).toHaveBeenCalled();
+      expect(strategy.cancelUnfilledOrders).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if strategy not found', async () => {
@@ -194,6 +194,14 @@ describe('ArbitrageStrategy', () => {
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
         .mockResolvedValue(strategyData);
 
+      const exchange = {
+        fetchOpenOrders: jest.fn().mockReturnValue([]),
+      };
+
+      jest
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
+        .mockReturnValue(exchange as any);
+
       await strategy.delete(command);
 
       expect(arbitrageService.updateStrategyStatusById).toHaveBeenCalledWith(
@@ -216,7 +224,7 @@ describe('ArbitrageStrategy', () => {
       };
 
       jest
-        .spyOn(exchangeRegistryService, 'getExchange')
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
         .mockImplementation((name: string) => {
           return name === 'ExchangeA' ? (exchangeA as any) : (exchangeB as any);
         });
@@ -240,7 +248,7 @@ describe('ArbitrageStrategy', () => {
       };
 
       jest
-        .spyOn(exchangeRegistryService, 'getExchange')
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
         .mockImplementation((name: string) => {
           return name === 'binance' ? (exchangeA as any) : (exchangeB as any);
         });

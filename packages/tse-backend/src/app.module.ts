@@ -5,6 +5,7 @@ import { TypeormConfig } from './common/config/typeorm.config';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { ExchangeRegistryModule } from './modules/exchange-registry/exchange-registry.module';
 import { ExchangeRegistryService } from './modules/exchange-registry/exchange-registry.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ExchangeDataModule } from './modules/exchange-data/exchange-data.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -19,6 +20,7 @@ import { StrategyExecutionModule } from './modules/strategy-execution/strategy-e
 import { TradingHistoryModule } from './modules/trading-history/trading-history.module';
 import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-deposit.module';
 import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange-withdrawal.module';
+import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module';
 import { CampaignModule } from './modules/campaign/campaign.module';
 
 @Module({
@@ -42,7 +44,7 @@ import { CampaignModule } from './modules/campaign/campaign.module';
     ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
-    ExchangeDataModule,
+    // ExchangeDataModule,
     ExchangeOperationModule,
     ExchangeTradeModule,
     HealthModule,
@@ -51,6 +53,7 @@ import { CampaignModule } from './modules/campaign/campaign.module';
     TradingHistoryModule,
     ExchangeDepositModule,
     ExchangeWithdrawalModule,
+    WebSchedulerModule,
     CampaignModule,
   ],
   controllers: [],

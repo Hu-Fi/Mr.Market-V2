@@ -25,14 +25,14 @@ export class TypeormConfig {
     return {
       type: 'postgres',
       schema: this.configService.get<string>('DATABASE_SCHEMA', 'public'),
-      host: this.configService.get<string>('DATABASE_HOST', 'localhost'),
+      host: this.configService.get<string>('POSTGRES_HOST', 'localhost'),
       port: parseInt(
         this.configService.get<string>('DATABASE_PORT', '5432'),
         10,
       ),
-      username: this.configService.get<string>('DATABASE_USERNAME', 'postgres'),
-      password: this.configService.get<string>('DATABASE_PASSWORD', 'postgres'),
-      database: this.configService.get<string>('DATABASE_NAME', 'mr_market_v2'),
+      username: this.configService.get<string>('POSTGRES_USER', 'postgres'),
+      password: this.configService.get<string>('POSTGRES_PASSWORD', 'postgres'),
+      database: this.configService.get<string>('POSTGRES_DATABASE', 'mr_market_v2'),
       entities: [
         User,
         UserBalance,
@@ -47,8 +47,9 @@ export class TypeormConfig {
       synchronize:
         this.configService.get<string>('DATABASE_SYNCHRONIZE') === 'true',
       migrationsRun:
-        this.configService.get<string>('DATABASE_AUTO_RUN_MIGRATIONS') ===
+        this.configService.get<string>('DATABASE_AUTO_RUN_MIGRATIONS', 'true') ===
         'true',
+      ssl: this.configService.get<string>('DATABASE_SSL', 'true') === 'true'
     };
   }
 }

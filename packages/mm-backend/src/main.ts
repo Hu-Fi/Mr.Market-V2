@@ -8,6 +8,8 @@ import {
   initializeTransactionalContext,
   StorageDriver,
 } from 'typeorm-transactional';
+import * as path from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
@@ -39,7 +41,16 @@ async function bootstrap() {
     .setVersion('0.0.1')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  const swaggerUiDistPath = path.join(
+    __dirname,
+    '..',
+    'node_modules',
+    'swagger-ui-dist',
+  );
+  app.use('/swagger-static', express.static(swaggerUiDistPath));
+  app.use('/', express.static(swaggerUiDistPath, { index: false }));
+
+  SwaggerModule.setup('', app, document);
 
   const port = configService.get<number>('MM_BE_PORT', 3000);
   await app.listen(port, async () => {

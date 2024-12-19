@@ -104,7 +104,8 @@ export class ExchangeTradeService {
   }
 
   private getExchangeInstance(exchange: string) {
-    const exchangeInstance = this.exchangeRegistryService.getExchange(exchange);
+    const exchangeInstance =
+      this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance) {
       throw new Error(`Exchange ${exchange} not found.`);
     }

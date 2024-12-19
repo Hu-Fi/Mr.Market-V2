@@ -41,7 +41,7 @@ describe('MarketMakingStrategy', () => {
         {
           provide: ExchangeRegistryService,
           useValue: {
-            getExchange: jest.fn(),
+            getExchangeByName: jest.fn().mockReturnValue({ name: '' }),
             getSupportedExchanges: jest.fn().mockReturnValue(['exchangea']),
             getSupportedPairs: jest.fn(),
           },
@@ -132,7 +132,7 @@ describe('MarketMakingStrategy', () => {
       jest
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
         .mockResolvedValue(strategyData);
-      jest.spyOn(strategy, 'cancelActiveOrders').mockResolvedValue();
+      jest.spyOn(strategy, 'cancelUnfilledOrders').mockResolvedValue(0);
 
       await strategy.stop(command);
 
@@ -140,7 +140,7 @@ describe('MarketMakingStrategy', () => {
         1,
         StrategyInstanceStatus.STOPPED,
       );
-      expect(strategy.cancelActiveOrders).toHaveBeenCalled();
+      expect(strategy.cancelUnfilledOrders).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if strategy not found', async () => {
@@ -170,6 +170,12 @@ describe('MarketMakingStrategy', () => {
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
         .mockResolvedValue(strategyData);
 
+      const exchange = {
+        fetchOpenOrders: jest.fn().mockReturnValue([]),
+      };
+      jest
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
+        .mockReturnValue(exchange as any);
       await strategy.delete(command);
 
       expect(marketMakingService.updateStrategyStatusById).toHaveBeenCalledWith(
@@ -183,6 +189,7 @@ describe('MarketMakingStrategy', () => {
         const command: MarketMakingStrategyCommand = MarketMakingCommandFixture;
 
         const exchange = {
+          fetchOpenOrders: jest.fn().mockReturnValue([]),
           amountToPrecision: jest.fn().mockReturnValue('1'),
           priceToPrecision: jest
             .fn()
@@ -192,7 +199,7 @@ describe('MarketMakingStrategy', () => {
         };
 
         jest
-          .spyOn(exchangeRegistryService, 'getExchange')
+          .spyOn(exchangeRegistryService, 'getExchangeByName')
           .mockReturnValue(exchange as any);
 
         (getPriceSource as jest.Mock).mockResolvedValue(50000);

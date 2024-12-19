@@ -31,5 +31,6 @@ import { MixinDepositModule } from './mixin-deposit/mixin-deposit.module';
     ExchangeTransactionUtils,
   ],
   controllers: [TransactionController],
+  exports: [TransactionService]
 })
 export class TransactionModule {}
