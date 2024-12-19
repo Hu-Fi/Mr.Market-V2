@@ -21,6 +21,7 @@ import { TradingHistoryModule } from './modules/trading-history/trading-history.
 import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-deposit.module';
 import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange-withdrawal.module';
 import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module';
+import { CampaignModule } from './modules/campaign/campaign.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module
     ExchangeDepositModule,
     ExchangeWithdrawalModule,
     WebSchedulerModule,
+    CampaignModule,
   ],
   controllers: [],
   providers: [

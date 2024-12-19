@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 import { Transactional } from 'typeorm-transactional';
 import { MixinDepositRepository } from './mixin-deposit.repository';
 import { DepositCommand } from './model/mixin-deposit.model';
@@ -10,7 +10,7 @@ import { MixinDepositStatus } from '../../../common/enums/transaction.enum';
 @Injectable()
 export class MixinDepositService {
   constructor(
-    private readonly mixinGateway: MixinGateway,
+    private readonly mixinGateway: MixinIntegrationService,
     private readonly repository: MixinDepositRepository,
   ) {}
 

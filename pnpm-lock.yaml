@@ -290,6 +290,9 @@ importers:
       cron:
         specifier: 3.1.7
         version: 3.1.7
+      ethers:
+        specifier: 6.13.3
+        version: 6.13.3
       express:
         specifier: ^4.21.1
         version: 4.21.1
@@ -7507,7 +7510,7 @@ snapshots:
   graphql-tag@2.12.6(graphql@16.9.0):
     dependencies:
       graphql: 16.9.0
-      tslib: 2.6.3
+      tslib: 2.7.0
 
   graphql@16.9.0: {}
 
@@ -9155,7 +9158,7 @@ snapshots:
   synckit@0.9.1:
     dependencies:
       '@pkgr/core': 0.1.1
-      tslib: 2.6.3
+      tslib: 2.7.0
 
   tapable@2.2.1: {}
 

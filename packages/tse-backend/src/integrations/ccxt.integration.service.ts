@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class CcxtGateway {
+export class CcxtIntegrationService {
   constructor(private readonly configService: ConfigService) {}
   private readonly exchanges = new Map<string, ccxt.Exchange>();
 

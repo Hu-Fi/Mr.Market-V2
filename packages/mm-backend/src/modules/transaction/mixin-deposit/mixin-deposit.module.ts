@@ -6,7 +6,7 @@ import { MixinDepositRepository } from '../mixin-deposit/mixin-deposit.repositor
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MixinDeposit } from '../../../common/entities/mixin-deposit.entity';
 import { MixinDepositService } from './mixin-deposit.service';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 
 @Module({
   imports: [HttpModule, TypeOrmModule.forFeature([MixinDeposit])],
@@ -15,7 +15,7 @@ import { MixinGateway } from '../../../integrations/mixin.gateway';
     MixinDepositRepository,
     TransactionProfile,
     ConfigService,
-    MixinGateway,
+    MixinIntegrationService,
   ],
   exports: [MixinDepositService],
 })

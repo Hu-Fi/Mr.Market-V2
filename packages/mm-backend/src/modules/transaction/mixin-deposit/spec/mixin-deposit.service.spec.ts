@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MixinDepositService } from '../mixin-deposit.service';
 import { MixinDepositRepository } from '../mixin-deposit.repository';
-import { MixinGateway } from '../../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../../integrations/mixin.integration.service';
 import { DepositCommand } from '../model/mixin-deposit.model';
 import { MixinDepositResponse } from '../../../../common/interfaces/transaction.interfaces';
 import { MixinDeposit } from '../../../../common/entities/mixin-deposit.entity';
@@ -18,7 +18,7 @@ jest.mock('typeorm-transactional', () => ({
 
 describe('DepositService', () => {
   let service: MixinDepositService;
-  let mixinGateway: MixinGateway;
+  let mixinGateway: MixinIntegrationService;
   let transactionRepository: MixinDepositRepository;
 
   const mockMixinGateway = {
@@ -40,7 +40,7 @@ describe('DepositService', () => {
       providers: [
         MixinDepositService,
         {
-          provide: MixinGateway,
+          provide: MixinIntegrationService,
           useValue: mockMixinGateway,
         },
         {
@@ -51,7 +51,7 @@ describe('DepositService', () => {
     }).compile();
 
     service = module.get<MixinDepositService>(MixinDepositService);
-    mixinGateway = module.get<MixinGateway>(MixinGateway);
+    mixinGateway = module.get<MixinIntegrationService>(MixinIntegrationService);
     transactionRepository = module.get<MixinDepositRepository>(
       MixinDepositRepository,
     );

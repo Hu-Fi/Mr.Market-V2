@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../user.service';
 import { UserRepository } from '../user.repository';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 import { AuthService } from '../../auth/auth.service';
 import { User } from '../../../common/entities/user.entity';
 import { Role } from '../../../common/enums/role.enum';
@@ -11,7 +11,7 @@ describe('UserService', () => {
   let service: UserService;
   let repository: UserRepository;
   let authService: AuthService;
-  let mixinGateway: MixinGateway;
+  let mixinGateway: MixinIntegrationService;
 
   beforeEach(async () => {
     const testingModule: TestingModule = await Test.createTestingModule({
@@ -24,7 +24,7 @@ describe('UserService', () => {
           },
         },
         {
-          provide: MixinGateway,
+          provide: MixinIntegrationService,
           useValue: {
             fetchUserBalanceDetails: jest.fn(),
           },
@@ -41,7 +41,7 @@ describe('UserService', () => {
     service = testingModule.get<UserService>(UserService);
     repository = testingModule.get<UserRepository>(UserRepository);
     authService = testingModule.get<AuthService>(AuthService);
-    mixinGateway = testingModule.get<MixinGateway>(MixinGateway);
+    mixinGateway = testingModule.get<MixinIntegrationService>(MixinIntegrationService);
   });
 
   it('should be defined', () => {

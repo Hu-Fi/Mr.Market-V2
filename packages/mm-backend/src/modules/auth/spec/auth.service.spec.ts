@@ -1,6 +1,6 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
@@ -16,7 +16,7 @@ import { AuthSessionRepository } from '../auth-session.repository';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mixinGateway: MixinGateway;
+  let mixinGateway: MixinIntegrationService;
   let jwtService: JwtService;
 
   beforeEach(async () => {
@@ -34,7 +34,7 @@ describe('AuthService', () => {
           useValue: mockAuthSessionRepository,
         },
         {
-          provide: MixinGateway,
+          provide: MixinIntegrationService,
           useValue: {
             oauthHandler: jest.fn(),
           },
@@ -67,7 +67,7 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    mixinGateway = module.get<MixinGateway>(MixinGateway);
+    mixinGateway = module.get<MixinIntegrationService>(MixinIntegrationService);
     jwtService = module.get<JwtService>(JwtService);
   });
 
