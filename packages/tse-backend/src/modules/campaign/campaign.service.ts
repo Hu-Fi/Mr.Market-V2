@@ -66,7 +66,7 @@ export class CampaignService {
         const walletAddress = await this.web3IntegrationService
           .getSigner(campaign.chainId)
           .getAddress();
-        const exchange = this.exchangeRegistryService.getExchange(
+        const exchange = this.exchangeRegistryService.getExchangeByName(
           campaign.exchangeName,
         );
         await this.registerToCampaign(campaign, exchange, walletAddress);
