@@ -5,6 +5,7 @@ import { Order } from '../entities/order.entity';
 import { Operation } from '../entities/operation.entity';
 import { Arbitrage } from '../entities/arbitrage.entity';
 import { MarketMaking } from '../entities/market-making.entity';
+import { ExchangeApiKey } from '../entities/exchange-api-key.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -30,7 +31,7 @@ export class TypeormConfig {
       username: this.configService.get<string>('POSTGRES_USER', 'postgres'),
       password: this.configService.get<string>('POSTGRES_PASSWORD', 'postgres'),
       database: this.configService.get<string>('POSTGRES_DATABASE', 'mr_market_v2'),
-      entities: [Order, Operation, Arbitrage, MarketMaking],
+      entities: [Order, Operation, Arbitrage, MarketMaking, ExchangeApiKey],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:
