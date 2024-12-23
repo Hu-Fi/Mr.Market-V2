@@ -4,9 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeormConfig } from './common/config/typeorm.config';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { ExchangeRegistryModule } from './modules/exchange-registry/exchange-registry.module';
-import { ExchangeRegistryService } from './modules/exchange-registry/exchange-registry.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ExchangeDataModule } from './modules/exchange-data/exchange-data.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
@@ -43,7 +40,6 @@ import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module
     ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
-    // ExchangeDataModule,
     ExchangeOperationModule,
     ExchangeTradeModule,
     HealthModule,
@@ -53,16 +49,6 @@ import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module
     ExchangeDepositModule,
     ExchangeWithdrawalModule,
     WebSchedulerModule,
-  ],
-  controllers: [],
-  providers: [
-    {
-      provide: 'EXCHANGE_REGISTRY_INITIALIZATION',
-      useFactory: async (service: ExchangeRegistryService) => {
-        await service.initializeExchanges();
-      },
-      inject: [ExchangeRegistryService],
-    },
   ],
 })
 export class AppModule {}

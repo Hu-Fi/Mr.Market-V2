@@ -9,10 +9,6 @@ import {
   MarketMakingStrategyCommand,
 } from '../model/market-making.dto';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
-import {
-  calculateOrderDetails,
-  getPriceSource,
-} from '../../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../../common/enums/exchange-operation.enums';
 import { PlaceOrderParams } from '../../../../../common/interfaces/trading-strategy.interfaces';
 import { MarketMaking } from '../../../../../common/entities/market-making.entity';
@@ -20,6 +16,8 @@ import {
   MarketMakingCommandFixture,
   MarketMakingDataFixture,
 } from './market-making.fixtures';
+import { ExchangeDataService } from '../../../../exchange-data/exchange-data.service';
+import { CcxtGateway } from '../../../../../integrations/ccxt.gateway';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateOrderDetails: jest.fn(),
@@ -34,6 +32,19 @@ describe('MarketMakingStrategy', () => {
   let tradeService: ExchangeTradeService;
   let marketMakingService: MarketMakingService;
 
+  const mockCcxtGateway = {
+    getExchangeInstances: jest.fn().mockResolvedValue([{ name: '' }]),
+    interpretError: jest.fn(),
+  };
+
+  const exchangeMock = {
+    fetchOpenOrders: jest.fn().mockReturnValue([]),
+    amountToPrecision: jest.fn().mockReturnValue('1'),
+    priceToPrecision: jest
+      .fn()
+      .mockImplementation((pair: string, price: number) => price.toFixed(2)),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -41,8 +52,8 @@ describe('MarketMakingStrategy', () => {
         {
           provide: ExchangeRegistryService,
           useValue: {
-            getExchangeByName: jest.fn().mockReturnValue({ name: '' }),
-            getSupportedExchanges: jest.fn().mockReturnValue(['exchangea']),
+            getExchangeByName: jest.fn().mockResolvedValue(exchangeMock),
+            getSupportedExchanges: jest.fn().mockResolvedValue(['exchangea']),
             getSupportedPairs: jest.fn(),
           },
         },
@@ -50,17 +61,28 @@ describe('MarketMakingStrategy', () => {
           provide: ExchangeTradeService,
           useValue: {
             executeLimitTrade: jest.fn(),
+            cancelUnfilledOrders: jest.fn(),
           },
         },
         {
           provide: MarketMakingService,
           useValue: {
             createStrategy: jest.fn(),
-            findLatestStrategyByUserId: jest.fn(),
-            updateStrategyStatusById: jest.fn(),
+            findLatestStrategyByUserId: jest.fn().mockResolvedValue({}),
+            updateStrategyStatusById: jest.fn().mockResolvedValue({}),
           },
         },
         Logger,
+        {
+          provide: CcxtGateway,
+          useValue: mockCcxtGateway,
+        },
+        {
+          provide: ExchangeDataService,
+          useValue: {
+            getSupportedPairs: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -132,7 +154,7 @@ describe('MarketMakingStrategy', () => {
       jest
         .spyOn(marketMakingService, 'findLatestStrategyByUserId')
         .mockResolvedValue(strategyData);
-      jest.spyOn(strategy, 'cancelUnfilledOrders').mockResolvedValue(0);
+      jest.spyOn(tradeService, 'cancelUnfilledOrders').mockResolvedValue(0);
 
       await strategy.stop(command);
 
@@ -140,7 +162,7 @@ describe('MarketMakingStrategy', () => {
         1,
         StrategyInstanceStatus.STOPPED,
       );
-      expect(strategy.cancelUnfilledOrders).toHaveBeenCalled();
+      expect(tradeService.cancelUnfilledOrders).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if strategy not found', async () => {
@@ -182,70 +204,6 @@ describe('MarketMakingStrategy', () => {
         1,
         StrategyInstanceStatus.DELETED,
       );
-    });
-
-    describe('evaluateMarketMaking', () => {
-      it('should place buy and sell orders based on market conditions', async () => {
-        const command: MarketMakingStrategyCommand = MarketMakingCommandFixture;
-
-        const exchange = {
-          fetchOpenOrders: jest.fn().mockReturnValue([]),
-          amountToPrecision: jest.fn().mockReturnValue('1'),
-          priceToPrecision: jest
-            .fn()
-            .mockImplementation((pair: string, price: number) =>
-              price.toFixed(2),
-            ),
-        };
-
-        jest
-          .spyOn(exchangeRegistryService, 'getExchangeByName')
-          .mockReturnValue(exchange as any);
-
-        (getPriceSource as jest.Mock).mockResolvedValue(50000);
-        (calculateOrderDetails as jest.Mock).mockReturnValue([
-          {
-            layer: 1,
-            currentOrderAmount: 1,
-            buyPrice: 49000,
-            sellPrice: 51000,
-            shouldBuy: true,
-            shouldSell: true,
-          },
-        ]);
-
-        const placeOrderSpy = jest
-          .spyOn(strategy as any, 'placeOrder')
-          .mockImplementation(async () => {});
-
-        await strategy['evaluateMarketMaking'](command);
-
-        expect(placeOrderSpy).toHaveBeenCalledTimes(2);
-
-        expect(placeOrderSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            userId: 'user1',
-            clientId: 'client1',
-            exchangeName: 'exchangea',
-            pair: 'ETH/USDT',
-            side: TradeSideType.BUY,
-            amount: 1,
-            price: 49000,
-          }),
-        );
-
-        expect(placeOrderSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            userId: 'user1',
-            clientId: 'client1',
-            exchangeName: 'exchangea',
-            pair: 'ETH/USDT',
-            side: TradeSideType.SELL,
-            amount: 1,
-            price: 51000,
-          }),
-        );
-      });
     });
 
     describe('placeOrder', () => {

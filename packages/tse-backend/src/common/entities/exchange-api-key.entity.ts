@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class ExchangeApiKey {
@@ -19,6 +25,9 @@ export class ExchangeApiKey {
 
   @Column({ nullable: true })
   apiPassphrase: string;
+
+  @Column({ default: false })
+  removed: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

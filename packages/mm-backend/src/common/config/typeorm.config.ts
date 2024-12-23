@@ -32,7 +32,10 @@ export class TypeormConfig {
       ),
       username: this.configService.get<string>('POSTGRES_USER', 'postgres'),
       password: this.configService.get<string>('POSTGRES_PASSWORD', 'postgres'),
-      database: this.configService.get<string>('POSTGRES_DATABASE', 'mr_market_v2'),
+      database: this.configService.get<string>(
+        'POSTGRES_DATABASE',
+        'mr_market_v2',
+      ),
       entities: [
         User,
         UserBalance,
@@ -47,9 +50,11 @@ export class TypeormConfig {
       synchronize:
         this.configService.get<string>('DATABASE_SYNCHRONIZE') === 'true',
       migrationsRun:
-        this.configService.get<string>('DATABASE_AUTO_RUN_MIGRATIONS', 'true') ===
-        'true',
-      ssl: this.configService.get<string>('DATABASE_SSL', 'true') === 'true'
+        this.configService.get<string>(
+          'DATABASE_AUTO_RUN_MIGRATIONS',
+          'true',
+        ) === 'true',
+      ssl: this.configService.get<string>('DATABASE_SSL', 'true') === 'true',
     };
   }
 }

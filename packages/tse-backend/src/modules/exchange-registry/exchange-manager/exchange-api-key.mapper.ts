@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { createMap, Mapper } from '@automapper/core';
-import { ExchangeApiKeyCommand, ExchangeApiKeyData, ExchangeApiKeyDto } from './model/exchange-api-key.model';
+import {
+  ExchangeApiKeyCommand,
+  ExchangeApiKeyData,
+  ExchangeApiKeyDto,
+} from './model/exchange-api-key.model';
 
 @Injectable()
 export class ExchangeApiKeyProfile extends AutomapperProfile {

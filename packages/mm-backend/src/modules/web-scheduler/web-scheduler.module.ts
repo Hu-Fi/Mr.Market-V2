@@ -6,6 +6,6 @@ import { TransactionModule } from '../transaction/transaction.module';
 @Module({
   imports: [TransactionModule],
   providers: [WebSchedulerService],
-  controllers: [WebSchedulerController]
+  controllers: [WebSchedulerController],
 })
 export class WebSchedulerModule {}

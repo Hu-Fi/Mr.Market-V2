@@ -7,7 +7,7 @@ export class ExchangeApiKeyDto {
   @ApiPropertyOptional({ example: 'my first account' })
   @IsOptional()
   @IsString()
-  description: string
+  description: string;
 
   @AutoMap()
   @ApiProperty({ example: 'binance' })
@@ -63,4 +63,7 @@ export class ExchangeApiKeyData {
 
   @AutoMap()
   apiPassphrase?: string;
+
+  @AutoMap()
+  removed: boolean;
 }

@@ -26,20 +26,32 @@ import {
   isPairSupported,
 } from '../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
+import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
+import { CcxtGateway } from '../../../../integrations/ccxt.gateway';
 
 @Injectable()
 export class MarketMakingStrategy implements Strategy {
   private logger = new Logger(MarketMakingStrategy.name);
   private strategies: Map<number, StrategyConfig> = new Map();
 
+  private static ERROR_MESSAGES = {
+    EXCHANGE_NOT_SUPPORTED: (exchange: string) =>
+      `Exchange ${exchange} is not supported`,
+    SYMBOL_NOT_SUPPORTED: (symbol: string, exchange: string) =>
+      `Symbol ${symbol} is not supported on exchange ${exchange}`,
+    STRATEGY_NOT_FOUND: 'MarketMaking strategy not found',
+  };
+
   constructor(
+    private readonly exchangeDataService: ExchangeDataService,
     private readonly exchangeRegistryService: ExchangeRegistryService,
     private readonly tradeService: ExchangeTradeService,
     private readonly marketMakingService: MarketMakingService,
+    private readonly ccxtGateway: CcxtGateway,
   ) {}
 
   async create(command: MarketMakingStrategyCommand): Promise<void> {
-    this.validateExchangesAndPairs(command);
+    await this.validateExchangesAndPairs(command);
 
     await this.marketMakingService.createStrategy({
       userId: command.userId,
@@ -59,119 +71,6 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice: command.floorPrice,
       status: StrategyInstanceStatus.RUNNING,
     });
-  }
-
-  private validateExchangesAndPairs(
-    command: MarketMakingStrategyCommand,
-  ): void {
-    const supportedExchanges =
-      this.exchangeRegistryService.getSupportedExchanges();
-
-    if (!isExchangeSupported(command.exchangeName, supportedExchanges)) {
-      throw new NotFoundException(
-        `Exchange ${command.exchangeName} is not supported`,
-      );
-    }
-
-    const supportedSymbolsExchangeA =
-      this.exchangeRegistryService.getSupportedPairs(command.exchangeName);
-
-    if (
-      !isPairSupported(
-        `${command.sideA}/${command.sideB}`,
-        supportedSymbolsExchangeA,
-      )
-    ) {
-      throw new NotFoundException(
-        `Symbol ${command.sideA}/${command.sideB} is not supported on exchange ${command.exchangeName}`,
-      );
-    }
-  }
-
-  async pause(command: MarketMakingStrategyActionCommand): Promise<void> {
-    const strategyEntity: MarketMakingStrategyData =
-      await this.marketMakingService.findLatestStrategyByUserId(command.userId);
-    if (!strategyEntity) {
-      throw new NotFoundException('MarketMaking strategy not found');
-    }
-
-    await this.marketMakingService.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.PAUSED,
-    );
-    const strategy = this.strategies.get(strategyEntity.id);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-    }
-
-    this.logger.debug('Paused market making strategy');
-  }
-
-  async stop(command: MarketMakingStrategyActionCommand): Promise<void> {
-    const strategyEntity: MarketMakingStrategyData =
-      await this.marketMakingService.findLatestStrategyByUserId(command.userId);
-    if (!strategyEntity) {
-      throw new NotFoundException('MarketMaking strategy not found');
-    }
-
-    await this.marketMakingService.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.STOPPED,
-    );
-
-    const strategy = this.strategies.get(strategyEntity.id);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-    }
-
-    const exchange = this.exchangeRegistryService.getExchangeByName(
-      strategyEntity.exchangeName,
-    );
-
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
-
-    this.cancelUnfilledOrders(exchange, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchange.name}`,
-      );
-    });
-
-    this.logger.debug(
-      'Stopped market making strategy, unfilled orders have been canceled',
-    );
-  }
-
-  async delete(command: MarketMakingStrategyActionCommand) {
-    const strategyEntity: MarketMakingStrategyData =
-      await this.marketMakingService.findLatestStrategyByUserId(command.userId);
-    if (!strategyEntity) {
-      throw new NotFoundException('MarketMaking strategy not found');
-    }
-
-    await this.marketMakingService.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.DELETED,
-    );
-
-    const strategy = this.strategies.get(strategyEntity.id);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-      this.strategies.delete(strategyEntity.id);
-    }
-
-    const exchange = this.exchangeRegistryService.getExchangeByName(
-      strategyEntity.exchangeName,
-    );
-
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
-
-    this.cancelUnfilledOrders(exchange, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchange.name}`,
-      );
-    });
-
-    this.logger.debug('Soft deleted market making strategy');
   }
 
   async start(strategies: MarketMakingStrategyData[]): Promise<void> {
@@ -199,6 +98,82 @@ export class MarketMakingStrategy implements Strategy {
     }
   }
 
+  async pause(command: MarketMakingStrategyActionCommand): Promise<void> {
+    const strategyEntity = await this.getStrategyByUserId(command.userId);
+    await this.marketMakingService.updateStrategyStatusById(
+      strategyEntity.id,
+      StrategyInstanceStatus.PAUSED,
+    );
+    this.clearStrategyInterval(strategyEntity.id);
+    this.logger.debug('Paused market making strategy');
+  }
+
+  async stop(command: MarketMakingStrategyActionCommand): Promise<void> {
+    const strategyEntity = await this.getStrategyByUserId(command.userId);
+    await this.marketMakingService.updateStrategyStatusById(
+      strategyEntity.id,
+      StrategyInstanceStatus.STOPPED,
+    );
+    this.clearStrategyInterval(strategyEntity.id);
+
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    await this.tradeService.cancelUnfilledOrders(
+      strategyEntity.exchangeName,
+      pair,
+    );
+
+    this.logger.debug(
+      'Stopped market making strategy, unfilled orders have been canceled',
+    );
+  }
+
+  async delete(command: MarketMakingStrategyActionCommand) {
+    const strategyEntity = await this.getStrategyByUserId(command.userId);
+    await this.marketMakingService.updateStrategyStatusById(
+      strategyEntity.id,
+      StrategyInstanceStatus.DELETED,
+    );
+
+    this.clearStrategyInterval(strategyEntity.id);
+    this.strategies.delete(strategyEntity.id);
+
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    await this.tradeService.cancelUnfilledOrders(
+      strategyEntity.exchangeName,
+      pair,
+    );
+
+    this.logger.debug('Soft deleted market making strategy');
+  }
+
+  private async validateExchangesAndPairs(
+    command: MarketMakingStrategyCommand,
+  ): Promise<void> {
+    const { exchangeName, sideA, sideB } = command;
+    const supportedExchanges =
+      this.exchangeRegistryService.getSupportedExchanges();
+
+    if (!isExchangeSupported(exchangeName, supportedExchanges)) {
+      throw new NotFoundException(
+        MarketMakingStrategy.ERROR_MESSAGES.EXCHANGE_NOT_SUPPORTED(
+          exchangeName,
+        ),
+      );
+    }
+
+    const supportedSymbols =
+      this.exchangeDataService.getSupportedPairs(exchangeName);
+    const pair = `${sideA}/${sideB}`;
+    if (!isPairSupported(pair, await supportedSymbols)) {
+      throw new NotFoundException(
+        MarketMakingStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
+          pair,
+          exchangeName,
+        ),
+      );
+    }
+  }
+
   async evaluateMarketMaking(command: MarketMakingStrategyCommand) {
     const {
       userId,
@@ -217,17 +192,24 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice,
     } = command;
 
-    const exchange =
-      this.exchangeRegistryService.getExchangeByName(exchangeName);
     const pair = `${sideA}/${sideB}`;
 
-    this.cancelUnfilledOrders(exchange, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchange.name}`,
-      );
-    });
+    this.tradeService
+      .cancelUnfilledOrders(exchangeName, pair)
+      .then((canceledCount) => {
+        this.logger.debug(
+          `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeName}`,
+        );
+      });
 
-    const priceSource = await getPriceSource(exchange, pair, priceSourceType);
+    const exchangeInstance =
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
+
+    const priceSource = await getPriceSource(
+      exchangeInstance,
+      pair,
+      priceSourceType,
+    );
 
     const orderDetails: OrderDetail[] = calculateOrderDetails(
       orderAmount,
@@ -242,9 +224,21 @@ export class MarketMakingStrategy implements Strategy {
     );
 
     for (const detail of orderDetails) {
+      const adjustedAmount = this.ccxtGateway.amountToPrecision(
+        exchangeInstance,
+        pair,
+        detail.currentOrderAmount,
+      );
+      let adjustedPrice = this.ccxtGateway.priceToPrecision(
+        exchangeInstance,
+        pair,
+        detail.buyPrice,
+      );
+
       await this.handleBuyOrder(
         detail,
-        exchange,
+        adjustedAmount,
+        adjustedPrice,
         pair,
         priceSource,
         userId,
@@ -252,9 +246,17 @@ export class MarketMakingStrategy implements Strategy {
         exchangeName,
         ceilingPrice,
       );
+
+      adjustedPrice = this.ccxtGateway.priceToPrecision(
+        exchangeInstance,
+        pair,
+        detail.sellPrice,
+      );
+
       await this.handleSellOrder(
         detail,
-        exchange,
+        adjustedAmount,
+        adjustedPrice,
         pair,
         priceSource,
         userId,
@@ -267,7 +269,8 @@ export class MarketMakingStrategy implements Strategy {
 
   private async handleBuyOrder(
     detail: OrderDetail,
-    exchange,
+    adjustedAmount: string,
+    adjustedPrice: string,
     pair: string,
     priceSource: number,
     userId: string,
@@ -275,14 +278,9 @@ export class MarketMakingStrategy implements Strategy {
     exchangeName: string,
     ceilingPrice: number,
   ) {
-    const { currentOrderAmount, buyPrice, shouldBuy } = detail;
+    const { shouldBuy } = detail;
 
     if (shouldBuy) {
-      const adjustedAmount = exchange.amountToPrecision(
-        pair,
-        currentOrderAmount,
-      );
-      const adjustedPrice = exchange.priceToPrecision(pair, buyPrice);
       await this.placeOrder({
         userId,
         clientId,
@@ -301,7 +299,8 @@ export class MarketMakingStrategy implements Strategy {
 
   private async handleSellOrder(
     detail: OrderDetail,
-    exchange,
+    adjustedAmount: string,
+    adjustedPrice: string,
     pair: string,
     priceSource: number,
     userId: string,
@@ -309,14 +308,9 @@ export class MarketMakingStrategy implements Strategy {
     exchangeName: string,
     floorPrice: number,
   ) {
-    const { currentOrderAmount, sellPrice, shouldSell } = detail;
+    const { shouldSell } = detail;
 
     if (shouldSell) {
-      const adjustedAmount = exchange.amountToPrecision(
-        pair,
-        currentOrderAmount,
-      );
-      const adjustedPrice = exchange.priceToPrecision(pair, sellPrice);
       await this.placeOrder({
         userId,
         clientId,
@@ -355,21 +349,23 @@ export class MarketMakingStrategy implements Strategy {
       `Order placed for user ${userId}, client ${clientId}: ${side} ${amount} ${pair} at ${price} on ${exchangeName}`,
     );
   }
+  private async getStrategyByUserId(
+    userId: string,
+  ): Promise<MarketMakingStrategyData> {
+    const strategyEntity =
+      await this.marketMakingService.findLatestStrategyByUserId(userId);
+    if (!strategyEntity) {
+      throw new NotFoundException(
+        MarketMakingStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,
+      );
+    }
+    return strategyEntity;
+  }
 
-  async cancelUnfilledOrders(exchange, pair: string) {
-    const openOrders = await exchange.fetchOpenOrders(pair);
-
-    const cancelPromises = openOrders.map(async (order) => {
-      try {
-        await exchange.cancelOrder(order.id, pair);
-        return true;
-      } catch (e) {
-        this.logger.error(`Error canceling order: ${e.message}`);
-        return false;
-      }
-    });
-
-    const results = await Promise.all(cancelPromises);
-    return results.filter((result) => result).length;
+  private clearStrategyInterval(strategyId: number): void {
+    const strategy = this.strategies.get(strategyId);
+    if (strategy) {
+      clearInterval(strategy.intervalId);
+    }
   }
 }
