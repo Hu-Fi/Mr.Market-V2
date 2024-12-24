@@ -5,6 +5,7 @@ import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.servi
 import { ExchangeManagerService } from './exchange-manager/exchange-manager.service';
 import { ExchangeSelectionStrategy } from './exchange-manager/exchange-selection-strategy.interface';
 import { FirstExchangeStrategy } from './exchange-manager/strategies/first-exchange.strategy';
+import { EncryptionService } from '../../common/utils/encryption.service';
 
 @Injectable()
 export class ExchangeRegistryService {
@@ -13,6 +14,7 @@ export class ExchangeRegistryService {
   constructor(
     private readonly ccxtGateway: CcxtGateway,
     private readonly exchangeApiKeyService: ExchangeApiKeyService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async getExchangeByName(
@@ -51,7 +53,13 @@ export class ExchangeRegistryService {
   }
 
   async getApiKeys(exchangeName: string) {
-    return await this.exchangeApiKeyService.getExchangeApiKeys(exchangeName);
+    const data =
+      await this.exchangeApiKeyService.getExchangeApiKeys(exchangeName);
+
+    return data.map((apiKey) => ({
+      apiKey: apiKey.apiKey,
+      apiSecret: this.encryptionService.decrypt(apiKey.apiSecret),
+    }));
   }
 
   getSupportedExchanges(): string[] {

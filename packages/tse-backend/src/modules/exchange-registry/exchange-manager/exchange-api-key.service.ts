@@ -7,6 +7,7 @@ import {
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { CcxtGateway } from '../../../integrations/ccxt.gateway';
+import { EncryptionService } from '../../../common/utils/encryption.service';
 
 @Injectable()
 export class ExchangeApiKeyService {
@@ -14,6 +15,7 @@ export class ExchangeApiKeyService {
     private repository: ExchangeApiKeyRepository,
     @InjectMapper() private readonly mapper: Mapper,
     private readonly ccxtGateway: CcxtGateway,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async addExchangeApiKey(command: ExchangeApiKeyCommand) {
@@ -28,6 +30,9 @@ export class ExchangeApiKeyService {
       ExchangeApiKeyCommand,
       ExchangeApiKeyData,
     );
+
+    data.apiSecret = this.encryptionService.encrypt(data.apiSecret);
+
     return await this.repository.save(data);
   }
 
