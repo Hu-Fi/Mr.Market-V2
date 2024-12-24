@@ -43,4 +43,18 @@ export class ExchangeApiKeyService {
     }
     return existingExchangeApiKeys;
   }
+
+  async getAllExchangeApiKeys(): Promise<ExchangeApiKeyData[]> {
+    return await this.repository.find();
+  }
+
+  async removeExchangeApiKey(id: number) {
+    const existingExchangeApiKey = await this.repository.findOne(id);
+    if (!existingExchangeApiKey) {
+      throw new BadRequestException(`Exchange API key not found: ${id}`);
+    }
+
+    existingExchangeApiKey.removed = true;
+    await this.repository.save(existingExchangeApiKey);
+  }
 }

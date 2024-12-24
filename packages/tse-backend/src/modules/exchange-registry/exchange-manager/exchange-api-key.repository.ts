@@ -25,4 +25,18 @@ export class ExchangeApiKeyRepository {
       },
     });
   }
+
+  async find() {
+    return await this.exchangeApiKeyRepository.find({
+      where: {
+        removed: false,
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    return await this.exchangeApiKeyRepository.findOne({
+      where: { id: id },
+    });
+  }
 }

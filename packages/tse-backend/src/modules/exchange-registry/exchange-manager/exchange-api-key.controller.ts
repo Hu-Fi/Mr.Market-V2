@@ -2,7 +2,10 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Post,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -30,5 +33,13 @@ export class ExchangeApiKeyController {
       ExchangeApiKeyCommand,
     );
     return await this.service.addExchangeApiKey(command);
+  }
+
+  @Get('/') async getExchangeApiKeys() {
+    return await this.service.getAllExchangeApiKeys();
+  }
+
+  @Delete('/') async removeExchangeApiKeys(@Query('id') id: number) {
+    await this.service.removeExchangeApiKey(id);
   }
 }
