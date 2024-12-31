@@ -1,105 +1,148 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeRegistryService } from './exchange-registry.service';
-import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
+import { FirstExchangeStrategy } from './exchange-manager/strategies/first-exchange.strategy';
+import * as ccxt from 'ccxt';
+import { EncryptionService } from '../../common/utils/encryption.service';
+jest.mock('../logger/logger.service');
+
+function createExchangeInstances(
+  exchangeConfigs: { id: string }[],
+): ccxt.Exchange[] {
+  return exchangeConfigs.map((config) => {
+    if (ccxt[config.id]) {
+      return new ccxt[config.id]({ apiKey: 'api-key', secret: 'secret' });
+    }
+    throw new Error(`Exchange ${config.id} not supported.`);
+  });
+}
 
 describe('ExchangeRegistryService', () => {
   let service: ExchangeRegistryService;
-  let configService: ConfigService;
   let ccxtGateway: CcxtGateway;
+  let exchangeApiKeyService: ExchangeApiKeyService;
+
+  const exchangeConfigs = [{ id: 'binance' }, { id: 'bybit' }];
+  const mockExchangeInstances = createExchangeInstances(exchangeConfigs);
+  const mockApiKeys = [
+    { apiKey: 'mockApiKey1', apiSecret: 'decrypted' },
+    { apiKey: 'mockApiKey2', apiSecret: 'decrypted' },
+  ];
 
   beforeEach(async () => {
-    jest.resetModules();
-    jest.clearAllMocks();
-    process.env = {
-      EXCHANGE_BINANCE_API: 'test_binance_api_key',
-      EXCHANGE_BINANCE_SECRET: 'test_binance_secret',
-      EXCHANGE_OKX_API: 'test_okx_api_key',
-      EXCHANGE_OKX_SECRET: 'test_okx_secret',
-    };
-
-    const mockConfigService = {
-      get: jest.fn((key: string) => process.env[key]),
-    };
+    jest.resetAllMocks();
 
     const mockCcxtGateway = {
-      exchanges: new Map(),
-      addExchange: jest.fn((name: string, exchange: any) => {
-        mockCcxtGateway.exchanges.set(name, exchange);
-      }),
-      getExchangeByName: jest.fn((name: string) =>
-        mockCcxtGateway.exchanges.get(name),
-      ),
-      getExchangesNames: jest.fn(() => mockCcxtGateway.exchanges.keys()),
-      initializeExchange: jest.fn(
-        async (name: string, apiKey: string, secret: string) => {
-          if (!apiKey || !secret) {
-            return null;
-          }
-          return {
-            name,
-            apiKey,
-            secret,
-            has: { sandbox: true },
-          };
-        },
-      ),
+      getExchangeInstances: jest.fn().mockReturnValue([]),
+      initializeExchange: jest.fn().mockResolvedValue(mockExchangeInstances[0]),
+      addExchange: jest.fn(),
+      getExchangeNames: jest
+        .fn()
+        .mockReturnValue(new Set(['binance', 'bybit'])),
     };
+
+    const mockExchangeApiKeyService = {
+      getExchangeApiKeys: jest.fn().mockResolvedValue(mockApiKeys),
+    };
+
+    const mockEncryptionService = {
+      encrypt: jest.fn().mockReturnValue('encrypted'),
+      decrypt: jest.fn().mockReturnValue('decrypted'),
+    }
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangeRegistryService,
-        ConfigService,
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: CcxtGateway, useValue: mockCcxtGateway },
+        { provide: ExchangeApiKeyService, useValue: mockExchangeApiKeyService },
+        { provide: EncryptionService, useValue: mockEncryptionService },
         CustomLogger,
       ],
     }).compile();
 
     service = module.get<ExchangeRegistryService>(ExchangeRegistryService);
-    configService = module.get<ConfigService>(ConfigService);
     ccxtGateway = module.get<CcxtGateway>(CcxtGateway);
+    exchangeApiKeyService = module.get<ExchangeApiKeyService>(
+      ExchangeApiKeyService,
+    );
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should warn if API key or secret is missing', async () => {
-    jest.spyOn(configService, 'get').mockImplementation((key: string) => {
-      if (key === 'EXCHANGE_OKX_API') return null;
-      return process.env[key];
+  describe('getExchangeByName', () => {
+    it('should initialize exchanges if none exist', async () => {
+      const exchangeName = 'binance';
+      jest.spyOn(ccxtGateway, 'getExchangeInstances').mockReturnValue([]);
+      const strategy = new FirstExchangeStrategy();
+
+      const result = await service.getExchangeByName(exchangeName, strategy);
+
+      expect(ccxtGateway.getExchangeInstances).toHaveBeenCalledWith(
+        exchangeName,
+      );
+      expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
+        mockApiKeys.length,
+      );
+      expect(result).toEqual(mockExchangeInstances[0]);
     });
 
-    await service.initializeExchanges();
-    expect(service.getSupportedExchanges()).toEqual(['binance']);
-    expect(service.getSupportedExchanges()).not.toContain('okx');
+    it('should return an existing exchange if already initialized', async () => {
+      const exchangeName = 'binance';
+      jest
+        .spyOn(ccxtGateway, 'getExchangeInstances')
+        .mockReturnValue(mockExchangeInstances);
+      const strategy = new FirstExchangeStrategy();
+
+      const result = await service.getExchangeByName(exchangeName, strategy);
+
+      expect(ccxtGateway.getExchangeInstances).toHaveBeenCalledWith(
+        exchangeName,
+      );
+      expect(ccxtGateway.initializeExchange).not.toHaveBeenCalled();
+      expect(result).toEqual(mockExchangeInstances[0]);
+    });
   });
 
-  it('should initialize exchanges successfully', async () => {
-    await service.initializeExchanges();
-    expect(ccxtGateway.initializeExchange).toHaveBeenCalledWith(
-      'binance',
-      'test_binance_api_key',
-      'test_binance_secret',
-    );
-    expect(ccxtGateway.initializeExchange).toHaveBeenCalledWith(
-      'okx',
-      'test_okx_api_key',
-      'test_okx_secret',
-    );
-    expect(service.getSupportedExchanges()).toEqual(['binance', 'okx']);
+  describe('initializeExchanges', () => {
+    it('should initialize exchanges with API keys', async () => {
+      const exchangeName = 'binance';
+
+      const result = await service['initializeExchanges'](exchangeName);
+
+      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
+        exchangeName,
+      );
+      expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
+        mockApiKeys.length,
+      );
+      expect(ccxtGateway.addExchange).toHaveBeenCalledTimes(mockApiKeys.length);
+      expect(result).toHaveLength(mockApiKeys.length);
+    });
   });
 
-  it('should get an exchange by name', async () => {
-    await service.initializeExchanges();
-    const binanceExchange = service.getExchangeByName('binance');
-    expect(binanceExchange).toEqual({
-      name: 'binance',
-      apiKey: 'test_binance_api_key',
-      secret: 'test_binance_secret',
-      has: { sandbox: true },
+  describe('getApiKeys', () => {
+    it('should retrieve API keys for a given exchange', async () => {
+      const exchangeName = 'binance';
+
+      const result = await service.getApiKeys(exchangeName);
+
+      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
+        exchangeName,
+      );
+      expect(result).toEqual(mockApiKeys);
+    });
+  });
+
+  describe('getSupportedExchanges', () => {
+    it('should return supported exchanges', () => {
+      const result = service.getSupportedExchanges();
+
+      expect(ccxtGateway.getExchangeNames).toHaveBeenCalled();
+      expect(result).toEqual(['binance', 'bybit']);
     });
   });
 });

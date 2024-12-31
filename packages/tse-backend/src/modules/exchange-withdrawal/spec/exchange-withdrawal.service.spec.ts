@@ -6,23 +6,30 @@ import {
   ExchangeNotFoundException,
   WithdrawalNotSupportedException,
 } from '../../../common/filters/withdrawal.exception.filter';
+import { ExchangeRegistryService } from '../../exchange-registry/exchange-registry.service';
 
 describe('ExchangeWithdrawalService', () => {
   let service: ExchangeWithdrawalService;
-  let mockCcxtGateway;
+
+  const mockExchangeRegistryService = {
+    getExchangeByName: jest.fn(),
+  };
+
+  const mockCcxtGateway = {
+    interpretError: jest.fn(),
+  };
 
   beforeEach(async () => {
-    mockCcxtGateway = {
-      getExchangeByName: jest.fn(),
-      interpretError: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangeWithdrawalService,
         {
           provide: CcxtGateway,
           useValue: mockCcxtGateway,
+        },
+        {
+          provide: ExchangeRegistryService,
+          useValue: mockExchangeRegistryService,
         },
       ],
     }).compile();
@@ -44,12 +51,14 @@ describe('ExchangeWithdrawalService', () => {
       amount: 1,
     };
 
-    mockCcxtGateway.getExchangeByName.mockReturnValue(null);
+    mockExchangeRegistryService.getExchangeByName.mockReturnValue(null);
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(
       ExchangeNotFoundException,
     );
-    expect(mockCcxtGateway.getExchangeByName).toHaveBeenCalledWith('binance');
+    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
+      'binance',
+    );
   });
 
   it('should throw WithdrawalNotSupportedException if exchange does not support withdrawal', async () => {
@@ -67,12 +76,14 @@ describe('ExchangeWithdrawalService', () => {
       has: { withdraw: false },
     };
 
-    mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+    mockExchangeRegistryService.getExchangeByName.mockReturnValue(mockExchange);
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(
       WithdrawalNotSupportedException,
     );
-    expect(mockCcxtGateway.getExchangeByName).toHaveBeenCalledWith('binance');
+    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
+      'binance',
+    );
   });
 
   it('should call withdraw method if withdrawal is supported', async () => {
@@ -91,7 +102,7 @@ describe('ExchangeWithdrawalService', () => {
       withdraw: jest.fn().mockResolvedValue('withdrawalSuccess'),
     };
 
-    mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+    mockExchangeRegistryService.getExchangeByName.mockReturnValue(mockExchange);
 
     const result = await service.handleWithdrawal(command);
 
@@ -121,13 +132,15 @@ describe('ExchangeWithdrawalService', () => {
       withdraw: jest.fn().mockRejectedValue(new Error('withdraw error')),
     };
 
-    mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+    mockExchangeRegistryService.getExchangeByName.mockReturnValue(mockExchange);
     mockCcxtGateway.interpretError.mockReturnValue(
       new Error('interpreted error'),
     );
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(Error);
     expect(mockCcxtGateway.interpretError).toHaveBeenCalled();
-    expect(mockCcxtGateway.getExchangeByName).toHaveBeenCalledWith('binance');
+    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
+      'binance',
+    );
   });
 });

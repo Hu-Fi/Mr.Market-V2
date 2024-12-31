@@ -6,9 +6,7 @@ import { CronSecretGuard } from '../../common/utils/auth/guards/cron-secret.guar
 @ApiTags('web-scheduler')
 @Controller('cron')
 export class WebSchedulerController {
-  constructor(
-    private readonly service: WebSchedulerService
-  ) {}
+  constructor(private readonly service: WebSchedulerService) {}
 
   @Get('transaction/execute')
   @ApiOperation({ summary: 'Trigger transaction cron job' })

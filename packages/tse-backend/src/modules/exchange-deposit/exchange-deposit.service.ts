@@ -6,16 +6,21 @@ import {
   ExchangeNotFoundException,
 } from '../../common/filters/deposit-address.exception.filter';
 import { CreateDepositCommand } from './model/exchange-deposit.model';
+import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 
 @Injectable()
 export class ExchangeDepositService {
   private readonly logger = new Logger(ExchangeDepositService.name);
 
-  constructor(private readonly ccxtGateway: CcxtGateway) {}
+  constructor(
+    private readonly ccxtGateway: CcxtGateway,
+    private readonly exchangeRegistryService: ExchangeRegistryService,
+  ) {}
 
   async handleDeposit(command: CreateDepositCommand) {
     const { exchangeName, symbol, network } = command;
-    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
+    const exchange =
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
@@ -79,7 +84,8 @@ export class ExchangeDepositService {
   }
 
   async fetchDeposits(exchangeName: string, symbol: string) {
-    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
+    const exchange =
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }

@@ -14,6 +14,7 @@ import { ExchangeDataSubscriptionManager } from './subscription-manager.ws.servi
     ExchangeDataWsGateway,
     ExchangeDataSubscriptionManager,
   ],
+  exports: [ExchangeDataService],
   controllers: [ExchangeDataController],
 })
 export class ExchangeDataModule {}

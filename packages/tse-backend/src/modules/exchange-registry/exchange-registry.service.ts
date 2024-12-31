@@ -1,65 +1,68 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtGateway } from '../../integrations/ccxt.gateway';
-import { ExchangeConfig } from '../../common/interfaces/exchange-registry.interfaces';
-import { buildExchangeConfigs } from '../../common/utils/config-utils';
+import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
+import { ExchangeManagerService } from './exchange-manager/exchange-manager.service';
+import { ExchangeSelectionStrategy } from './exchange-manager/exchange-selection-strategy.interface';
+import { FirstExchangeStrategy } from './exchange-manager/strategies/first-exchange.strategy';
+import { EncryptionService } from '../../common/utils/encryption.service';
 
 @Injectable()
 export class ExchangeRegistryService {
   private readonly logger = new CustomLogger(ExchangeRegistryService.name);
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly ccxtGateway: CcxtGateway,
+    private readonly exchangeApiKeyService: ExchangeApiKeyService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
-  async initializeExchanges() {
-    const exchangeConfigs = buildExchangeConfigs(this.configService);
+  async getExchangeByName(
+    exchangeName: string,
+    strategy: ExchangeSelectionStrategy = new FirstExchangeStrategy(),
+  ) {
+    let exchanges = this.ccxtGateway.getExchangeInstances(exchangeName);
 
-    await Promise.all(
-      Object.values(exchangeConfigs).map(async (config: ExchangeConfig) => {
-        if (!config.api || !config.secret) {
-          this.logger.warn(
-            `API key or secret for ${config.name} is missing. Skipping initialization.`,
-          );
-          return;
-        }
-        const exchange = await this.ccxtGateway.initializeExchange(
-          config.name,
-          config.api,
-          config.secret,
-        );
-        if (exchange) {
-          this.ccxtGateway.addExchange(config.name, exchange);
-          this.logger.log(
-            `${config.name} initialized successfully. ${exchange.has['sandbox'] ? '(sandbox mode)' : ''}`,
-          );
-        } else {
-          this.logger.warn(`Failed to initialize ${config.name}.`);
-        }
-      }),
-    );
+    if (!exchanges.length) {
+      this.logger.debug(
+        `Exchange ${exchangeName} is not configured. Initializing.`,
+      );
+      exchanges = await this.initializeExchanges(exchangeName);
+    }
+
+    const manager = new ExchangeManagerService(exchanges, strategy);
+    return manager.getExchange();
   }
 
-  getExchangeByName(name: string) {
-    const exchange = this.ccxtGateway.getExchangeByName(name);
-    if (!exchange) {
-      this.logger.error(`Exchange ${name} is not configured.`);
+  private async initializeExchanges(exchangeName: string) {
+    const apiKeys = await this.getApiKeys(exchangeName);
+    const initializedExchanges = [];
+
+    for (const apiKey of apiKeys) {
+      const exchangeIdentifier = `${exchangeName}-${apiKey}`;
+      const exchange = await this.ccxtGateway.initializeExchange(
+        exchangeName,
+        apiKey.apiKey,
+        apiKey.apiSecret,
+      );
+      initializedExchanges.push(exchange);
+      this.ccxtGateway.addExchange(exchangeIdentifier, exchange);
     }
-    return exchange;
+
+    return initializedExchanges;
+  }
+
+  async getApiKeys(exchangeName: string) {
+    const data =
+      await this.exchangeApiKeyService.getExchangeApiKeys(exchangeName);
+
+    return data.map((apiKey) => ({
+      apiKey: apiKey.apiKey,
+      apiSecret: this.encryptionService.decrypt(apiKey.apiSecret),
+    }));
   }
 
   getSupportedExchanges(): string[] {
-    return Array.from(this.ccxtGateway.getExchangesNames());
-  }
-
-  getSupportedPairs(exchangeName: string) {
-    const exchange = this.getExchangeByName(exchangeName);
-    if (!exchange) {
-      this.logger.error(`Exchange ${exchangeName} is not configured.`);
-      throw new Error('Exchange configuration error.');
-    }
-    return exchange.symbols;
+    return Array.from(this.ccxtGateway.getExchangeNames());
   }
 }

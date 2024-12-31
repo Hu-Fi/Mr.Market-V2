@@ -28,7 +28,7 @@ export class ExchangeTradeService {
   ) {}
 
   async executeMarketTrade(command: MarketTradeCommand) {
-    const exchangeInstance = this.getExchangeInstance(command.exchange);
+    const exchangeInstance = await this.getExchangeInstance(command.exchange);
     const savedData = await this.saveOrder(
       command,
       MarketOrderType.MARKET_ORDER,
@@ -56,7 +56,7 @@ export class ExchangeTradeService {
   }
 
   async executeLimitTrade(command: MarketLimitCommand) {
-    const exchangeInstance = this.getExchangeInstance(command.exchange);
+    const exchangeInstance = await this.getExchangeInstance(command.exchange);
     const savedData = await this.saveOrder(
       command,
       MarketOrderType.LIMIT_ORDER,
@@ -85,7 +85,7 @@ export class ExchangeTradeService {
   }
 
   async cancelOrder(command: CancelOrderCommand) {
-    const exchangeInstance = this.getExchangeInstance(command.exchange);
+    const exchangeInstance = await this.getExchangeInstance(command.exchange);
 
     try {
       const result = await exchangeInstance.cancelOrder(
@@ -101,6 +101,24 @@ export class ExchangeTradeService {
     } catch (error) {
       await this.handleOrderError(null, error, command.orderId);
     }
+  }
+
+  async cancelUnfilledOrders(exchangeName: string, pair: string) {
+    const exchangeInstance = await this.getExchangeInstance(exchangeName);
+    const openOrders = await exchangeInstance.fetchOpenOrders(pair);
+
+    const cancelPromises = openOrders.map(async (order: { id: string }) => {
+      try {
+        await exchangeInstance.cancelOrder(order.id, pair);
+        return true;
+      } catch (e) {
+        this.logger.error(`Error canceling order: ${e.message}`);
+        return false;
+      }
+    });
+
+    const results = await Promise.all(cancelPromises);
+    return results.filter((result) => result).length;
   }
 
   private getExchangeInstance(exchange: string) {

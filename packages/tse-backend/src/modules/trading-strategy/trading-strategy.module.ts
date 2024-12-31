@@ -15,12 +15,16 @@ import { MarketMakingService } from './strategies/market-making/market-making.se
 import { MarketMakingRepository } from './strategies/market-making/market-making.repository';
 import { MarketMakingStrategyProfile } from './strategies/market-making/market-making.mapper';
 import { MarketMakingController } from './strategies/market-making/market-making.controller';
+import { ExchangeDataModule } from '../exchange-data/exchange-data.module';
+import { IntegrationsModule } from '../../integrations/integrations.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Arbitrage, MarketMaking]),
     ExchangeRegistryModule,
     ExchangeOperationModule,
+    ExchangeDataModule,
+    IntegrationsModule,
   ],
   providers: [
     ArbitrageStrategy,

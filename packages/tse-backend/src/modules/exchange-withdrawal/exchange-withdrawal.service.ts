@@ -5,16 +5,21 @@ import {
   WithdrawalNotSupportedException,
 } from '../../common/filters/withdrawal.exception.filter';
 import { CreateWithdrawalCommand } from './model/exchange-withdrawal.model';
+import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 
 @Injectable()
 export class ExchangeWithdrawalService {
   private readonly logger = new Logger(ExchangeWithdrawalService.name);
 
-  constructor(private readonly ccxtGateway: CcxtGateway) {}
+  constructor(
+    private readonly ccxtGateway: CcxtGateway,
+    private readonly exchangeRegistryService: ExchangeRegistryService,
+  ) {}
 
   async handleWithdrawal(command: CreateWithdrawalCommand) {
     const { exchangeName, symbol, network, address, tag, amount } = command;
-    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
+    const exchange =
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
@@ -36,7 +41,8 @@ export class ExchangeWithdrawalService {
   }
 
   async fetchWithdrawal(exchangeName: string, transactionHash: string) {
-    const exchange = this.ccxtGateway.getExchangeByName(exchangeName);
+    const exchange =
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
