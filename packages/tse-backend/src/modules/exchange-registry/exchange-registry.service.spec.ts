@@ -5,6 +5,7 @@ import { CcxtGateway } from '../../integrations/ccxt.gateway';
 import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
 import { FirstExchangeStrategy } from './exchange-manager/strategies/first-exchange.strategy';
 import * as ccxt from 'ccxt';
+import { EncryptionService } from '../../common/utils/encryption.service';
 jest.mock('../logger/logger.service');
 
 function createExchangeInstances(
@@ -26,8 +27,8 @@ describe('ExchangeRegistryService', () => {
   const exchangeConfigs = [{ id: 'binance' }, { id: 'bybit' }];
   const mockExchangeInstances = createExchangeInstances(exchangeConfigs);
   const mockApiKeys = [
-    { apiKey: 'mockApiKey1', apiSecret: 'mockApiSecret1' },
-    { apiKey: 'mockApiKey2', apiSecret: 'mockApiSecret2' },
+    { apiKey: 'mockApiKey1', apiSecret: 'decrypted' },
+    { apiKey: 'mockApiKey2', apiSecret: 'decrypted' },
   ];
 
   beforeEach(async () => {
@@ -46,11 +47,17 @@ describe('ExchangeRegistryService', () => {
       getExchangeApiKeys: jest.fn().mockResolvedValue(mockApiKeys),
     };
 
+    const mockEncryptionService = {
+      encrypt: jest.fn().mockReturnValue('encrypted'),
+      decrypt: jest.fn().mockReturnValue('decrypted'),
+    }
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangeRegistryService,
         { provide: CcxtGateway, useValue: mockCcxtGateway },
         { provide: ExchangeApiKeyService, useValue: mockExchangeApiKeyService },
+        { provide: EncryptionService, useValue: mockEncryptionService },
         CustomLogger,
       ],
     }).compile();
