@@ -20,6 +20,8 @@ import {
 } from 'typeorm-transactional';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module';
+import { JwtModule } from '@nestjs/jwt';
+import { SecretGeneratorUtils } from './common/utils/auth/secret-generator.utils';
 
 @Module({
   imports: [
@@ -50,13 +52,23 @@ import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module
     ScheduleModule.forRoot(),
     IntegrationsModule,
     AuthModule,
+    JwtModule.registerAsync({
+      global: true,
+      imports: [AuthModule],
+      useFactory: async (secretGeneratorUtils: SecretGeneratorUtils) => {
+        const secret = await secretGeneratorUtils.getOrGenerateSecret();
+        return {
+          secret,
+          signOptions: { expiresIn: '7d' },
+        };
+      },
+      inject: [SecretGeneratorUtils],
+    }),
     UserModule,
     HealthModule,
     UserBalanceModule,
     TransactionModule,
     WebSchedulerModule,
-  ],
-  controllers: [],
-  providers: [],
+  ]
 })
 export class AppModule {}

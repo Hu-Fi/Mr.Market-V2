@@ -31,7 +31,7 @@ export class ExchangeApiKeyService {
       ExchangeApiKeyData,
     );
 
-    data.apiSecret = this.encryptionService.encrypt(data.apiSecret);
+    data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
 
     return await this.repository.save(data);
   }
