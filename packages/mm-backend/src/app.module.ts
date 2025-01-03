@@ -69,6 +69,6 @@ import { SecretGeneratorUtils } from './common/utils/auth/secret-generator.utils
     UserBalanceModule,
     TransactionModule,
     WebSchedulerModule,
-  ]
+  ],
 })
 export class AppModule {}

@@ -58,10 +58,10 @@ export class ExchangeRegistryService {
 
     return Promise.all(
       data.map(async (apiKey) => ({
-      apiKey: apiKey.apiKey,
-      apiSecret: await this.encryptionService.decrypt(apiKey.apiSecret),
-    })),
-  );
+        apiKey: apiKey.apiKey,
+        apiSecret: await this.encryptionService.decrypt(apiKey.apiSecret),
+      })),
+    );
   }
 
   getSupportedExchanges(): string[] {

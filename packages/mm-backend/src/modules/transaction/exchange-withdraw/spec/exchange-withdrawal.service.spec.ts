@@ -85,7 +85,7 @@ describe('ExchangeWithdrawService', () => {
       exchangeName: 'binance',
     });
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://mock-tse-api-url/exchange-withdrawal',
+      'http://mock-tse-api-url/api/v1/exchange-withdrawal',
       command,
     );
     expect(

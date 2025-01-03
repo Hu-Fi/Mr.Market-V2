@@ -17,7 +17,7 @@ import { PassportModule } from '@nestjs/passport';
     ConfigModule,
     forwardRef(() => UserModule),
     TypeOrmModule.forFeature([MixinAuthSession]),
-    PassportModule
+    PassportModule,
   ],
   providers: [
     AuthService,
@@ -28,11 +28,11 @@ import { PassportModule } from '@nestjs/passport';
         const secret = await secretGeneratorUtils.getOrGenerateSecret();
         return new JwtStrategy(secret);
       },
-      inject: [SecretGeneratorUtils]
+      inject: [SecretGeneratorUtils],
     },
     AuthProfile,
     AuthSessionRepository,
-    SecretGeneratorUtils
+    SecretGeneratorUtils,
   ],
   exports: [AuthService, SecretGeneratorUtils],
   controllers: [AuthController],

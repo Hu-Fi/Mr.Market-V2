@@ -7,14 +7,14 @@ import { Cache } from 'cache-manager';
 export class SecretGeneratorUtils {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-   async getOrGenerateSecret(): Promise<string> {
-     const secretKey: string = await this.cacheManager.get('JWT_SECRET');
-     if (secretKey) {
-       return secretKey;
-     }
+  async getOrGenerateSecret(): Promise<string> {
+    const secretKey: string = await this.cacheManager.get('JWT_SECRET');
+    if (secretKey) {
+      return secretKey;
+    }
 
-     const newSecret = crypto.randomBytes(64).toString('hex');
-     await this.cacheManager.set('JWT_SECRET', newSecret);
-     return newSecret;
-   }
+    const newSecret = crypto.randomBytes(64).toString('hex');
+    await this.cacheManager.set('JWT_SECRET', newSecret);
+    return newSecret;
+  }
 }

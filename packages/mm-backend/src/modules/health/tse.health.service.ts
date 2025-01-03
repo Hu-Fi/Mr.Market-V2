@@ -17,7 +17,9 @@ export class TseHealthService {
   async checkDbHealth() {
     try {
       const response = await lastValueFrom(
-        this.httpService.get(`${this.TRADING_STRATEGY_EXECUTION_URL}/api/v1/health`),
+        this.httpService.get(
+          `${this.TRADING_STRATEGY_EXECUTION_URL}/api/v1/health`,
+        ),
       );
       return response.data;
     } catch {

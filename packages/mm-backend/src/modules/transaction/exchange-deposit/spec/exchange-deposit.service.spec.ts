@@ -74,7 +74,7 @@ describe('ExchangeDepositService', () => {
     const result = await service.deposit(command);
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://mock-tse-api-url/exchange-deposit',
+      'http://mock-tse-api-url/api/v1/exchange-deposit',
       command,
     );
     expect(mockDepositRepository.save).toHaveBeenCalledWith({
