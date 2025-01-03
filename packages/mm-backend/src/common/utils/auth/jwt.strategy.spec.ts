@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtStrategy } from './jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
@@ -13,7 +13,12 @@ describe('JwtStrategy', () => {
           load: [() => ({ JWT_SECRET: 'secret' })],
         }),
       ],
-      providers: [JwtStrategy, ConfigService],
+      providers: [
+        {
+          provide: JwtStrategy,
+          useFactory: () => new JwtStrategy('secret'),
+        },
+      ],
     }).compile();
 
     strategy = module.get<JwtStrategy>(JwtStrategy);

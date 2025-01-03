@@ -11,7 +11,11 @@ import { EncryptionService } from '../../common/utils/encryption.service';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [IntegrationsModule, TypeOrmModule.forFeature([ExchangeApiKey]), ConfigModule],
+  imports: [
+    IntegrationsModule,
+    TypeOrmModule.forFeature([ExchangeApiKey]),
+    ConfigModule,
+  ],
   providers: [
     ExchangeRegistryService,
     ExchangeApiKeyService,

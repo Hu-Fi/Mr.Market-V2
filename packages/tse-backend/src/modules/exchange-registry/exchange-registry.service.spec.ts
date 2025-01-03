@@ -50,7 +50,7 @@ describe('ExchangeRegistryService', () => {
     const mockEncryptionService = {
       encrypt: jest.fn().mockReturnValue('encrypted'),
       decrypt: jest.fn().mockReturnValue('decrypted'),
-    }
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

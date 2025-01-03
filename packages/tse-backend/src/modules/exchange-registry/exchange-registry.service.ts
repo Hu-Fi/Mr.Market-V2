@@ -56,10 +56,12 @@ export class ExchangeRegistryService {
     const data =
       await this.exchangeApiKeyService.getExchangeApiKeys(exchangeName);
 
-    return data.map((apiKey) => ({
-      apiKey: apiKey.apiKey,
-      apiSecret: this.encryptionService.decrypt(apiKey.apiSecret),
-    }));
+    return Promise.all(
+      data.map(async (apiKey) => ({
+        apiKey: apiKey.apiKey,
+        apiSecret: await this.encryptionService.decrypt(apiKey.apiSecret),
+      })),
+    );
   }
 
   getSupportedExchanges(): string[] {

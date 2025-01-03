@@ -1,21 +1,18 @@
 import * as crypto from 'crypto';
-import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class EncryptionService {
   private readonly algorithm = 'aes-256-cbc';
   private readonly ivLength = 16;
-  private readonly key: string;
 
-  constructor(private configService: ConfigService) {
-    this.key = this.configService.get<string>(
-      'ENCRYPTION_KEY', '72e5ff121f6860dbbe22c2d7ac881eaac9956e532d1ea01d1c7dda2831effd2a'
-    );
-  }
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  encrypt(text: string): string {
-    const key = Buffer.from(this.key, 'hex');
+  async encrypt(text: string): Promise<string> {
+    const keyHex = await this.getOrGenerateKey();
+    const key = Buffer.from(keyHex, 'hex');
     const iv = crypto.randomBytes(this.ivLength);
     const cipher = crypto.createCipheriv(this.algorithm, key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -23,8 +20,9 @@ export class EncryptionService {
     return `${iv.toString('hex')}:${encrypted}`;
   }
 
-  decrypt(encrypted: string): string {
-    const key = Buffer.from(this.key, 'hex');
+  async decrypt(encrypted: string): Promise<string> {
+    const keyHex = await this.getOrGenerateKey();
+    const key = Buffer.from(keyHex, 'hex');
     const [iv, encryptedText] = encrypted.split(':');
     const decipher = crypto.createDecipheriv(
       this.algorithm,
@@ -34,5 +32,19 @@ export class EncryptionService {
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
+  }
+
+  private generateKey(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  private async getOrGenerateKey(): Promise<string> {
+    const cachedKey = await this.cacheManager.get<string>('ENCRYPTION_KEY');
+    if (cachedKey) {
+      return cachedKey;
+    }
+    const newKey = this.generateKey();
+    await this.cacheManager.set('ENCRYPTION_KEY', newKey);
+    return newKey;
   }
 }

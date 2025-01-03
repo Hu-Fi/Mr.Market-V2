@@ -52,7 +52,10 @@ describe('RolesGuard', () => {
           provide: 'APP_GUARD',
           useClass: JwtAuthGuard,
         },
-        JwtStrategy,
+        {
+          provide: JwtStrategy,
+          useFactory: () => new JwtStrategy('secret'),
+        },
         AuthService,
         RolesGuard,
         {

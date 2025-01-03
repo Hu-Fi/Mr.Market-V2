@@ -17,13 +17,13 @@ export class ExchangeWithdrawalService {
     private readonly repository: ExchangeWithdrawalRepository,
   ) {
     this.tseApiUrl = this.configService.get<string>(
-      'TRADING_STRATEGY_EXECUTION_API',
+      'TRADING_STRATEGY_EXECUTION_URL',
     );
   }
 
   @Transactional()
   async withdraw(command: CreateWithdrawalCommand) {
-    const url = `${this.tseApiUrl}/exchange-withdrawal`;
+    const url = `${this.tseApiUrl}/api/v1/exchange-withdrawal`;
     const payload = { ...command };
 
     const withdrawal = await this.repository.save({
