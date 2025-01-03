@@ -85,30 +85,30 @@ export class ExchangeDataService {
   }
 
   async getSupportedPairs(exchangeName?: string) {
-    const exchangeInstances = exchangeName
-      ? [await this.exchangeRegistryService.getExchangeByName(exchangeName)]
+    const exchangeNames = exchangeName
+      ? [exchangeName]
       : this.exchangeRegistryService.getSupportedExchanges();
     const pairs: string[] = [];
     this.logger.log(
-      `Fetching supported pairs from ${exchangeInstances.length} exchanges`,
+      `Fetching supported pairs from ${exchangeNames.length} exchanges`,
     );
 
-    for (const exchange of exchangeInstances) {
-      await this.fetchPairsFromExchange(exchange, pairs);
+    for (const name of exchangeNames) {
+      await this.fetchPairsFromExchange(name, pairs);
     }
     return Array.from(new Set(pairs));
   }
 
-  private async fetchPairsFromExchange(exchange: string, pairs: string[]) {
+  private async fetchPairsFromExchange(exchangeName: string, pairs: string[]) {
     const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
     if (exchangeInstance && exchangeInstance.has.fetchTickers) {
       try {
         // TODO: cache the results of fetchTickers method
         const tickers = await exchangeInstance.fetchTickers();
         pairs.push(...Object.keys(tickers));
       } catch (error) {
-        this.logger.error(`Error fetching tickers from ${exchange}: ${error}`);
+        this.logger.error(`Error fetching tickers: ${error}`);
       }
     }
   }

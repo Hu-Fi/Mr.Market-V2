@@ -150,6 +150,7 @@ export class MarketMakingStrategy implements Strategy {
     command: MarketMakingStrategyCommand,
   ): Promise<void> {
     const { exchangeName, sideA, sideB } = command;
+    await this.exchangeRegistryService.getExchangeByName(exchangeName);
     const supportedExchanges =
       this.exchangeRegistryService.getSupportedExchanges();
 
@@ -162,9 +163,9 @@ export class MarketMakingStrategy implements Strategy {
     }
 
     const supportedSymbols =
-      this.exchangeDataService.getSupportedPairs(exchangeName);
-    const pair = `${sideA}/${sideB}`;
-    if (!isPairSupported(pair, await supportedSymbols)) {
+      await this.exchangeDataService.getSupportedPairs(exchangeName);
+    const pair = `${sideA}/${sideB}:${sideB}`;
+    if (!isPairSupported(pair, supportedSymbols)) {
       throw new NotFoundException(
         MarketMakingStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
           pair,

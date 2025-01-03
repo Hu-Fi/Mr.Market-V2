@@ -147,7 +147,7 @@ export class ArbitrageStrategy implements Strategy {
       this.validateExchange(exchangeBName),
     ]);
 
-    const pair = `${sideA}/${sideB}`;
+    const pair = `${sideA}/${sideB}:${sideB}`;
     await Promise.all([
       this.validatePair(pair, exchangeAName),
       this.validatePair(pair, exchangeBName),
@@ -155,6 +155,7 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   private async validateExchange(exchangeName: string): Promise<void> {
+    await this.exchangeRegistryService.getExchangeByName(exchangeName);
     const supportedExchanges =
       this.exchangeRegistryService.getSupportedExchanges();
     if (!isExchangeSupported(exchangeName, supportedExchanges)) {
