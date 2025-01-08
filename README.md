@@ -45,8 +45,6 @@ Below are links to the documentation files located in the `architecture/docs` fo
 2. Add storage
 - In the Add Storage section, select the Postgres Database option available to you. The Vercel integration will create and provision a Postgres database, and you should manually connect it to your new projects.
 - Do the same for Redis.
-3. Add environment variables
-- In this section, you will add the subsequent exchange credentials for the `tse-backend` application. (Project -> Settings -> Environment Variables)
 
 # License
 
