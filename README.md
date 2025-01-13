@@ -40,11 +40,24 @@ Below are links to the documentation files located in the `architecture/docs` fo
 | mm-backend  | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Fmm-backend&env=TRADING_STRATEGY_EXECUTION_API,ADMIN_PASSWORD,MIXIN_APP_ID,MIXIN_SESSION_ID,MIXIN_SERVER_PUBLIC_KEY,MIXIN_SESSION_PRIVATE_KEY,MIXIN_SPEND_PRIVATE_KEY,MIXIN_OAUTH_SECRET) |
 
 1. Start the deployment
-- First, you should run the `tse-backend`, just click the deploy button.
+- First, you should run the `tse-backend`, just click the deploy button (not need to provide any environment variables).
 - Second you should run the mm-backend.
 2. Add storage
 - In the Add Storage section, select the Postgres Database option available to you. The Vercel integration will create and provision a Postgres database, and you should manually connect it to your new projects.
 - Do the same for Redis.
+
+### Required Environment Variables for `mm-backend`
+
+| Variable                        | Description                                                                                 |
+|---------------------------------|---------------------------------------------------------------------------------------------|
+| `TRADING_STRATEGY_EXECUTION_API` | The API endpoint for executing trading strategies.                                         |
+| `ADMIN_PASSWORD`                | Admin password for accessing restricted endpoints.                              |
+| `MIXIN_APP_ID`                  | The Mixin application ID.                                                                  |
+| `MIXIN_SESSION_ID`              | The session ID for the Mixin integration.                                                 |
+| `MIXIN_SERVER_PUBLIC_KEY`       | Public key for the Mixin server.                                                           |
+| `MIXIN_SESSION_PRIVATE_KEY`     | Private key for the Mixin session.                                                         |
+| `MIXIN_SPEND_PRIVATE_KEY`       | Private key for Mixin spend operations.                                                    |
+| `MIXIN_OAUTH_SECRET`            | OAuth secret for the Mixin integration.                                                   |
 
 # License
 
