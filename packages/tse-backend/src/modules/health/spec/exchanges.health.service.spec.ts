@@ -1,23 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
 import { ExchangesHealthService } from '../exchanges.health.service';
 import { CustomLogger } from '../../logger/logger.service';
+import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
 
 describe('ExchangesHealthService', () => {
   let exchangesHealthService: ExchangesHealthService;
-  let mockConfigService: jest.Mocked<ConfigService>;
   let mockCcxtGateway: jest.Mocked<CcxtIntegrationService>;
 
   beforeEach(async () => {
     mockCcxtGateway = {
-      getExchangesNames: jest.fn(),
+      getExchangeNames: jest.fn(),
     } as unknown as jest.Mocked<CcxtIntegrationService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangesHealthService,
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: CcxtIntegrationService, useValue: mockCcxtGateway },
         CustomLogger,
       ],

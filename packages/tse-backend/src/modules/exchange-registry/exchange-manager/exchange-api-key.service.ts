@@ -6,15 +6,15 @@ import {
 } from './model/exchange-api-key.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { CcxtGateway } from '../../../integrations/ccxt.gateway';
 import { EncryptionService } from '../../../common/utils/encryption.service';
+import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
 
 @Injectable()
 export class ExchangeApiKeyService {
   constructor(
     private repository: ExchangeApiKeyRepository,
     @InjectMapper() private readonly mapper: Mapper,
-    private readonly ccxtGateway: CcxtGateway,
+    private readonly ccxtGateway: CcxtIntegrationService,
     private readonly encryptionService: EncryptionService,
   ) {}
 

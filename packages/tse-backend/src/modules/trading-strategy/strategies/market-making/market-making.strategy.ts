@@ -27,7 +27,7 @@ import {
 } from '../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
 import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
-import { CcxtGateway } from '../../../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../../../integrations/ccxt.integration.service';
 
 @Injectable()
 export class MarketMakingStrategy implements Strategy {
@@ -47,7 +47,7 @@ export class MarketMakingStrategy implements Strategy {
     private readonly exchangeRegistryService: ExchangeRegistryService,
     private readonly tradeService: ExchangeTradeService,
     private readonly marketMakingService: MarketMakingService,
-    private readonly ccxtGateway: CcxtGateway,
+    private readonly ccxtGateway: CcxtIntegrationService,
   ) {}
 
   async create(command: MarketMakingStrategyCommand): Promise<void> {
