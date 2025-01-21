@@ -20,6 +20,7 @@ import {
   ArbitrageCommandFixture,
   ArbitrageDataFixture,
 } from './arbitrage.fixtures';
+import { ExchangeDataService } from '../../../../exchange-data/exchange-data.service';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateVWAPForAmount: jest.fn(),
@@ -36,7 +37,6 @@ describe('ArbitrageStrategy', () => {
   let exchangeRegistryService: ExchangeRegistryService;
   let tradeService: ExchangeTradeService;
   let arbitrageService: ArbitrageService;
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -48,13 +48,13 @@ describe('ArbitrageStrategy', () => {
             getSupportedExchanges: jest
               .fn()
               .mockReturnValue(['ExchangeA', 'ExchangeB']),
-            getSupportedPairs: jest.fn(),
           },
         },
         {
           provide: ExchangeTradeService,
           useValue: {
             executeLimitTrade: jest.fn(),
+            cancelUnfilledOrders: jest.fn(),
           },
         },
         {
@@ -67,6 +67,12 @@ describe('ArbitrageStrategy', () => {
           },
         },
         Logger,
+        {
+          provide: ExchangeDataService,
+          useValue: {
+            getSupportedPairs: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -157,7 +163,7 @@ describe('ArbitrageStrategy', () => {
       jest
         .spyOn(arbitrageService, 'findLatestStrategyByUserId')
         .mockResolvedValue(strategyData);
-      jest.spyOn(strategy, 'cancelUnfilledOrders').mockResolvedValue(0);
+      jest.spyOn(tradeService, 'cancelUnfilledOrders').mockResolvedValue(0);
 
       await strategy.stop(command);
 
@@ -165,7 +171,7 @@ describe('ArbitrageStrategy', () => {
         1,
         StrategyInstanceStatus.STOPPED,
       );
-      expect(strategy.cancelUnfilledOrders).toHaveBeenCalled();
+      expect(tradeService.cancelUnfilledOrders).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if strategy not found', async () => {

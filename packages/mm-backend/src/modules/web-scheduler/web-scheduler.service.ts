@@ -3,9 +3,7 @@ import { TransactionService } from '../transaction/transaction.service';
 
 @Injectable()
 export class WebSchedulerService {
-  constructor(
-    private readonly transactionService: TransactionService,
-  ) {}
+  constructor(private readonly transactionService: TransactionService) {}
 
   async triggerTransactionCronJob() {
     await this.transactionService.processData();

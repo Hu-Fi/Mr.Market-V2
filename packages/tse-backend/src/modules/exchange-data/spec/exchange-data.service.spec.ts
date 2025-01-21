@@ -15,20 +15,6 @@ import { MarketDataType } from '../../../common/enums/exchange-data.enums';
 describe('ExchangeDataService', () => {
   let service: ExchangeDataService;
 
-  const mockExchangeRegistryService = {
-    getExchangeByName: jest.fn(),
-    getSupportedExchanges: jest.fn(),
-  };
-
-  const mockSubscriptionManager = {
-    isSubscribed: jest.fn(),
-  };
-
-  const mockLogger = {
-    log: jest.fn(),
-    error: jest.fn(),
-  };
-
   const mockExchangeInstance = {
     name: 'mockExchange',
     has: {
@@ -40,7 +26,7 @@ describe('ExchangeDataService', () => {
       watchTicker: true,
       watchTickers: true,
     },
-    fetchTickers: jest.fn(),
+    fetchTickers: jest.fn().mockResolvedValue(['ETH/USDT', 'BTC/USDT']),
     fetchOHLCV: jest.fn(),
     fetchTicker: jest.fn(),
     watchOrderBook: jest.fn(),
@@ -49,6 +35,20 @@ describe('ExchangeDataService', () => {
     watchTickers: jest.fn(),
     loadMarkets: jest.fn(),
     markets: { 'ETH/USDT': {}, 'BTC/USDT': {} },
+  };
+
+  const mockExchangeRegistryService = {
+    getExchangeByName: jest.fn().mockResolvedValue(mockExchangeInstance),
+    getSupportedExchanges: jest.fn().mockReturnValue(['bybit']),
+  };
+
+  const mockSubscriptionManager = {
+    isSubscribed: jest.fn(),
+  };
+
+  const mockLogger = {
+    log: jest.fn(),
+    error: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -180,24 +180,38 @@ describe('ExchangeDataService', () => {
 
   describe('getSupportedPairs', () => {
     it('should fetch supported pairs from all exchanges', async () => {
+      const mockPairsExchange1 = { 'ETH/USDT': {}, 'BTC/USDT': {} };
+      const mockPairsExchange2 = { 'XRP/USDT': {}, 'BTC/USDT': {} };
+
       mockExchangeRegistryService.getSupportedExchanges.mockReturnValue([
-        'mockExchange',
+        'exchange1',
+        'exchange2',
       ]);
-      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
-        mockExchangeInstance,
-      );
-      mockExchangeInstance.fetchTickers.mockResolvedValue({
-        'ETH/USDT': {},
-        'BTC/USDT': {},
-      });
+
+      mockExchangeRegistryService.getExchangeByName
+        .mockResolvedValueOnce({
+          ...mockExchangeInstance,
+          name: 'exchange1',
+          fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange1),
+        })
+        .mockResolvedValueOnce({
+          ...mockExchangeInstance,
+          name: 'exchange2',
+          fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange2),
+        });
 
       const result = await service.getSupportedPairs();
 
+      expect(result).toEqual(['ETH/USDT', 'BTC/USDT', 'XRP/USDT']);
       expect(
         mockExchangeRegistryService.getSupportedExchanges,
       ).toHaveBeenCalled();
-      expect(mockExchangeInstance.fetchTickers).toHaveBeenCalled();
-      expect(result).toEqual(['ETH/USDT', 'BTC/USDT']);
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('exchange1');
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('exchange2');
     });
   });
 

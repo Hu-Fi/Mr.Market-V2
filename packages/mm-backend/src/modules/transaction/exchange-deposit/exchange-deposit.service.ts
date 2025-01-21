@@ -17,13 +17,13 @@ export class ExchangeDepositService {
     private readonly repository: ExchangeDepositRepository,
   ) {
     this.tseApiUrl = this.configService.get<string>(
-      'TRADING_STRATEGY_EXECUTION_API',
+      'TRADING_STRATEGY_EXECUTION_URL',
     );
   }
 
   @Transactional()
   async deposit(command: CreateDepositCommand) {
-    const url = `${this.tseApiUrl}/exchange-deposit`;
+    const url = `${this.tseApiUrl}/api/v1/exchange-deposit`;
     const payload = { ...command };
 
     const transaction = await lastValueFrom(

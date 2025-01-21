@@ -15,38 +15,46 @@ export class CcxtIntegrationService {
     this.exchanges.set(name, exchange);
   }
 
-  getExchangeByName(name: string): ccxt.Exchange {
-    return this.exchanges.get(name);
+  getExchangeInstances(exchangeName: string): ccxt.Exchange[] | undefined {
+    const exchangeInstances: ccxt.Exchange[] = [];
+    for (const [key, exchangeInstance] of this.exchanges.entries()) {
+      const identifier = key.split('-')[0];
+      if (identifier?.startsWith(exchangeName)) {
+        exchangeInstances.push(exchangeInstance);
+      }
+    }
+    return exchangeInstances;
   }
 
-  getExchangesNames() {
-    return this.exchanges.keys();
+  getExchangeNames(): Set<string> {
+    const uniqueNames = new Set<string>();
+    for (const key of this.exchanges.keys()) {
+      const exchangeName = key.split('-')[0];
+      uniqueNames.add(exchangeName);
+    }
+    return uniqueNames;
   }
 
-  async initializeExchange(
-    name: string,
-    apiKey: string,
-    secret: string,
-  ): Promise<ccxt.Exchange | null> {
-    try {
-      const exchangeClass = ccxt.pro[name] || ccxt[name];
-      if (!exchangeClass) {
-        throw new Error(`Exchange class for ${name} not found`);
-      }
-      const exchange = new exchangeClass({
-        apiKey,
-        secret,
-      });
-
-      const isSandbox = this.configService.get('SANDBOX', false) === 'true';
-      if (exchange.has['sandbox']) {
-        exchange.setSandboxMode(isSandbox);
-      }
-
+  async initializeExchange(name: string, apiKey: string, secret: string) {
+    const exchangeClass = this.getExchangeClass(name);
+    if (exchangeClass) {
+      const exchange = new exchangeClass({ apiKey, secret });
+      this.configureSandboxMode(exchange);
       await exchange.loadMarkets();
       return exchange;
-    } catch (error) {
-      throw new Error(`Failed to initialize ${name}: ${error.message}`);
+    } else {
+      throw new Error(`Exchange class for ${name} not found`);
+    }
+  }
+
+  getExchangeClass(name: string): typeof ccxt.Exchange | null {
+    return ccxt.pro[name] ?? ccxt[name] ?? null;
+  }
+
+  private configureSandboxMode(exchange: ccxt.Exchange): void {
+    const isSandbox = this.configService.get('SANDBOX', false) === 'true';
+    if (exchange.has['sandbox']) {
+      exchange.setSandboxMode(isSandbox);
     }
   }
 
@@ -61,5 +69,21 @@ export class CcxtIntegrationService {
 
     const ExceptionClass = errorMap.get(error.constructor as any);
     return ExceptionClass ? ExceptionClass() : error;
+  }
+
+  priceToPrecision(
+    exchangeInstance: ccxt.Exchange,
+    pair: string,
+    sellPrice: any,
+  ) {
+    return exchangeInstance.priceToPrecision(pair, sellPrice);
+  }
+
+  amountToPrecision(
+    exchangeInstance: ccxt.Exchange,
+    pair: string,
+    amount: any,
+  ) {
+    return exchangeInstance.amountToPrecision(pair, amount);
   }
 }

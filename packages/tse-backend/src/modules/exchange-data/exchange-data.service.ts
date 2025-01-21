@@ -29,7 +29,7 @@ export class ExchangeDataService {
   async getTickers(command: GetTickersCommand) {
     const { exchange, symbols } = command;
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance || !exchangeInstance.has.fetchTickers) {
       throw new Error(
         'Exchange does not support fetchTickers or is not configured.',
@@ -51,7 +51,7 @@ export class ExchangeDataService {
   async getOHLCVData(command: GetOHLCVCommand) {
     const { exchange, symbol, timeframe = '1m', since, limit = 30 } = command;
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance || !exchangeInstance.has.fetchOHLCV) {
       throw new Error(
         'Exchange does not support fetchOHLCV or is not configured.',
@@ -68,7 +68,7 @@ export class ExchangeDataService {
         since,
         limit,
       );
-      return result.map((data) => {
+      return result.map((data: any[]) => {
         return {
           timestamp: data[0],
           open: data[1],
@@ -84,30 +84,31 @@ export class ExchangeDataService {
     }
   }
 
-  async getSupportedPairs() {
-    const exchangeInstances =
-      this.exchangeRegistryService.getSupportedExchanges();
+  async getSupportedPairs(exchangeName?: string) {
+    const exchangeNames = exchangeName
+      ? [exchangeName]
+      : this.exchangeRegistryService.getSupportedExchanges();
     const pairs: string[] = [];
     this.logger.log(
-      `Fetching supported pairs from ${exchangeInstances.length} exchanges`,
+      `Fetching supported pairs from ${exchangeNames.length} exchanges`,
     );
 
-    for (const exchange of exchangeInstances) {
-      await this.fetchPairsFromExchange(exchange, pairs);
+    for (const name of exchangeNames) {
+      await this.fetchPairsFromExchange(name, pairs);
     }
     return Array.from(new Set(pairs));
   }
 
-  private async fetchPairsFromExchange(exchange: string, pairs: string[]) {
+  private async fetchPairsFromExchange(exchangeName: string, pairs: string[]) {
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchangeName);
     if (exchangeInstance && exchangeInstance.has.fetchTickers) {
       try {
         // TODO: cache the results of fetchTickers method
         const tickers = await exchangeInstance.fetchTickers();
         pairs.push(...Object.keys(tickers));
       } catch (error) {
-        this.logger.error(`Error fetching tickers from ${exchange}: ${error}`);
+        this.logger.error(`Error fetching tickers: ${error}`);
       }
     }
   }
@@ -116,7 +117,7 @@ export class ExchangeDataService {
     const { exchange, symbol } = command;
     const upperCaseSymbol = symbol.toUpperCase();
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance || !exchangeInstance.has.fetchTicker) {
       throw new Error(
         'Exchange does not support fetchTicker or is not configured.',
@@ -173,7 +174,7 @@ export class ExchangeDataService {
   async getSupportedSymbols(command: GetSupportedSymbolsCommand) {
     const { exchange } = command;
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance) {
       throw new Error(`Exchange ${exchange} is not configured.`);
     }
@@ -199,7 +200,7 @@ export class ExchangeDataService {
     extraParams: any = {},
   ): Promise<void> {
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchange);
     const methodName = `watch${type}`;
     const context = new CompositeKeyContext(type);
     const compositeKey = context.createCompositeKey(

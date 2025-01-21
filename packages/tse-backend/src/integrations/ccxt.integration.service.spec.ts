@@ -54,7 +54,7 @@ describe('CcxtGateway', () => {
       const exchange = new ccxt.binance({ apiKey: 'test', secret: 'test' });
       gateway.addExchange('binance', exchange);
 
-      expect(gateway.getExchangeByName('binance')).toBe(exchange);
+      expect(gateway.getExchangeInstances('binance')).toStrictEqual([exchange]);
     });
   });
 
@@ -63,13 +63,13 @@ describe('CcxtGateway', () => {
       const exchange = new ccxt.binance({ apiKey: 'test', secret: 'test' });
       gateway.addExchange('binance', exchange);
 
-      const retrievedExchange = gateway.getExchangeByName('binance');
-      expect(retrievedExchange).toBe(exchange);
+      const retrievedExchange = gateway.getExchangeInstances('binance');
+      expect(retrievedExchange).toStrictEqual([exchange]);
     });
 
     it('should return undefined for a non-existing exchange', () => {
-      const retrievedExchange = gateway.getExchangeByName('nonexistent');
-      expect(retrievedExchange).toBeUndefined();
+      const retrievedExchange = gateway.getExchangeInstances('nonexistent');
+      expect(retrievedExchange).toStrictEqual([]);
     });
   });
 
@@ -80,7 +80,7 @@ describe('CcxtGateway', () => {
       gateway.addExchange('binance', exchange1);
       gateway.addExchange('kraken', exchange2);
 
-      const exchangesNames = Array.from(gateway.getExchangesNames());
+      const exchangesNames = Array.from(gateway.getExchangeNames());
       expect(exchangesNames).toContain('binance');
       expect(exchangesNames).toContain('kraken');
     });
@@ -112,7 +112,7 @@ describe('CcxtGateway', () => {
 
       await expect(
         gateway.initializeExchange('binance', 'testApiKey', 'testSecret'),
-      ).rejects.toThrow('Failed to initialize binance: Initialization error');
+      ).rejects.toThrow('Initialization error');
     });
   });
 });

@@ -4,23 +4,12 @@ import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.s
 import { ExchangesHealthService } from '../exchanges.health.service';
 import { CustomLogger } from '../../logger/logger.service';
 
-jest.mock('../../../common/utils/config-utils', () => ({
-  buildExchangeConfigs: jest.fn(() => ({
-    exchange1: {},
-    exchange2: {},
-  })),
-}));
-
 describe('ExchangesHealthService', () => {
   let exchangesHealthService: ExchangesHealthService;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockCcxtGateway: jest.Mocked<CcxtIntegrationService>;
 
   beforeEach(async () => {
-    mockConfigService = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<ConfigService>;
-
     mockCcxtGateway = {
       getExchangesNames: jest.fn(),
     } as unknown as jest.Mocked<CcxtIntegrationService>;
@@ -40,27 +29,34 @@ describe('ExchangesHealthService', () => {
   });
 
   describe('checkExchanges', () => {
-    it('should return UP when all expected exchanges are present', async () => {
-      mockConfigService.get.mockReturnValue({ exchange1: {}, exchange2: {} });
-      mockCcxtGateway.getExchangesNames.mockReturnValue(
-        new Set(['exchange1', 'exchange2']).values(),
+    it('should return UP when there are initialized exchanges', async () => {
+      mockCcxtGateway.getExchangeNames.mockReturnValue(
+        new Set(['binance', 'kraken']),
       );
 
       const result = await exchangesHealthService.checkExchanges();
-      expect(result).toEqual({ status: 'UP', details: {} });
+
+      expect(result).toEqual({
+        status: 'UP',
+        details: {
+          initialized: 'binance, kraken',
+        },
+      });
+      expect(mockCcxtGateway.getExchangeNames).toHaveBeenCalledTimes(1);
     });
 
-    it('should return DOWN with missing exchanges when some exchanges are missing', async () => {
-      mockConfigService.get.mockReturnValue({ exchange1: {}, exchange2: {} });
-      mockCcxtGateway.getExchangesNames.mockReturnValue(
-        new Set(['exchange1']).values(),
-      );
+    it('should return DOWN when there are no initialized exchanges', async () => {
+      mockCcxtGateway.getExchangeNames.mockReturnValue(new Set());
 
       const result = await exchangesHealthService.checkExchanges();
+
       expect(result).toEqual({
         status: 'DOWN',
-        details: { missingExchanges: ['exchange2'] },
+        details: {
+          initialized: '',
+        },
       });
+      expect(mockCcxtGateway.getExchangeNames).toHaveBeenCalledTimes(1);
     });
   });
 });

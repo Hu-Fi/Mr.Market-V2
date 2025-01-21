@@ -34,19 +34,54 @@ Below are links to the documentation files located in the `architecture/docs` fo
 
 ## Vercel Deploy Button
 
-| Project     | Deploy                                                                                                                                                                                                                                                                                                                                                                  |
-|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| mm-backend  | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Fmm-backend&env=CRON_SECRET,TRADING_STRATEGY_EXECUTION_API,ADMIN_PASSWORD,MIXIN_APP_ID,MIXIN_SESSION_ID,MIXIN_SERVER_PUBLIC_KEY,MIXIN_SESSION_PRIVATE_KEY,MIXIN_SPEND_PRIVATE_KEY,MIXIN_OAUTH_SECRET) |
-| tse-backend | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Ftse-backend&env=CRON_SECRET,EXCHANGE_BYBIT_API,EXCHANGE_BYBIT_SECRET)                                                                                                                              |
+| Project     | Deploy                                                                                                                                                                                                                                           |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| tse-backend | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Ftse-backend)                                                                                                                                                                                                                                                |
+| mm-backend  | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHu-Fi%2FMr.Market-V2%2Ftree%2Fmain%2Fpackages%2Fmm-backend&env=TRADING_STRATEGY_EXECUTION_API,ADMIN_PASSWORD,MIXIN_APP_ID,MIXIN_SESSION_ID,MIXIN_SERVER_PUBLIC_KEY,MIXIN_SESSION_PRIVATE_KEY,MIXIN_SPEND_PRIVATE_KEY,MIXIN_OAUTH_SECRET) |
 
 1. Start the deployment
-- First, you should run the `tse-backend`, just click the deploy button.
+- First, you should run the `tse-backend`, just click the deploy button (not need to provide any environment variables).
 - Second you should run the mm-backend.
 2. Add storage
 - In the Add Storage section, select the Postgres Database option available to you. The Vercel integration will create and provision a Postgres database, and you should manually connect it to your new projects.
 - Do the same for Redis.
-3. Add environment variables
-- In this section, you will add the subsequent exchange credentials for the `tse-backend` application. (Project -> Settings -> Environment Variables)
+
+### Required Environment Variables for `mm-backend`
+
+| Variable                        | Description                                                                                 |
+|---------------------------------|---------------------------------------------------------------------------------------------|
+| `TRADING_STRATEGY_EXECUTION_API` | The API endpoint for executing trading strategies.                                         |
+| `ADMIN_PASSWORD`                | Admin password for accessing restricted endpoints.                              |
+| `MIXIN_APP_ID`                  | The Mixin application ID.                                                                  |
+| `MIXIN_SESSION_ID`              | The session ID for the Mixin integration.                                                 |
+| `MIXIN_SERVER_PUBLIC_KEY`       | Public key for the Mixin server.                                                           |
+| `MIXIN_SESSION_PRIVATE_KEY`     | Private key for the Mixin session.                                                         |
+| `MIXIN_SPEND_PRIVATE_KEY`       | Private key for Mixin spend operations.                                                    |
+| `MIXIN_OAUTH_SECRET`            | OAuth secret for the Mixin integration.                                                   |
+
+## How to Connect Vercel Logs to Better Stack
+
+Follow these steps to integrate Vercel logs with Better Stack for improved log management and monitoring:
+
+1. **Create an Account on Better Stack**  
+   If you don’t already have an account, go to [Better Stack](https://betterstack.com) and sign up. Follow the prompts to set up your workspace.
+
+2. **Log in to Your Vercel Dashboard**  
+   Navigate to [Vercel](https://vercel.com) and log in to your account.
+
+3. **Select Your Application**  
+   From the Vercel dashboard, choose the project for which you want to set up the log integration.
+
+4. **Access the Integrations Tab**
+    - In your application's settings, locate and click the **Integrations** tab.
+    - This tab lists all available integrations for your project.
+
+5. **Find and Select the Better Stack Integration**
+    - Search for **Better Stack** in the integrations list.
+    - Click on the **Better Stack** integration to begin the setup process.
+
+6. **Connect Vercel to Better Stack**
+    - Follow the instructions provided during the setup to connect your Vercel project to Better Stack.
 
 # License
 

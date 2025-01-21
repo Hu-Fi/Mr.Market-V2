@@ -43,6 +43,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "@testcontainers/postgresql": "^10.13.0",
     "@testcontainers/redis": "^10.13.2",
+    "@types/passport-jwt": "^4.0.1",
     "@types/uuid": "^10.0.0",
     "axios": "^1.7.7",
     "bignumber.js": "^9.1.2",

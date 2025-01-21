@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 @Injectable()
 export class CronSecretGuard implements CanActivate {
@@ -10,7 +15,9 @@ export class CronSecretGuard implements CanActivate {
       !process.env.CRON_SECRET ||
       authHeader !== `Bearer ${process.env.CRON_SECRET}`
     ) {
-      throw new UnauthorizedException('Invalid or missing authorization header');
+      throw new UnauthorizedException(
+        'Invalid or missing authorization header',
+      );
     }
 
     return true;

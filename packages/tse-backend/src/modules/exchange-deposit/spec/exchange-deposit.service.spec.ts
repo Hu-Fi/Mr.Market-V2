@@ -7,13 +7,17 @@ import {
   DepositAddressFetchException,
   ExchangeNotFoundException,
 } from '../../../common/filters/deposit-address.exception.filter';
+import { ExchangeRegistryService } from '../../exchange-registry/exchange-registry.service';
 
 describe('ExchangeDepositService', () => {
   let service: ExchangeDepositService;
 
   const mockCcxtGateway = {
-    getExchangeByName: jest.fn(),
     interpretError: jest.fn(),
+  };
+
+  const mockExchangeRegistryService = {
+    getExchangeByName: jest.fn(),
   };
 
   const createDepositCommand: CreateDepositCommand = {
@@ -30,6 +34,10 @@ describe('ExchangeDepositService', () => {
           provide: CcxtIntegrationService,
           useValue: mockCcxtGateway,
         },
+        {
+          provide: ExchangeRegistryService,
+          useValue: mockExchangeRegistryService,
+        },
       ],
     }).compile();
 
@@ -42,7 +50,7 @@ describe('ExchangeDepositService', () => {
 
   describe('handleDeposit', () => {
     it('should throw ExchangeNotFoundException if exchange does not exist', async () => {
-      mockCcxtGateway.getExchangeByName.mockReturnValue(null);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(null);
 
       await expect(service.handleDeposit(createDepositCommand)).rejects.toThrow(
         new ExchangeNotFoundException(createDepositCommand.exchangeName),
@@ -51,7 +59,9 @@ describe('ExchangeDepositService', () => {
 
     it('should throw DepositAddressFetchException if fetchDepositAddress is not supported', async () => {
       const mockExchange = { has: { fetchDepositAddress: false } };
-      mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        mockExchange,
+      );
 
       await expect(service.handleDeposit(createDepositCommand)).rejects.toThrow(
         DepositAddressFetchException,
@@ -65,7 +75,9 @@ describe('ExchangeDepositService', () => {
           .fn()
           .mockResolvedValue({ address: '0xABC', tag: 'memo' }),
       };
-      mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        mockExchange,
+      );
 
       const result = await service.handleDeposit(createDepositCommand);
       expect(result).toEqual({ address: '0xABC', memo: 'memo' });
@@ -78,7 +90,9 @@ describe('ExchangeDepositService', () => {
           .fn()
           .mockRejectedValue(new Error('fetch error')),
       };
-      mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        mockExchange,
+      );
       mockCcxtGateway.interpretError.mockReturnValue(
         new DepositAddressFetchException(
           'binance',
@@ -102,7 +116,9 @@ describe('ExchangeDepositService', () => {
           .mockResolvedValue({ address: '0xGHI', tag: 'memo' }),
       };
       const symbol = 'ETH';
-      mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        mockExchange,
+      );
 
       const result = await service['createDepositAddress'](
         mockExchange,
@@ -120,7 +136,9 @@ describe('ExchangeDepositService', () => {
           .mockRejectedValue(new Error('create error')),
       };
       const symbol = 'ETH';
-      mockCcxtGateway.getExchangeByName.mockReturnValue(mockExchange);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        mockExchange,
+      );
       mockCcxtGateway.interpretError.mockReturnValue(
         new Error('interpreted error'),
       );

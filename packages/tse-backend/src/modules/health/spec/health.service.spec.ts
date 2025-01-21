@@ -51,14 +51,22 @@ describe('HealthService', () => {
       jest
         .spyOn(dbHealthService, 'checkDbHealth')
         .mockResolvedValue(checkDbHealthFixture);
-      jest
-        .spyOn(exchangesHealthService, 'checkExchanges')
-        .mockResolvedValue({ status: 'UP', details: {} });
+      jest.spyOn(exchangesHealthService, 'checkExchanges').mockResolvedValue({
+        status: 'UP',
+        details: {
+          initialized: '',
+        },
+      });
 
       const result = await healthService.geHealthStatuses();
       expect(result).toEqual({
         db: checkDbHealthFixture,
-        exchanges: { status: 'UP', details: {} },
+        exchanges: {
+          status: 'UP',
+          details: {
+            initialized: '',
+          },
+        },
       });
     });
   });

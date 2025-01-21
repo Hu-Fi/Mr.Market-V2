@@ -28,20 +28,30 @@ import {
   TimeUnit,
 } from '../../../../common/enums/strategy-type.enums';
 import { ArbitrageService } from './arbitrage.service';
+import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
 
 @Injectable()
 export class ArbitrageStrategy implements Strategy {
   private logger = new Logger(ArbitrageStrategy.name);
   private strategies: Map<number, StrategyConfig> = new Map();
 
+  private static ERROR_MESSAGES = {
+    EXCHANGE_NOT_SUPPORTED: (exchange: string) =>
+      `Exchange ${exchange} is not supported`,
+    SYMBOL_NOT_SUPPORTED: (symbol: string, exchange: string) =>
+      `Symbol ${symbol} is not supported on exchange ${exchange}`,
+    STRATEGY_NOT_FOUND: 'Arbitrage strategy not found',
+  };
+
   constructor(
+    private readonly exchangeDataService: ExchangeDataService,
     private readonly exchangeRegistryService: ExchangeRegistryService,
     private readonly tradeService: ExchangeTradeService,
     private readonly arbitrageService: ArbitrageService,
   ) {}
 
   async create(command: ArbitrageStrategyCommand): Promise<void> {
-    this.validateExchangesAndPairs(command);
+    await this.validateExchangesAndPairs(command);
 
     await this.arbitrageService.createStrategy({
       userId: command.userId,
@@ -56,150 +66,6 @@ export class ArbitrageStrategy implements Strategy {
       maxOpenOrders: command.maxOpenOrders,
       status: StrategyInstanceStatus.CREATED,
     });
-  }
-
-  private validateExchangesAndPairs(command: ArbitrageStrategyCommand): void {
-    const supportedExchanges =
-      this.exchangeRegistryService.getSupportedExchanges();
-
-    if (!isExchangeSupported(command.exchangeAName, supportedExchanges)) {
-      throw new NotFoundException(
-        `Exchange ${command.exchangeAName} is not supported`,
-      );
-    }
-
-    if (!isExchangeSupported(command.exchangeBName, supportedExchanges)) {
-      throw new NotFoundException(
-        `Exchange ${command.exchangeBName} is not supported`,
-      );
-    }
-
-    const supportedSymbolsExchangeA =
-      this.exchangeRegistryService.getSupportedPairs(command.exchangeAName);
-    const supportedSymbolsExchangeB =
-      this.exchangeRegistryService.getSupportedPairs(command.exchangeBName);
-
-    if (
-      !isPairSupported(
-        `${command.sideA}/${command.sideB}`,
-        supportedSymbolsExchangeA,
-      )
-    ) {
-      throw new NotFoundException(
-        `Symbol ${command.sideA}/${command.sideB} is not supported on exchange ${command.exchangeAName}`,
-      );
-    }
-
-    if (
-      !isPairSupported(
-        `${command.sideA}/${command.sideB}`,
-        supportedSymbolsExchangeB,
-      )
-    ) {
-      throw new NotFoundException(
-        `Symbol ${command.sideA}/${command.sideB} is not supported on exchange ${command.exchangeBName}`,
-      );
-    }
-  }
-
-  async pause(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity: ArbitrageStrategyData =
-      await this.arbitrageService.findLatestStrategyByUserId(command.userId);
-    if (!strategyEntity) {
-      throw new NotFoundException('Arbitrage strategy not found');
-    }
-
-    await this.arbitrageService.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.PAUSED,
-    );
-    const strategy = this.strategies.get(strategyEntity.id);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-    }
-
-    this.logger.debug('Paused arbitrage strategy');
-  }
-
-  async stop(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity: ArbitrageStrategyData =
-      await this.arbitrageService.findLatestStrategyByUserId(command.userId);
-    if (!strategyEntity) {
-      throw new NotFoundException('Arbitrage strategy not found');
-    }
-
-    await this.arbitrageService.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.STOPPED,
-    );
-
-    const strategy = this.strategies.get(strategyEntity.id);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-    }
-
-    const exchangeA = this.exchangeRegistryService.getExchangeByName(
-      strategyEntity.exchangeAName,
-    );
-    const exchangeB = this.exchangeRegistryService.getExchangeByName(
-      strategyEntity.exchangeBName,
-    );
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
-
-    this.cancelUnfilledOrders(exchangeA, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeA.name}`,
-      );
-    });
-    this.cancelUnfilledOrders(exchangeB, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeB.name}`,
-      );
-    });
-
-    this.logger.debug(
-      'Stopped arbitrage strategy, not filled orders have been canceled',
-    );
-  }
-
-  async delete(command: ArbitrageStrategyActionCommand) {
-    const strategyEntity: ArbitrageStrategyData =
-      await this.arbitrageService.findLatestStrategyByUserId(command.userId);
-    if (!strategyEntity) {
-      throw new NotFoundException('Arbitrage strategy not found');
-    }
-
-    await this.arbitrageService.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.DELETED,
-    );
-
-    const strategy = this.strategies.get(strategyEntity.id);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-      this.strategies.delete(strategyEntity.id);
-    }
-
-    const exchangeA = this.exchangeRegistryService.getExchangeByName(
-      strategyEntity.exchangeAName,
-    );
-    const exchangeB = this.exchangeRegistryService.getExchangeByName(
-      strategyEntity.exchangeBName,
-    );
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
-
-    this.cancelUnfilledOrders(exchangeA, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeA.name}`,
-      );
-    });
-    this.cancelUnfilledOrders(exchangeB, pair).then((canceledCount) => {
-      this.logger.debug(
-        `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeB.name}`,
-      );
-    });
-
-    this.logger.debug('Soft deleted arbitrage strategy');
   }
 
   async start(strategies: ArbitrageStrategyData[]): Promise<void> {
@@ -229,6 +95,133 @@ export class ArbitrageStrategy implements Strategy {
     }
   }
 
+  async pause(command: ArbitrageStrategyActionCommand): Promise<void> {
+    const strategyEntity = await this.getStrategyEntity(command.userId);
+    await this.updateStrategyStatus(
+      strategyEntity.id,
+      StrategyInstanceStatus.PAUSED,
+    );
+    this.clearStrategyInterval(strategyEntity.id);
+    this.logger.debug('Paused arbitrage strategy');
+  }
+
+  async stop(command: ArbitrageStrategyActionCommand): Promise<void> {
+    const strategyEntity = await this.getStrategyEntity(command.userId);
+    await this.updateStrategyStatus(
+      strategyEntity.id,
+      StrategyInstanceStatus.STOPPED,
+    );
+    this.clearStrategyInterval(strategyEntity.id);
+
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    await this.cancelStrategyOrders(strategyEntity, pair);
+
+    this.logger.debug(
+      'Stopped arbitrage strategy, not filled orders have been canceled',
+    );
+  }
+
+  async delete(command: ArbitrageStrategyActionCommand): Promise<void> {
+    const strategyEntity = await this.getStrategyEntity(command.userId);
+    await this.updateStrategyStatus(
+      strategyEntity.id,
+      StrategyInstanceStatus.DELETED,
+    );
+    this.clearStrategyInterval(strategyEntity.id);
+
+    this.strategies.delete(strategyEntity.id);
+
+    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    await this.cancelStrategyOrders(strategyEntity, pair);
+
+    this.logger.debug('Soft deleted arbitrage strategy');
+  }
+
+  private async validateExchangesAndPairs(
+    command: ArbitrageStrategyCommand,
+  ): Promise<void> {
+    const { exchangeAName, exchangeBName, sideA, sideB } = command;
+
+    await Promise.all([
+      this.validateExchange(exchangeAName),
+      this.validateExchange(exchangeBName),
+    ]);
+
+    const pair = `${sideA}/${sideB}:${sideB}`;
+    await Promise.all([
+      this.validatePair(pair, exchangeAName),
+      this.validatePair(pair, exchangeBName),
+    ]);
+  }
+
+  private async validateExchange(exchangeName: string): Promise<void> {
+    await this.exchangeRegistryService.getExchangeByName(exchangeName);
+    const supportedExchanges =
+      this.exchangeRegistryService.getSupportedExchanges();
+    if (!isExchangeSupported(exchangeName, supportedExchanges)) {
+      throw new NotFoundException(
+        ArbitrageStrategy.ERROR_MESSAGES.EXCHANGE_NOT_SUPPORTED(exchangeName),
+      );
+    }
+  }
+
+  private async validatePair(
+    symbol: string,
+    exchangeName: string,
+  ): Promise<void> {
+    const supportedSymbols =
+      await this.exchangeDataService.getSupportedPairs(exchangeName);
+    if (!isPairSupported(symbol, supportedSymbols)) {
+      throw new NotFoundException(
+        ArbitrageStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
+          symbol,
+          exchangeName,
+        ),
+      );
+    }
+  }
+
+  private async getStrategyEntity(
+    userId: string,
+  ): Promise<ArbitrageStrategyData> {
+    const strategyEntity =
+      await this.arbitrageService.findLatestStrategyByUserId(userId);
+    if (!strategyEntity) {
+      throw new NotFoundException(
+        ArbitrageStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,
+      );
+    }
+    return strategyEntity;
+  }
+
+  private async updateStrategyStatus(
+    strategyId: number,
+    status: StrategyInstanceStatus,
+  ): Promise<void> {
+    await this.arbitrageService.updateStrategyStatusById(strategyId, status);
+  }
+
+  private async cancelStrategyOrders(
+    strategyEntity: ArbitrageStrategyData,
+    pair: string,
+  ): Promise<void> {
+    await this.tradeService.cancelUnfilledOrders(
+      strategyEntity.exchangeAName,
+      pair,
+    );
+    await this.tradeService.cancelUnfilledOrders(
+      strategyEntity.exchangeBName,
+      pair,
+    );
+  }
+
+  private clearStrategyInterval(strategyId: number): void {
+    const strategy = this.strategies.get(strategyId);
+    if (strategy) {
+      clearInterval(strategy.intervalId);
+    }
+  }
+
   async evaluateArbitrage(command: ArbitrageStrategyCommand): Promise<void> {
     const {
       userId,
@@ -242,9 +235,9 @@ export class ArbitrageStrategy implements Strategy {
     } = command;
 
     const exchangeA =
-      this.exchangeRegistryService.getExchangeByName(exchangeAName);
+      await this.exchangeRegistryService.getExchangeByName(exchangeAName);
     const exchangeB =
-      this.exchangeRegistryService.getExchangeByName(exchangeBName);
+      await this.exchangeRegistryService.getExchangeByName(exchangeBName);
 
     const pair = `${sideA}/${sideB}`;
 
@@ -347,22 +340,5 @@ export class ArbitrageStrategy implements Strategy {
     } catch (error) {
       this.logger.error(`Failed to execute arbitrage trade: ${error.message}`);
     }
-  }
-
-  async cancelUnfilledOrders(exchange, pair: string) {
-    const openOrders = await exchange.fetchOpenOrders(pair);
-
-    const cancelPromises = openOrders.map(async (order) => {
-      try {
-        await exchange.cancelOrder(order.id, pair);
-        return true;
-      } catch (e) {
-        this.logger.error(`Error canceling order: ${e.message}`);
-        return false;
-      }
-    });
-
-    const results = await Promise.all(cancelPromises);
-    return results.filter((result) => result).length;
   }
 }
