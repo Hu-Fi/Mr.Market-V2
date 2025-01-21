@@ -1,11 +1,11 @@
 import { CustomLogger } from '../logger/logger.service';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
 import { Injectable } from '@nestjs/common';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 
 @Injectable()
 export class ExchangesHealthService {
   private readonly logger = new CustomLogger(ExchangesHealthService.name);
-  constructor(private readonly ccxtGateway: CcxtGateway) {}
+  constructor(private readonly ccxtGateway: CcxtIntegrationService) {}
 
   async checkExchanges() {
     this.logger.debug('Checking exchanges configuration health...');
