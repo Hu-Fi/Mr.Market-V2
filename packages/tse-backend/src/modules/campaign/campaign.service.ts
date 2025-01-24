@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { Web3IntegrationService } from '../../integrations/web3.integration.service';
 import {
   Campaign,
@@ -14,7 +14,7 @@ import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 
 @Injectable()
-export class CampaignService {
+export class CampaignService implements  OnModuleInit {
   private readonly logger = new CustomLogger(CampaignService.name);
 
   CAMPAIGN_LAUNCHER_API_URL: string;
@@ -34,19 +34,22 @@ export class CampaignService {
   ) {
     this.CAMPAIGN_LAUNCHER_API_URL = this.configService.get<string>(
       'CAMPAIGN_LAUNCHER_API_URL',
+      'https://hufi-campaign-launcher-server-testnet.onrender.com'
     );
     this.RECORDING_ORACLE_API_URL = this.configService.get<string>(
       'RECORDING_ORACLE_API_URL',
+      'https://hufi-recording-oracle-testnet.onrender.com'
     );
     this.RECORDING_ORACLE_API_KEY = this.configService.get<string>(
       'RECORDING_ORACLE_API_KEY',
+      'yLrq5hCRWn'
     );
   }
 
   onModuleInit() {
     this.schedulerUtils.addCronJob(
       CampaignService.name,
-      this.configService.get<string>('CRON_EXPRESSION_JOIN_CAMPAIGN'),
+      CronExpression.EVERY_HOUR,
       this.tryJoinCampaigns.bind(this),
       this.schedulerRegistry,
     );

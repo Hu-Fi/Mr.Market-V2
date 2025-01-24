@@ -12,4 +12,10 @@ export class WebSchedulerController {
   async triggerStrategyCronJob() {
     await this.service.triggerStrategyCronJob();
   }
+
+  @Get('campaign/execute')
+  @ApiOperation({ summary: 'Trigger campaign cron job' })
+  async triggerCampaignCronJob() {
+    await this.service.triggerCampaignCronJob();
+  }
 }
