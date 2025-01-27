@@ -14,12 +14,23 @@ export class Web3IdentityRepository {
     private readonly web3IdentityRpcRepository: Repository<Web3IdentityRpc>,
   ) {}
 
-  saveKey(key: IdentityKeyData) {
-    return this.web3IdentityKeyRepository.save(key);
+  async saveKey(key: IdentityKeyData) {
+    const [existingKey] = await this.web3IdentityKeyRepository.find({
+        take: 1,
+      }
+    );
+    if (existingKey) {
+      await this.web3IdentityKeyRepository.update({ id: existingKey.id }, key);
+    } else {
+      await this.web3IdentityKeyRepository.save(key);
+    }
   }
 
-  findKey() {
-    return this.web3IdentityKeyRepository.find();
+  async findKey() {
+    const [key] = await this.web3IdentityKeyRepository.find({
+      take: 1,
+    });
+    return key ? key.privateKey : null;
   }
 
   saveRpc(rpc: IdentityRpcData) {

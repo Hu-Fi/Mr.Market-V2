@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { Web3IntegrationService } from '../../integrations/web3.integration.service';
 import {
   Campaign,
   ExchangeCredentials,
@@ -12,6 +11,7 @@ import { Status } from '../../common/enums/campaign.enums';
 import { CustomLogger } from '../logger/logger.service';
 import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
+import { Web3IdentityService } from './web3-identity-manager/web3-identity.service';
 
 @Injectable()
 export class CampaignService implements  OnModuleInit {
@@ -29,8 +29,8 @@ export class CampaignService implements  OnModuleInit {
     private readonly httpService: HttpService,
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly schedulerUtils: SchedulerUtil,
-    private readonly web3IntegrationService: Web3IntegrationService,
     private readonly exchangeRegistryService: ExchangeRegistryService,
+    private readonly web3IdentityService: Web3IdentityService
   ) {
     this.CAMPAIGN_LAUNCHER_API_URL = this.configService.get<string>(
       'CAMPAIGN_LAUNCHER_API_URL',
@@ -66,7 +66,7 @@ export class CampaignService implements  OnModuleInit {
 
     for (const campaign of campaigns) {
       try {
-        const walletAddress = await this.web3IntegrationService
+        const walletAddress = await this.web3IdentityService
           .getSigner(campaign.chainId)
           .getAddress();
         const exchange = await this.exchangeRegistryService.getExchangeByName(

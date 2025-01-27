@@ -17,11 +17,11 @@ export class Web3IdentityController {
 
   @Post('/key') async addPrivateKey(@Body() dto: IdentityKeyDto) {
     const command = this.mapper.map(dto, IdentityKeyDto, IdentityKeyCommand);
-    return await this.service.addIdentityPrivateKey(command);
+    await this.service.addIdentityPrivateKey(command);
   }
 
   @Post('/rpc') async addRpc(@Body() dto: IdentityRpcDto) {
     const command = this.mapper.map(dto, IdentityRpcDto, IdentityRpcCommand);
-    return await this.service.addIdentityRpc(command);
+    await this.service.addIdentityRpc(command);
   }
 }
