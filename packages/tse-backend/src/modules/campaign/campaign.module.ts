@@ -19,16 +19,16 @@ import { Web3IdentityController } from './web3-identity-manager/web3-identity.co
     HttpModule,
     IntegrationsModule,
     ExchangeRegistryModule,
-    TypeOrmModule.forFeature([Web3IdentityKey, Web3IdentityRpc])
+    TypeOrmModule.forFeature([Web3IdentityKey, Web3IdentityRpc]),
   ],
   providers: [
     CampaignService,
     SchedulerUtil,
     Web3IdentityRepository,
     Web3IdentityProfile,
-    Web3IdentityService
+    Web3IdentityService,
   ],
   controllers: [Web3IdentityController],
-  exports: [CampaignService]
+  exports: [CampaignService],
 })
 export class CampaignModule {}

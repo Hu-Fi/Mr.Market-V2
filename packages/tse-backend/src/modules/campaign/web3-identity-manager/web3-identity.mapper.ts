@@ -5,7 +5,8 @@ import {
   IdentityKeyCommand,
   IdentityKeyData,
   IdentityKeyDto,
-  IdentityRpcCommand, IdentityRpcData,
+  IdentityRpcCommand,
+  IdentityRpcData,
   IdentityRpcDto,
 } from './model/web3-identity.model';
 

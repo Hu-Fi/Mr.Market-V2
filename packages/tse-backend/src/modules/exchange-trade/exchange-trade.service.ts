@@ -64,7 +64,7 @@ export class ExchangeTradeService {
         MarketOrderType.MARKET_ORDER,
         command.side,
         amount,
-        price
+        price,
       );
     }
 

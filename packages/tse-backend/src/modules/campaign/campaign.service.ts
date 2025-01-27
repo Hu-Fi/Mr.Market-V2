@@ -14,7 +14,7 @@ import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.
 import { Web3IdentityService } from './web3-identity-manager/web3-identity.service';
 
 @Injectable()
-export class CampaignService implements  OnModuleInit {
+export class CampaignService implements OnModuleInit {
   private readonly logger = new CustomLogger(CampaignService.name);
 
   CAMPAIGN_LAUNCHER_API_URL: string;
@@ -30,19 +30,19 @@ export class CampaignService implements  OnModuleInit {
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly schedulerUtils: SchedulerUtil,
     private readonly exchangeRegistryService: ExchangeRegistryService,
-    private readonly web3IdentityService: Web3IdentityService
+    private readonly web3IdentityService: Web3IdentityService,
   ) {
     this.CAMPAIGN_LAUNCHER_API_URL = this.configService.get<string>(
       'CAMPAIGN_LAUNCHER_API_URL',
-      'https://hufi-campaign-launcher-server-testnet.onrender.com'
+      'https://hufi-campaign-launcher-server-testnet.onrender.com',
     );
     this.RECORDING_ORACLE_API_URL = this.configService.get<string>(
       'RECORDING_ORACLE_API_URL',
-      'https://hufi-recording-oracle-testnet.onrender.com'
+      'https://hufi-recording-oracle-testnet.onrender.com',
     );
     this.RECORDING_ORACLE_API_KEY = this.configService.get<string>(
       'RECORDING_ORACLE_API_KEY',
-      'yLrq5hCRWn'
+      'yLrq5hCRWn',
     );
   }
 
@@ -73,7 +73,9 @@ export class CampaignService implements  OnModuleInit {
           campaign.exchangeName,
         );
         if (!exchange) {
-          this.logger.debug(`Could not find exchange ${campaign.exchangeName} for ${campaign.chainId} in exchange registry`);
+          this.logger.debug(
+            `Could not find exchange ${campaign.exchangeName} for ${campaign.chainId} in exchange registry`,
+          );
           return;
         }
         await this.registerToCampaign(campaign, exchange, walletAddress);

@@ -6,7 +6,7 @@ import { CampaignService } from '../campaign/campaign.service';
 export class WebSchedulerService {
   constructor(
     private readonly executionWorker: ExecutionWorkerService,
-    private readonly campaignService: CampaignService
+    private readonly campaignService: CampaignService,
   ) {}
 
   async triggerStrategyCronJob() {

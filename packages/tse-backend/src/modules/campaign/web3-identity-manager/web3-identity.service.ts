@@ -2,7 +2,12 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Web3IdentityRepository } from './web3-identity.repository';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { IdentityKeyCommand, IdentityKeyData, IdentityRpcCommand, IdentityRpcData } from './model/web3-identity.model';
+import {
+  IdentityKeyCommand,
+  IdentityKeyData,
+  IdentityRpcCommand,
+  IdentityRpcData,
+} from './model/web3-identity.model';
 import { ethers, Wallet } from 'ethers';
 
 @Injectable()
@@ -10,7 +15,7 @@ export class Web3IdentityService implements OnModuleInit {
   private signers: { [key: number]: Wallet } = {};
   constructor(
     private repository: Web3IdentityRepository,
-    @InjectMapper() private readonly mapper: Mapper
+    @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
   async onModuleInit() {
@@ -23,10 +28,7 @@ export class Web3IdentityService implements OnModuleInit {
 
     for (const network of networks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
-      this.signers[network.chainId] = new Wallet(
-        privateKey,
-        provider,
-      );
+      this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
   }
 
@@ -35,11 +37,7 @@ export class Web3IdentityService implements OnModuleInit {
   }
 
   async addIdentityPrivateKey(command: IdentityKeyCommand) {
-    const data = this.mapper.map(
-      command,
-      IdentityKeyCommand,
-      IdentityKeyData
-    );
+    const data = this.mapper.map(command, IdentityKeyCommand, IdentityKeyData);
 
     await this.repository.saveKey(data);
 
@@ -47,11 +45,7 @@ export class Web3IdentityService implements OnModuleInit {
   }
 
   async addIdentityRpc(command: IdentityRpcCommand) {
-    const data = this.mapper.map(
-      command,
-      IdentityRpcCommand,
-      IdentityRpcData
-    );
+    const data = this.mapper.map(command, IdentityRpcCommand, IdentityRpcData);
 
     await this.repository.saveRpc(data);
 

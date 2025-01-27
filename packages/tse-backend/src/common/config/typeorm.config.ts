@@ -36,7 +36,15 @@ export class TypeormConfig {
         'POSTGRES_DATABASE',
         'mr_market_v2',
       ),
-      entities: [Order, Operation, Arbitrage, MarketMaking, ExchangeApiKey, Web3IdentityKey, Web3IdentityRpc],
+      entities: [
+        Order,
+        Operation,
+        Arbitrage,
+        MarketMaking,
+        ExchangeApiKey,
+        Web3IdentityKey,
+        Web3IdentityRpc,
+      ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:

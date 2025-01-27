@@ -16,9 +16,8 @@ export class Web3IdentityRepository {
 
   async saveKey(key: IdentityKeyData) {
     const [existingKey] = await this.web3IdentityKeyRepository.find({
-        take: 1,
-      }
-    );
+      take: 1,
+    });
     if (existingKey) {
       await this.web3IdentityKeyRepository.update({ id: existingKey.id }, key);
     } else {

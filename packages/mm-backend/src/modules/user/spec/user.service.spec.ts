@@ -41,7 +41,9 @@ describe('UserService', () => {
     service = testingModule.get<UserService>(UserService);
     repository = testingModule.get<UserRepository>(UserRepository);
     authService = testingModule.get<AuthService>(AuthService);
-    mixinGateway = testingModule.get<MixinIntegrationService>(MixinIntegrationService);
+    mixinGateway = testingModule.get<MixinIntegrationService>(
+      MixinIntegrationService,
+    );
   });
 
   it('should be defined', () => {
