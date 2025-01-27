@@ -72,6 +72,10 @@ export class CampaignService implements  OnModuleInit {
         const exchange = await this.exchangeRegistryService.getExchangeByName(
           campaign.exchangeName,
         );
+        if (!exchange) {
+          this.logger.debug(`Could not find exchange ${campaign.exchangeName} for ${campaign.chainId} in exchange registry`);
+          return;
+        }
         await this.registerToCampaign(campaign, exchange, walletAddress);
         results.successful.push(campaign.address);
       } catch (error) {
