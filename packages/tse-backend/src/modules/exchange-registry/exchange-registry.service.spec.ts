@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeRegistryService } from './exchange-registry.service';
 import { CustomLogger } from '../logger/logger.service';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
 import { FirstExchangeStrategy } from './exchange-manager/strategies/first-exchange.strategy';
 import * as ccxt from 'ccxt';
@@ -21,7 +21,7 @@ function createExchangeInstances(
 
 describe('ExchangeRegistryService', () => {
   let service: ExchangeRegistryService;
-  let ccxtGateway: CcxtGateway;
+  let ccxtGateway: CcxtIntegrationService;
   let exchangeApiKeyService: ExchangeApiKeyService;
 
   const exchangeConfigs = [{ id: 'binance' }, { id: 'bybit' }];
@@ -55,7 +55,7 @@ describe('ExchangeRegistryService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangeRegistryService,
-        { provide: CcxtGateway, useValue: mockCcxtGateway },
+        { provide: CcxtIntegrationService, useValue: mockCcxtGateway },
         { provide: ExchangeApiKeyService, useValue: mockExchangeApiKeyService },
         { provide: EncryptionService, useValue: mockEncryptionService },
         CustomLogger,
@@ -63,7 +63,7 @@ describe('ExchangeRegistryService', () => {
     }).compile();
 
     service = module.get<ExchangeRegistryService>(ExchangeRegistryService);
-    ccxtGateway = module.get<CcxtGateway>(CcxtGateway);
+    ccxtGateway = module.get<CcxtIntegrationService>(CcxtIntegrationService);
     exchangeApiKeyService = module.get<ExchangeApiKeyService>(
       ExchangeApiKeyService,
     );

@@ -7,7 +7,7 @@ import { RolesGuard } from '../../../common/utils/auth/guards/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/utils/auth/jwt.strategy';
 import {
@@ -59,7 +59,7 @@ describe('RolesGuard', () => {
         AuthService,
         RolesGuard,
         {
-          provide: MixinGateway,
+          provide: MixinIntegrationService,
           useValue: {
             oauthHandler: jest.fn().mockReturnValue(oauthResponseFixture),
           },

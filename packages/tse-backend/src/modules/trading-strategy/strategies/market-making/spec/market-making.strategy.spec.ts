@@ -17,7 +17,7 @@ import {
   MarketMakingDataFixture,
 } from './market-making.fixtures';
 import { ExchangeDataService } from '../../../../exchange-data/exchange-data.service';
-import { CcxtGateway } from '../../../../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../../../../integrations/ccxt.integration.service';
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   calculateOrderDetails: jest.fn(),
@@ -74,7 +74,7 @@ describe('MarketMakingStrategy', () => {
         },
         Logger,
         {
-          provide: CcxtGateway,
+          provide: CcxtIntegrationService,
           useValue: mockCcxtGateway,
         },
         {

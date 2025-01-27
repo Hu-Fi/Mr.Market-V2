@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { MixinGateway } from '../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
 import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -28,7 +28,7 @@ export class AuthService {
   private readonly logger = new CustomLogger(AuthService.name);
   private readonly adminPassword: string;
   constructor(
-    private readonly mixinGateway: MixinGateway,
+    private readonly mixinGateway: MixinIntegrationService,
     private configService: ConfigService,
     private jwtService: JwtService,
     @Inject(forwardRef(() => UserService))

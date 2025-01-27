@@ -6,6 +6,8 @@ import { Operation } from '../entities/operation.entity';
 import { Arbitrage } from '../entities/arbitrage.entity';
 import { MarketMaking } from '../entities/market-making.entity';
 import { ExchangeApiKey } from '../entities/exchange-api-key.entity';
+import { Web3IdentityKey } from '../entities/web3-identity-key.entity';
+import { Web3IdentityRpc } from '../entities/web3-identity-rpc.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -34,7 +36,15 @@ export class TypeormConfig {
         'POSTGRES_DATABASE',
         'mr_market_v2',
       ),
-      entities: [Order, Operation, Arbitrage, MarketMaking, ExchangeApiKey],
+      entities: [
+        Order,
+        Operation,
+        Arbitrage,
+        MarketMaking,
+        ExchangeApiKey,
+        Web3IdentityKey,
+        Web3IdentityRpc,
+      ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:

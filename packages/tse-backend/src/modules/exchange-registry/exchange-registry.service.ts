@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CustomLogger } from '../logger/logger.service';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
 import { ExchangeManagerService } from './exchange-manager/exchange-manager.service';
 import { ExchangeSelectionStrategy } from './exchange-manager/exchange-selection-strategy.interface';
@@ -12,7 +12,7 @@ export class ExchangeRegistryService {
   private readonly logger = new CustomLogger(ExchangeRegistryService.name);
 
   constructor(
-    private readonly ccxtGateway: CcxtGateway,
+    private readonly ccxtGateway: CcxtIntegrationService,
     private readonly exchangeApiKeyService: ExchangeApiKeyService,
     private readonly encryptionService: EncryptionService,
   ) {}

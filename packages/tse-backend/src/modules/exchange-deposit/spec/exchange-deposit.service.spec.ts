@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeDepositService } from '../exchange-deposit.service';
-import { CcxtGateway } from '../../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
 import { CreateDepositCommand } from '../model/exchange-deposit.model';
 import {
   DepositAddressCreateException,
@@ -31,7 +31,7 @@ describe('ExchangeDepositService', () => {
       providers: [
         ExchangeDepositService,
         {
-          provide: CcxtGateway,
+          provide: CcxtIntegrationService,
           useValue: mockCcxtGateway,
         },
         {

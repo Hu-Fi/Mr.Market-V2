@@ -35,12 +35,7 @@ export class ExchangeTradeService {
     );
 
     try {
-      const result = await exchangeInstance.createOrder(
-        command.symbol,
-        MarketOrderType.MARKET_ORDER,
-        command.side,
-        command.amount,
-      );
+      const result = await this.createMarketOrder(exchangeInstance, command);
       this.logger.log(
         `Market trade executed successfully: ${JSON.stringify(result)}`,
       );
@@ -53,6 +48,32 @@ export class ExchangeTradeService {
     } catch (error) {
       await this.handleOrderError(savedData.id, error);
     }
+  }
+
+  private async createMarketOrder(
+    exchangeInstance: any,
+    command: MarketTradeCommand,
+  ) {
+    if (command.exchange === 'bigone') {
+      const ticker = await exchangeInstance.fetchTicker(command.symbol);
+      const price = ticker.ask;
+      const amount = command.amount * price;
+
+      return exchangeInstance.createOrder(
+        command.symbol,
+        MarketOrderType.MARKET_ORDER,
+        command.side,
+        amount,
+        price,
+      );
+    }
+
+    return exchangeInstance.createOrder(
+      command.symbol,
+      MarketOrderType.MARKET_ORDER,
+      command.side,
+      command.amount,
+    );
   }
 
   async executeLimitTrade(command: MarketLimitCommand) {

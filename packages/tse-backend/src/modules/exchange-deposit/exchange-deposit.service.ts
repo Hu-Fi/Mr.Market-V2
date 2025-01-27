@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CcxtGateway } from '../../integrations/ccxt.gateway';
+import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import {
   DepositAddressCreateException,
   DepositAddressFetchException,
@@ -13,7 +13,7 @@ export class ExchangeDepositService {
   private readonly logger = new Logger(ExchangeDepositService.name);
 
   constructor(
-    private readonly ccxtGateway: CcxtGateway,
+    private readonly ccxtGateway: CcxtIntegrationService,
     private readonly exchangeRegistryService: ExchangeRegistryService,
   ) {}
 

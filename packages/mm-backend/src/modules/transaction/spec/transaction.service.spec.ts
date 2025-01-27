@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionService } from '../transaction.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { MixinGateway } from '../../../integrations/mixin.gateway';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 import { SchedulerUtil } from '../../../common/utils/scheduler.utils';
 import { MixinTransactionUtils } from '../utils/mixin-transaction.utils';
 import { ExchangeTransactionUtils } from '../utils/exchange-transaction.utils';
@@ -45,7 +45,7 @@ describe('TransactionService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TransactionService,
-        { provide: MixinGateway, useValue: mockMixinGateway },
+        { provide: MixinIntegrationService, useValue: mockMixinGateway },
         { provide: SchedulerRegistry, useValue: {} },
         { provide: SchedulerUtil, useValue: mockSchedulerUtils },
         { provide: MixinTransactionUtils, useValue: mockMixinTransactionUtils },
