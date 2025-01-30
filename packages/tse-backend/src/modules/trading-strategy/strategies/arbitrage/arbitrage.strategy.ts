@@ -171,7 +171,8 @@ export class ArbitrageStrategy implements Strategy {
   ): Promise<void> {
     const supportedSymbols =
       await this.exchangeDataService.getSupportedPairs(exchangeName);
-    if (!isPairSupported(symbol, supportedSymbols)) {
+    const altSymbol = symbol.includes(":") ? symbol.split(":")[0] : symbol;
+    if (!isPairSupported(symbol, supportedSymbols) && !isPairSupported(altSymbol, supportedSymbols)) {
       throw new NotFoundException(
         ArbitrageStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
           symbol,

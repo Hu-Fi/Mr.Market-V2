@@ -165,7 +165,8 @@ export class MarketMakingStrategy implements Strategy {
     const supportedSymbols =
       await this.exchangeDataService.getSupportedPairs(exchangeName);
     const pair = `${sideA}/${sideB}:${sideB}`;
-    if (!isPairSupported(pair, supportedSymbols)) {
+    const altPair = `${sideA}/${sideB}`;
+    if (!isPairSupported(pair, supportedSymbols) && !isPairSupported(altPair, supportedSymbols)) {
       throw new NotFoundException(
         MarketMakingStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
           pair,
