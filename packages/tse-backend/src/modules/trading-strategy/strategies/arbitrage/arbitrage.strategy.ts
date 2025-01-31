@@ -10,7 +10,6 @@ import {
 import {
   calculateProfitLoss,
   calculateVWAPForAmount,
-  createStrategyKey,
   getFee,
   isArbitrageOpportunityBuyOnA,
   isArbitrageOpportunityBuyOnB,
@@ -18,22 +17,14 @@ import {
   isPairSupported,
 } from '../../../../common/utils/trading-strategy.utils';
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
-import {
-  ArbitrageTradeParams,
-  StrategyConfig,
-} from '../../../../common/interfaces/trading-strategy.interfaces';
-import {
-  StrategyInstanceStatus,
-  StrategyTypeEnums,
-  TimeUnit,
-} from '../../../../common/enums/strategy-type.enums';
+import { ArbitrageTradeParams } from '../../../../common/interfaces/trading-strategy.interfaces';
+import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 import { ArbitrageService } from './arbitrage.service';
 import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
 
 @Injectable()
 export class ArbitrageStrategy implements Strategy {
   private logger = new Logger(ArbitrageStrategy.name);
-  private strategies: Map<number, StrategyConfig> = new Map();
 
   private static ERROR_MESSAGES = {
     EXCHANGE_NOT_SUPPORTED: (exchange: string) =>
@@ -64,7 +55,7 @@ export class ArbitrageStrategy implements Strategy {
       exchangeBName: command.exchangeBName,
       checkIntervalSeconds: command.checkIntervalSeconds,
       maxOpenOrders: command.maxOpenOrders,
-      status: StrategyInstanceStatus.CREATED,
+      status: StrategyInstanceStatus.RUNNING,
     });
   }
 
@@ -74,44 +65,42 @@ export class ArbitrageStrategy implements Strategy {
     );
 
     for (const strategy of strategies) {
-      if (!this.strategies.get(strategy.id)) {
-        const intervalId = setInterval(async () => {
-          // TODO: control opened orders
-          //  quantity of unfilled orders cannot be more than strategy.maxOpenOrders
-          await this.evaluateArbitrage(strategy);
-        }, strategy.checkIntervalSeconds * TimeUnit.MILLISECONDS);
+      if (strategy.status === StrategyInstanceStatus.RUNNING) {
+        const { checkIntervalSeconds, lastTradingAttemptAt } = strategy;
+        const now = new Date();
 
-        const configuration: StrategyConfig = {
-          strategyKey: createStrategyKey({
-            type: StrategyTypeEnums.ARBITRAGE,
-            user_id: strategy.userId,
-            client_id: strategy.clientId,
-          }),
-          intervalId,
-          status: StrategyInstanceStatus.RUNNING,
-        };
-        this.strategies.set(strategy.id, configuration);
+        if (!lastTradingAttemptAt) {
+          await this.evaluateArbitrage(strategy);
+          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+          continue;
+        }
+
+        const nextAllowedTime = new Date(
+          lastTradingAttemptAt.getTime() + checkIntervalSeconds * 1000,
+        );
+        if (now >= nextAllowedTime) {
+          await this.evaluateArbitrage(strategy);
+          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+        }
       }
     }
   }
 
   async pause(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.userId);
+    const strategyEntity = await this.getStrategyEntity(command.id);
     await this.updateStrategyStatus(
       strategyEntity.id,
       StrategyInstanceStatus.PAUSED,
     );
-    this.clearStrategyInterval(strategyEntity.id);
     this.logger.debug('Paused arbitrage strategy');
   }
 
   async stop(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.userId);
+    const strategyEntity = await this.getStrategyEntity(command.id);
     await this.updateStrategyStatus(
       strategyEntity.id,
       StrategyInstanceStatus.STOPPED,
     );
-    this.clearStrategyInterval(strategyEntity.id);
 
     const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
     await this.cancelStrategyOrders(strategyEntity, pair);
@@ -122,14 +111,11 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async delete(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.userId);
+    const strategyEntity = await this.getStrategyEntity(command.id);
     await this.updateStrategyStatus(
       strategyEntity.id,
       StrategyInstanceStatus.DELETED,
     );
-    this.clearStrategyInterval(strategyEntity.id);
-
-    this.strategies.delete(strategyEntity.id);
 
     const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
     await this.cancelStrategyOrders(strategyEntity, pair);
@@ -171,8 +157,11 @@ export class ArbitrageStrategy implements Strategy {
   ): Promise<void> {
     const supportedSymbols =
       await this.exchangeDataService.getSupportedPairs(exchangeName);
-    const altSymbol = symbol.includes(":") ? symbol.split(":")[0] : symbol;
-    if (!isPairSupported(symbol, supportedSymbols) && !isPairSupported(altSymbol, supportedSymbols)) {
+    const altSymbol = symbol.includes(':') ? symbol.split(':')[0] : symbol;
+    if (
+      !isPairSupported(symbol, supportedSymbols) &&
+      !isPairSupported(altSymbol, supportedSymbols)
+    ) {
       throw new NotFoundException(
         ArbitrageStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
           symbol,
@@ -183,10 +172,10 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   private async getStrategyEntity(
-    userId: string,
+    strategyId: number,
   ): Promise<ArbitrageStrategyData> {
     const strategyEntity =
-      await this.arbitrageService.findLatestStrategyByUserId(userId);
+      await this.arbitrageService.findStrategyById(strategyId);
     if (!strategyEntity) {
       throw new NotFoundException(
         ArbitrageStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,
@@ -202,6 +191,16 @@ export class ArbitrageStrategy implements Strategy {
     await this.arbitrageService.updateStrategyStatusById(strategyId, status);
   }
 
+  private async updateStrategyLastTradingAttempt(
+    strategyId: number,
+    date: Date,
+  ) {
+    await this.arbitrageService.updateStrategyLastTradingAttemptById(
+      strategyId,
+      date,
+    );
+  }
+
   private async cancelStrategyOrders(
     strategyEntity: ArbitrageStrategyData,
     pair: string,
@@ -214,13 +213,6 @@ export class ArbitrageStrategy implements Strategy {
       strategyEntity.exchangeBName,
       pair,
     );
-  }
-
-  private clearStrategyInterval(strategyId: number): void {
-    const strategy = this.strategies.get(strategyId);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
-    }
   }
 
   async evaluateArbitrage(command: ArbitrageStrategyCommand): Promise<void> {

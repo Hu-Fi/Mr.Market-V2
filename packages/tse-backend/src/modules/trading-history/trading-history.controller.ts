@@ -9,6 +9,8 @@ import {
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { TradingHistoryService } from './trading-history.service';
 import {
+  GetUserStrategyHistoryParamsCommand,
+  GetUserStrategyHistoryParamsDto,
   GetUserTradingHistoryParamsCommand,
   GetUserTradingHistoryParamsDto,
   GetUserTradingHistoryQueryCommand,
@@ -17,16 +19,16 @@ import {
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 
-@ApiTags('user trading history')
+@ApiTags('trading history service')
 @UsePipes(new ValidationPipe())
-@Controller('trading-history')
+@Controller('history')
 export class TradingHistoryController {
   constructor(
     private readonly service: TradingHistoryService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Get('/user/:userId')
+  @Get('/trading/user/:userId')
   @ApiOperation({ summary: 'Retrieve user trading history' })
   async getUserTradingHistory(
     @Param() params: GetUserTradingHistoryParamsDto,
@@ -44,5 +46,19 @@ export class TradingHistoryController {
     );
 
     return this.service.getUserTradingHistory(paramsCommand, queryCommand);
+  }
+
+  @Get('/strategy/user/:userId')
+  @ApiOperation({ summary: 'Retrieve user trading strategies' })
+  async getUserStrategyHistory(
+    @Param() params: GetUserStrategyHistoryParamsDto,
+  ) {
+    const paramsCommand = this.mapper.map(
+      params,
+      GetUserStrategyHistoryParamsDto,
+      GetUserStrategyHistoryParamsCommand,
+    );
+
+    return this.service.getUserStrategyHistory(paramsCommand);
   }
 }

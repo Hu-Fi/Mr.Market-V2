@@ -1,25 +1,34 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import {
   MarketOrderType,
   OrderStatus,
   TradeSideType,
 } from '../../../common/enums/exchange-operation.enums';
 import { AutoMap } from '@automapper/classes';
+import { Type } from 'class-transformer';
 
 export class GetUserTradingHistoryParamsDto {
   @AutoMap()
   @ApiProperty({
     description: 'Unique identifier of the user',
     example: 1,
+    type: Number,
   })
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   userId: number;
 }
 
 export class GetUserTradingHistoryParamsCommand {
   @AutoMap()
-  userId: number;
+  userId: string;
 }
 
 export class GetUserTradingHistoryQueryDto {
@@ -159,4 +168,21 @@ export class GetUserTradingHistoryQueryCommand {
 
   @AutoMap()
   sortOrder?: string;
+}
+
+export class GetUserStrategyHistoryParamsDto {
+  @AutoMap()
+  @ApiProperty({
+    description: 'Unique identifier of the user',
+    example: 123,
+    type: Number,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  userId: number;
+}
+
+export class GetUserStrategyHistoryParamsCommand {
+  @AutoMap()
+  userId: string;
 }

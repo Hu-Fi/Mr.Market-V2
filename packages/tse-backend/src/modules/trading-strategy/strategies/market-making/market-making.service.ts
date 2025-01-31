@@ -22,7 +22,20 @@ export class MarketMakingService {
     try {
       await this.repository.updateStrategyStatusById(id, newState);
     } catch (error) {
-      this.logger.error('Error updating market making strategy status', error);
+      this.logger.error(
+        `Error updating strategy status with ID ${id}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async updateStrategyLastTradingAttemptById(id: number, newDate: Date) {
+    try {
+      await this.repository.updateStrategyLastTradingAttemptById(id, newDate);
+    } catch (error) {
+      this.logger.error(
+        `Error updating last trading attempt with ID ${id}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -39,16 +52,11 @@ export class MarketMakingService {
     }
   }
 
-  async findLatestStrategyByUserId(
-    userId: string,
-  ): Promise<MarketMaking | null> {
+  async findStrategyById(id: number): Promise<MarketMaking | null> {
     try {
-      return this.repository.findLatestStrategyByUserId(userId);
+      return this.repository.findStrategyById(id);
     } catch (error) {
-      this.logger.error(
-        'Error finding latest market making strategy by user',
-        error,
-      );
+      this.logger.error('Error finding market making strategy by od', error);
       throw error;
     }
   }

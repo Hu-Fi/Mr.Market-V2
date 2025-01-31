@@ -12,7 +12,6 @@ import { HealthModule } from './modules/health/health.module';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CacheModule } from '@nestjs/common/cache';
 import { TradingStrategyModule } from './modules/trading-strategy/trading-strategy.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { StrategyExecutionModule } from './modules/strategy-execution/strategy-execution.module';
 import { TradingHistoryModule } from './modules/trading-history/trading-history.module';
 import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-deposit.module';
@@ -38,7 +37,6 @@ import { CampaignModule } from './modules/campaign/campaign.module';
       strategyInitializer: classes(),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),
-    ScheduleModule.forRoot(),
     IntegrationsModule,
     ExchangeRegistryModule,
     ExchangeOperationModule,

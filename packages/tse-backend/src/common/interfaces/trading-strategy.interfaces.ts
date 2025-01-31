@@ -1,11 +1,4 @@
-import { StrategyInstanceStatus } from '../enums/strategy-type.enums';
 import { TradeSideType } from '../enums/exchange-operation.enums';
-
-export interface StrategyConfig {
-  strategyKey: string;
-  intervalId: NodeJS.Timeout;
-  status: StrategyInstanceStatus;
-}
 
 export interface ArbitrageTradeParams {
   buyExchange: any;

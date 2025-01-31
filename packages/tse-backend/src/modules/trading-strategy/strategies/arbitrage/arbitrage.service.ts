@@ -29,6 +29,17 @@ export class ArbitrageService {
     }
   }
 
+  async updateStrategyLastTradingAttemptById(id: number, newDate: Date) {
+    try {
+      await this.repository.updateStrategyLastTradingAttemptById(id, newDate);
+    } catch (error) {
+      this.logger.error(
+        `Error updating last trading attempt with ID ${id}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
   async findRunningStrategies(): Promise<Arbitrage[]> {
     try {
       return this.repository.findRunningStrategies();
@@ -38,13 +49,11 @@ export class ArbitrageService {
     }
   }
 
-  async findLatestStrategyByUserId(userId: string): Promise<Arbitrage | null> {
+  async findStrategyById(id: number) {
     try {
-      return this.repository.findLatestStrategyByUserId(userId);
+      return this.repository.findStrategyById(id);
     } catch (error) {
-      this.logger.error(
-        `Error finding latest strategy for user ${userId}: ${error.message}`,
-      );
+      this.logger.error(`Error finding strategy by ID ${id}: ${error.message}`);
       throw error;
     }
   }

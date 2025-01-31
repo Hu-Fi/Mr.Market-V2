@@ -4,8 +4,6 @@ import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CustomAdapter } from './common/config/socket-io-adapter.config';
 import * as path from 'path';
 import * as express from 'express';
 
@@ -47,8 +45,6 @@ async function bootstrap() {
   app.use('/', express.static(swaggerUiDistPath, { index: false }));
 
   SwaggerModule.setup('', app, document);
-
-  // app.useWebSocketAdapter(new CustomAdapter(app, configService));
 
   const port = configService.get<number>('TSE_BE_PORT', 3001);
   await app.listen(port, async () => {

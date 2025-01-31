@@ -139,27 +139,16 @@ export class MarketMakingStrategyData {
   ceilingPrice?: number;
   floorPrice?: number;
   status: StrategyInstanceStatus;
+  lastTradingAttemptAt: Date;
 }
 
 export class MarketMakingStrategyActionDto {
   @AutoMap()
-  @ApiProperty({
-    example: '123',
-    description:
-      'User ID for whom the strategy is being paused/stopped/deleted.',
-  })
-  userId: string;
-  @AutoMap()
-  @ApiProperty({
-    example: '456',
-    description: 'Client ID associated with the user.',
-  })
-  clientId: string;
+  @ApiProperty({ example: '1' })
+  id: number;
 }
 
 export class MarketMakingStrategyActionCommand {
   @AutoMap()
-  userId: string;
-  @AutoMap()
-  clientId: string;
+  id: number;
 }

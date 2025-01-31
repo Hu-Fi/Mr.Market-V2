@@ -3,7 +3,6 @@ import { Strategy } from '../../strategy.interface';
 import {
   OrderDetail,
   PlaceOrderParams,
-  StrategyConfig,
 } from '../../../../common/interfaces/trading-strategy.interfaces';
 import { ExchangeRegistryService } from '../../../exchange-registry/exchange-registry.service';
 import { ExchangeTradeService } from '../../../exchange-trade/exchange-trade.service';
@@ -13,14 +12,9 @@ import {
   MarketMakingStrategyCommand,
   MarketMakingStrategyData,
 } from './model/market-making.dto';
-import {
-  StrategyInstanceStatus,
-  StrategyTypeEnums,
-  TimeUnit,
-} from '../../../../common/enums/strategy-type.enums';
+import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 import {
   calculateOrderDetails,
-  createStrategyKey,
   getPriceSource,
   isExchangeSupported,
   isPairSupported,
@@ -32,7 +26,6 @@ import { CcxtIntegrationService } from '../../../../integrations/ccxt.integratio
 @Injectable()
 export class MarketMakingStrategy implements Strategy {
   private logger = new Logger(MarketMakingStrategy.name);
-  private strategies: Map<number, StrategyConfig> = new Map();
 
   private static ERROR_MESSAGES = {
     EXCHANGE_NOT_SUPPORTED: (exchange: string) =>
@@ -79,42 +72,42 @@ export class MarketMakingStrategy implements Strategy {
     );
 
     for (const strategy of strategies) {
-      if (!this.strategies.get(strategy.id)) {
-        const intervalId = setInterval(async () => {
-          await this.evaluateMarketMaking(strategy);
-        }, strategy.checkIntervalSeconds * TimeUnit.MILLISECONDS);
+      if (strategy.status === StrategyInstanceStatus.RUNNING) {
+        const { checkIntervalSeconds, lastTradingAttemptAt } = strategy;
+        const now = new Date();
 
-        const configuration: StrategyConfig = {
-          strategyKey: createStrategyKey({
-            type: StrategyTypeEnums.MARKET_MAKING,
-            user_id: strategy.userId,
-            client_id: strategy.clientId,
-          }),
-          intervalId,
-          status: StrategyInstanceStatus.RUNNING,
-        };
-        this.strategies.set(strategy.id, configuration);
+        if (!lastTradingAttemptAt) {
+          await this.evaluateMarketMaking(strategy);
+          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+          continue;
+        }
+
+        const nextAllowedTime = new Date(
+          lastTradingAttemptAt.getTime() + checkIntervalSeconds * 1000,
+        );
+        if (now >= nextAllowedTime) {
+          await this.evaluateMarketMaking(strategy);
+          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+        }
       }
     }
   }
 
   async pause(command: MarketMakingStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyByUserId(command.userId);
-    await this.marketMakingService.updateStrategyStatusById(
+    const strategyEntity = await this.getStrategyById(command.id);
+    await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.PAUSED,
     );
-    this.clearStrategyInterval(strategyEntity.id);
     this.logger.debug('Paused market making strategy');
   }
 
   async stop(command: MarketMakingStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyByUserId(command.userId);
-    await this.marketMakingService.updateStrategyStatusById(
+    const strategyEntity = await this.getStrategyById(command.id);
+    await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.STOPPED,
     );
-    this.clearStrategyInterval(strategyEntity.id);
 
     const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
     await this.tradeService.cancelUnfilledOrders(
@@ -128,14 +121,11 @@ export class MarketMakingStrategy implements Strategy {
   }
 
   async delete(command: MarketMakingStrategyActionCommand) {
-    const strategyEntity = await this.getStrategyByUserId(command.userId);
-    await this.marketMakingService.updateStrategyStatusById(
+    const strategyEntity = await this.getStrategyById(command.id);
+    await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.DELETED,
     );
-
-    this.clearStrategyInterval(strategyEntity.id);
-    this.strategies.delete(strategyEntity.id);
 
     const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
     await this.tradeService.cancelUnfilledOrders(
@@ -166,7 +156,10 @@ export class MarketMakingStrategy implements Strategy {
       await this.exchangeDataService.getSupportedPairs(exchangeName);
     const pair = `${sideA}/${sideB}:${sideB}`;
     const altPair = `${sideA}/${sideB}`;
-    if (!isPairSupported(pair, supportedSymbols) && !isPairSupported(altPair, supportedSymbols)) {
+    if (
+      !isPairSupported(pair, supportedSymbols) &&
+      !isPairSupported(altPair, supportedSymbols)
+    ) {
       throw new NotFoundException(
         MarketMakingStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
           pair,
@@ -351,11 +344,11 @@ export class MarketMakingStrategy implements Strategy {
       `Order placed for user ${userId}, client ${clientId}: ${side} ${amount} ${pair} at ${price} on ${exchangeName}`,
     );
   }
-  private async getStrategyByUserId(
-    userId: string,
+  private async getStrategyById(
+    strategyId: number,
   ): Promise<MarketMakingStrategyData> {
     const strategyEntity =
-      await this.marketMakingService.findLatestStrategyByUserId(userId);
+      await this.marketMakingService.findStrategyById(strategyId);
     if (!strategyEntity) {
       throw new NotFoundException(
         MarketMakingStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,
@@ -364,10 +357,25 @@ export class MarketMakingStrategy implements Strategy {
     return strategyEntity;
   }
 
-  private clearStrategyInterval(strategyId: number): void {
-    const strategy = this.strategies.get(strategyId);
-    if (strategy) {
-      clearInterval(strategy.intervalId);
+  private async updateStrategyStatusById(
+    id: number,
+    newState: StrategyInstanceStatus,
+  ) {
+    try {
+      await this.marketMakingService.updateStrategyStatusById(id, newState);
+    } catch (error) {
+      this.logger.error('Error updating market making strategy status', error);
+      throw error;
     }
+  }
+
+  private async updateStrategyLastTradingAttempt(
+    strategyId: number,
+    date: Date,
+  ) {
+    await this.marketMakingService.updateStrategyLastTradingAttemptById(
+      strategyId,
+      date,
+    );
   }
 }
