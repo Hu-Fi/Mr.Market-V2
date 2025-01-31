@@ -20,7 +20,7 @@
   "crons": [
     {
       "path": "/api/v1/cron/strategy/execute",
-      "schedule": "*/30 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/api/v1/cron/campaign/execute",

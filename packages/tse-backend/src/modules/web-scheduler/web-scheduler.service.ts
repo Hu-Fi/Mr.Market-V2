@@ -10,7 +10,7 @@ export class WebSchedulerService {
   ) {}
 
   async triggerStrategyCronJob() {
-    await this.executionWorker.processData();
+    await this.executionWorker.executeStrategies();
   }
 
   async triggerCampaignCronJob() {

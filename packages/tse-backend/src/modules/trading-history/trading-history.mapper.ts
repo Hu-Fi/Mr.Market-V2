@@ -2,6 +2,8 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
 import {
+  GetUserStrategyHistoryParamsCommand,
+  GetUserStrategyHistoryParamsDto,
   GetUserTradingHistoryParamsCommand,
   GetUserTradingHistoryParamsDto,
   GetUserTradingHistoryQueryCommand,
@@ -25,6 +27,11 @@ export class TradingHistoryProfile extends AutomapperProfile {
         mapper,
         GetUserTradingHistoryQueryDto,
         GetUserTradingHistoryQueryCommand,
+      );
+      createMap(
+        mapper,
+        GetUserStrategyHistoryParamsDto,
+        GetUserStrategyHistoryParamsCommand,
       );
     };
   }

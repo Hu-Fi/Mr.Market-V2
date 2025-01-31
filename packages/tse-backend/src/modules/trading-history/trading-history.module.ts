@@ -5,10 +5,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from '../../common/entities/order.entity';
 import { OrderRepository } from '../exchange-operation/order.repository';
 import { TradingHistoryProfile } from './trading-history.mapper';
+import { MarketMakingRepository } from '../trading-strategy/strategies/market-making/market-making.repository';
+import { MarketMaking } from '../../common/entities/market-making.entity';
+import { ArbitrageStrategyRepository } from '../trading-strategy/strategies/arbitrage/arbitrage.repository';
+import { Arbitrage } from '../../common/entities/arbitrage.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order])],
-  providers: [TradingHistoryService, OrderRepository, TradingHistoryProfile],
+  imports: [TypeOrmModule.forFeature([Order, MarketMaking, Arbitrage])],
+  providers: [
+    TradingHistoryService,
+    TradingHistoryProfile,
+    OrderRepository,
+    MarketMakingRepository,
+    ArbitrageStrategyRepository,
+  ],
   controllers: [TradingHistoryController],
 })
 export class TradingHistoryModule {}

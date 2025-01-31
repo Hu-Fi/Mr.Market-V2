@@ -95,27 +95,16 @@ export class ArbitrageStrategyData {
   checkIntervalSeconds: number;
   maxOpenOrders?: number;
   status: StrategyInstanceStatus;
+  lastTradingAttemptAt: Date;
 }
 
 export class ArbitrageStrategyActionDto {
   @AutoMap()
-  @ApiProperty({
-    example: '123',
-    description:
-      'User ID for whom the strategy is being paused/stopped/deleted.',
-  })
-  userId: string;
-  @AutoMap()
-  @ApiProperty({
-    example: '456',
-    description: 'Client ID associated with the user.',
-  })
-  clientId: string;
+  @ApiProperty({ example: '1' })
+  id: number;
 }
 
 export class ArbitrageStrategyActionCommand {
   @AutoMap()
-  userId: string;
-  @AutoMap()
-  clientId: string;
+  id: number;
 }

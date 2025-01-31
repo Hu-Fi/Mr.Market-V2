@@ -48,7 +48,8 @@ export class TypeormConfig {
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,
       synchronize:
-        this.configService.get<string>('DATABASE_SYNCHRONIZE', 'true') === 'true',
+        this.configService.get<string>('DATABASE_SYNCHRONIZE', 'true') ===
+        'true',
       migrationsRun:
         this.configService.get<string>(
           'DATABASE_AUTO_RUN_MIGRATIONS',

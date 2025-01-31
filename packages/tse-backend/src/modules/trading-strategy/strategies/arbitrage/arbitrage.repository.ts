@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 import { Arbitrage } from '../../../../common/entities/arbitrage.entity';
 
@@ -18,6 +18,13 @@ export class ArbitrageStrategyRepository {
     return await this.repository.update({ id }, { status: newState });
   }
 
+  async updateStrategyLastTradingAttemptById(id: number, newDate: Date) {
+    return await this.repository.update(
+      { id },
+      { lastTradingAttemptAt: newDate },
+    );
+  }
+
   async findRunningStrategies(): Promise<Arbitrage[]> {
     return this.repository.findBy({ status: StrategyInstanceStatus.CREATED });
   }
@@ -26,6 +33,18 @@ export class ArbitrageStrategyRepository {
     return this.repository.findOne({
       where: { userId: userId },
       order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findStrategiesByUserId(userId: string): Promise<Arbitrage[]> {
+    return this.repository.find({
+      where: { userId: userId, status: Not(StrategyInstanceStatus.DELETED) },
+    });
+  }
+
+  async findStrategyById(id: number): Promise<Arbitrage> {
+    return this.repository.findOne({
+      where: { id: id },
     });
   }
 }

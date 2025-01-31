@@ -3,7 +3,6 @@ import { CampaignService } from './campaign.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { IntegrationsModule } from '../../integrations/integrations.module';
-import { SchedulerUtil } from '../../common/utils/scheduler.utils';
 import { ExchangeRegistryModule } from '../exchange-registry/exchange-registry.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Web3IdentityKey } from '../../common/entities/web3-identity-key.entity';
@@ -23,7 +22,6 @@ import { Web3IdentityController } from './web3-identity-manager/web3-identity.co
   ],
   providers: [
     CampaignService,
-    SchedulerUtil,
     Web3IdentityRepository,
     Web3IdentityProfile,
     Web3IdentityService,

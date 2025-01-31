@@ -69,4 +69,7 @@ export class MarketMaking {
 
   @Column()
   status: StrategyInstanceStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastTradingAttemptAt: Date;
 }

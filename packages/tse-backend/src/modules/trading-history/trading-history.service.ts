@@ -7,13 +7,20 @@ import {
   TradeSideType,
 } from '../../common/enums/exchange-operation.enums';
 import {
+  GetUserStrategyHistoryParamsCommand,
   GetUserTradingHistoryParamsCommand,
   GetUserTradingHistoryQueryCommand,
 } from './model/trading-history.model';
+import { MarketMakingRepository } from '../trading-strategy/strategies/market-making/market-making.repository';
+import { ArbitrageStrategyRepository } from '../trading-strategy/strategies/arbitrage/arbitrage.repository';
 
 @Injectable()
 export class TradingHistoryService {
-  constructor(private readonly repository: OrderRepository) {}
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly marketMakingRepository: MarketMakingRepository,
+    private readonly arbitrageRepository: ArbitrageStrategyRepository,
+  ) {}
 
   async getUserTradingHistory(
     params: GetUserTradingHistoryParamsCommand,
@@ -44,6 +51,66 @@ export class TradingHistoryService {
       },
     };
 
-    return await this.repository.find(query);
+    return await this.orderRepository.find(query);
+  }
+
+  async getUserStrategyHistory(params: GetUserStrategyHistoryParamsCommand) {
+    const marketMakingStrategies =
+      await this.marketMakingRepository.findStrategiesByUserId(
+        params.userId.toString(),
+      );
+    const arbitrageStrategies =
+      await this.arbitrageRepository.findStrategiesByUserId(
+        params.userId.toString(),
+      );
+
+    const marketMakingResponse = marketMakingStrategies.map((strategy) => ({
+      id: strategy.id,
+      userId: strategy.userId,
+      clientId: strategy.clientId,
+      strategyType: 'marketMaking',
+      parameters: {
+        userId: strategy.userId,
+        clientId: strategy.clientId,
+        pair: `${strategy.sideA}/${strategy.sideB}`,
+        exchangeName: strategy.exchangeName,
+        bidSpread: strategy.bidSpread,
+        askSpread: strategy.askSpread,
+        orderAmount: strategy.orderAmount,
+        orderRefreshTime: strategy.checkIntervalSeconds * 1000,
+        numberOfLayers: strategy.numberOfLayers,
+        priceSourceType: strategy.priceSourceType,
+        amountChangePerLayer: strategy.amountChangePerLayer,
+        amountChangeType: strategy.amountChangeType,
+        ceilingPrice: strategy.ceilingPrice,
+        floorPrice: strategy.floorPrice,
+      },
+      status: strategy.status,
+      createdAt: strategy.createdAt,
+      updatedAt: strategy.updatedAt,
+    }));
+
+    const arbitrageResponse = arbitrageStrategies.map((strategy) => ({
+      id: strategy.id,
+      userId: strategy.userId,
+      clientId: strategy.clientId,
+      strategyType: 'arbitrage',
+      parameters: {
+        userId: strategy.userId,
+        clientId: strategy.clientId,
+        pair: `${strategy.sideA}/${strategy.sideB}`,
+        exchangeAName: strategy.exchangeAName,
+        exchangeBName: strategy.exchangeBName,
+        checkIntervalSeconds: strategy.checkIntervalSeconds,
+        amountToTrade: strategy.amountToTrade,
+        minProfitability: strategy.minProfitability,
+        maxOpenOrders: strategy.maxOpenOrders,
+      },
+      status: strategy.status,
+      createdAt: strategy.createdAt,
+      updatedAt: strategy.updatedAt,
+    }));
+
+    return [...marketMakingResponse, ...arbitrageResponse];
   }
 }

@@ -50,4 +50,7 @@ export class Arbitrage {
 
   @Column()
   status: StrategyInstanceStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastTradingAttemptAt: Date;
 }
