@@ -67,37 +67,54 @@ export class ArbitrageStrategy implements Strategy {
     for (const strategy of strategies) {
       if (strategy.status === StrategyInstanceStatus.RUNNING) {
         const { checkIntervalSeconds, lastTradingAttemptAt } = strategy;
-        const now = new Date();
 
         if (!lastTradingAttemptAt) {
-          await this.evaluateArbitrage(strategy);
-          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+          await this.attemptEvaluation(strategy);
           continue;
         }
 
         const nextAllowedTime = new Date(
           lastTradingAttemptAt.getTime() + checkIntervalSeconds * 1000,
         );
-        if (now >= nextAllowedTime) {
-          await this.evaluateArbitrage(strategy);
-          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+        if (new Date() >= nextAllowedTime) {
+          await this.attemptEvaluation(strategy);
         }
       }
     }
   }
 
+  async attemptEvaluation(strategy: ArbitrageStrategyData) {
+    try {
+      await this.evaluateArbitrage(strategy);
+      await this.updateStrategyLastTradingAttempt(strategy.id, new Date());
+    } catch (e) {
+      await this.updateStrategyStatusById(
+        strategy.id,
+        StrategyInstanceStatus.PAUSED,
+      );
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      await this.updateStrategyPausedReasonById(strategy.id, errorMessage);
+    }
+  }
+
   async pause(command: ArbitrageStrategyActionCommand): Promise<void> {
     const strategyEntity = await this.getStrategyEntity(command.id);
-    await this.updateStrategyStatus(
-      strategyEntity.id,
-      StrategyInstanceStatus.PAUSED,
-    );
-    this.logger.debug('Paused arbitrage strategy');
+    if (strategyEntity.status === StrategyInstanceStatus.RUNNING) {
+      await this.updateStrategyStatusById(
+        strategyEntity.id,
+        StrategyInstanceStatus.PAUSED,
+      );
+      this.logger.debug('Paused arbitrage strategy');
+      await this.updateStrategyPausedReasonById(
+        strategyEntity.id,
+        'Manually paused by user',
+      );
+    }
   }
 
   async stop(command: ArbitrageStrategyActionCommand): Promise<void> {
     const strategyEntity = await this.getStrategyEntity(command.id);
-    await this.updateStrategyStatus(
+    await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.STOPPED,
     );
@@ -112,7 +129,7 @@ export class ArbitrageStrategy implements Strategy {
 
   async delete(command: ArbitrageStrategyActionCommand): Promise<void> {
     const strategyEntity = await this.getStrategyEntity(command.id);
-    await this.updateStrategyStatus(
+    await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.DELETED,
     );
@@ -184,7 +201,7 @@ export class ArbitrageStrategy implements Strategy {
     return strategyEntity;
   }
 
-  private async updateStrategyStatus(
+  private async updateStrategyStatusById(
     strategyId: number,
     status: StrategyInstanceStatus,
   ): Promise<void> {
@@ -198,6 +215,13 @@ export class ArbitrageStrategy implements Strategy {
     await this.arbitrageService.updateStrategyLastTradingAttemptById(
       strategyId,
       date,
+    );
+  }
+
+  private async updateStrategyPausedReasonById(id: number, reason: string) {
+    return await this.arbitrageService.updateStrategyPausedReasonById(
+      id,
+      reason,
     );
   }
 

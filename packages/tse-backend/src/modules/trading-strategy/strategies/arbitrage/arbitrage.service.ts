@@ -40,6 +40,17 @@ export class ArbitrageService {
     }
   }
 
+  async updateStrategyPausedReasonById(id: number, newReason: string) {
+    try {
+      await this.repository.updateStrategyPausedReasonById(id, newReason);
+    } catch (error) {
+      this.logger.error(
+        `Error updating strategy paused reason with ID ${id}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
   async findRunningStrategies(): Promise<Arbitrage[]> {
     try {
       return this.repository.findRunningStrategies();

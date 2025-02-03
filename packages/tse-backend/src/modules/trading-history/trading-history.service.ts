@@ -87,6 +87,7 @@ export class TradingHistoryService {
       },
       lastTradingAttemptAt: strategy.lastTradingAttemptAt,
       status: strategy.status,
+      pausedReason: strategy.pausedReason,
       createdAt: strategy.createdAt,
       updatedAt: strategy.updatedAt,
     }));
@@ -109,6 +110,7 @@ export class TradingHistoryService {
       },
       lastTradingAttemptAt: strategy.lastTradingAttemptAt,
       status: strategy.status,
+      pausedReason: strategy.pausedReason,
       createdAt: strategy.createdAt,
       updatedAt: strategy.updatedAt,
     }));

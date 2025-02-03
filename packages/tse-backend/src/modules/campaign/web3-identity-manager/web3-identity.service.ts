@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { Web3IdentityRepository } from './web3-identity.repository';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -47,6 +47,13 @@ export class Web3IdentityService implements OnModuleInit {
   async addIdentityRpc(command: IdentityRpcCommand) {
     const data = this.mapper.map(command, IdentityRpcCommand, IdentityRpcData);
 
+    const existingRpc = await this.getAllIdentityRpc();
+    if (existingRpc.find((rpc) => rpc.chainId === data.chainId)) {
+      throw new BadRequestException(
+        `The Web3 rpc already exists: ${data.chainId}. Please remove the existing one to add the new one.`,
+      );
+    }
+
     await this.repository.saveRpc(data);
 
     await this.initSigners();
@@ -58,5 +65,19 @@ export class Web3IdentityService implements OnModuleInit {
 
   async getAllIdentityRpc() {
     return await this.repository.findAllRpc();
+  }
+
+  async getAllRpc() {
+    return await this.repository.findAllRpc();
+  }
+
+  async removeRpc(id: number) {
+    const existingRpc = await this.repository.findOneRpc(id);
+    if (!existingRpc) {
+      throw new BadRequestException(`Rpc not found: ${id}`);
+    }
+
+    existingRpc.removed = true;
+    await this.repository.saveRpc(existingRpc);
   }
 }

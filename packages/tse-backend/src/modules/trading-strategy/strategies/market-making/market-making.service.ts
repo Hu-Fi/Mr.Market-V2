@@ -29,6 +29,17 @@ export class MarketMakingService {
     }
   }
 
+  async updateStrategyPausedReasonById(id: number, newReason: string) {
+    try {
+      await this.repository.updateStrategyPausedReasonById(id, newReason);
+    } catch (error) {
+      this.logger.error(
+        `Error updating strategy paused reason with ID ${id}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
   async updateStrategyLastTradingAttemptById(id: number, newDate: Date) {
     try {
       await this.repository.updateStrategyLastTradingAttemptById(id, newDate);

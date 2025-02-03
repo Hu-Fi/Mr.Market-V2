@@ -25,6 +25,10 @@ export class ArbitrageStrategyRepository {
     );
   }
 
+  async updateStrategyPausedReasonById(id: number, newReason: string) {
+    return await this.repository.update({ id }, { pausedReason: newReason });
+  }
+
   async findRunningStrategies(): Promise<Arbitrage[]> {
     return this.repository.findBy({ status: StrategyInstanceStatus.CREATED });
   }

@@ -25,6 +25,16 @@ export class ExchangeApiKeyService {
       throw new BadRequestException(`Invalid exchange name: ${exchangeName}`);
     }
 
+    const existingExchangeApiKeys = await this.getExchangeApiKeys(exchangeName);
+
+    if (
+      existingExchangeApiKeys.some((apiKey) => apiKey.apiKey === command.apiKey)
+    ) {
+      throw new BadRequestException(
+        `Exchange API key already exists for exchange: ${exchangeName}. Please remove the existing one to add the new one.`,
+      );
+    }
+
     const data = this.mapper.map(
       command,
       ExchangeApiKeyCommand,

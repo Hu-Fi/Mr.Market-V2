@@ -1,8 +1,8 @@
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
-  Controller,
-  Post,
+  Controller, Delete, Get,
+  Post, Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -33,5 +33,13 @@ export class Web3IdentityController {
   @Post('/rpc') async addRpc(@Body() dto: IdentityRpcDto) {
     const command = this.mapper.map(dto, IdentityRpcDto, IdentityRpcCommand);
     await this.service.addIdentityRpc(command);
+  }
+
+  @Get('/rpc') async getExchangeApiKeys() {
+    return await this.service.getAllRpc();
+  }
+
+  @Delete('/rpc') async removeExchangeApiKeys(@Query('id') id: number) {
+    await this.service.removeRpc(id);
   }
 }

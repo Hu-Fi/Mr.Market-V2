@@ -53,4 +53,7 @@ export class Arbitrage {
 
   @Column({ type: 'timestamp', nullable: true })
   lastTradingAttemptAt: Date;
+
+  @Column({ nullable: true })
+  pausedReason: string;
 }

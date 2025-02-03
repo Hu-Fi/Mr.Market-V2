@@ -10,6 +10,7 @@ import { Status } from '../../common/enums/campaign.enums';
 import { CustomLogger } from '../logger/logger.service';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 import { Web3IdentityService } from './web3-identity-manager/web3-identity.service';
+import { CampaignRepository } from './campaign.repository';
 
 @Injectable()
 export class CampaignService {
@@ -27,6 +28,7 @@ export class CampaignService {
     private readonly httpService: HttpService,
     private readonly exchangeRegistryService: ExchangeRegistryService,
     private readonly web3IdentityService: Web3IdentityService,
+    private readonly campaignRepository: CampaignRepository,
   ) {
     this.CAMPAIGN_LAUNCHER_API_URL = this.configService.get<string>(
       'CAMPAIGN_LAUNCHER_API_URL',
@@ -67,6 +69,11 @@ export class CampaignService {
         }
         await this.registerToCampaign(campaign, exchange, walletAddress);
         results.successful.push(campaign.address);
+        await this.campaignRepository.save({
+          chainId: campaign.chainId,
+          exchangeName: campaign.exchangeName,
+          campaignAddress: campaign.address,
+        })
       } catch (error) {
         if (
           error instanceof Error &&
@@ -151,5 +158,9 @@ export class CampaignService {
       }
       throw new Error('Unexpected error during campaign registration');
     }
+  }
+
+  async getCampaignContribution() {
+    return await this.campaignRepository.find();
   }
 }

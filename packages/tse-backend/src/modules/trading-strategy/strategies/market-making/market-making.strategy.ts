@@ -74,32 +74,50 @@ export class MarketMakingStrategy implements Strategy {
     for (const strategy of strategies) {
       if (strategy.status === StrategyInstanceStatus.RUNNING) {
         const { checkIntervalSeconds, lastTradingAttemptAt } = strategy;
-        const now = new Date();
 
         if (!lastTradingAttemptAt) {
-          await this.evaluateMarketMaking(strategy);
-          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+          await this.attemptEvaluation(strategy);
           continue;
         }
 
         const nextAllowedTime = new Date(
           lastTradingAttemptAt.getTime() + checkIntervalSeconds * 1000,
         );
-        if (now >= nextAllowedTime) {
-          await this.evaluateMarketMaking(strategy);
-          await this.updateStrategyLastTradingAttempt(strategy.id, now);
+
+        if (new Date() >= nextAllowedTime) {
+          await this.attemptEvaluation(strategy);
         }
       }
     }
   }
 
+  async attemptEvaluation(strategy: MarketMakingStrategyData) {
+    try {
+      await this.evaluateMarketMaking(strategy);
+      await this.updateStrategyLastTradingAttempt(strategy.id, new Date());
+    } catch (e) {
+      await this.updateStrategyStatusById(
+        strategy.id,
+        StrategyInstanceStatus.PAUSED,
+      );
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      await this.updateStrategyPausedReasonById(strategy.id, errorMessage);
+    }
+  }
+
   async pause(command: MarketMakingStrategyActionCommand): Promise<void> {
     const strategyEntity = await this.getStrategyById(command.id);
-    await this.updateStrategyStatusById(
-      strategyEntity.id,
-      StrategyInstanceStatus.PAUSED,
-    );
-    this.logger.debug('Paused market making strategy');
+    if (strategyEntity.status === StrategyInstanceStatus.RUNNING) {
+      await this.updateStrategyStatusById(
+        strategyEntity.id,
+        StrategyInstanceStatus.PAUSED,
+      );
+      this.logger.debug('Paused market making strategy');
+      await this.updateStrategyPausedReasonById(
+        strategyEntity.id,
+        'Manually paused by user',
+      );
+    }
   }
 
   async stop(command: MarketMakingStrategyActionCommand): Promise<void> {
@@ -337,7 +355,7 @@ export class MarketMakingStrategy implements Strategy {
       });
     } catch (e) {
       this.logger.error(`Error placing order: ${e.message}`);
-      return;
+      throw e;
     }
 
     this.logger.debug(
@@ -361,12 +379,17 @@ export class MarketMakingStrategy implements Strategy {
     id: number,
     newState: StrategyInstanceStatus,
   ) {
-    try {
-      await this.marketMakingService.updateStrategyStatusById(id, newState);
-    } catch (error) {
-      this.logger.error('Error updating market making strategy status', error);
-      throw error;
-    }
+    return await this.marketMakingService.updateStrategyStatusById(
+      id,
+      newState,
+    );
+  }
+
+  private async updateStrategyPausedReasonById(id: number, reason: string) {
+    return await this.marketMakingService.updateStrategyPausedReasonById(
+      id,
+      reason,
+    );
   }
 
   private async updateStrategyLastTradingAttempt(

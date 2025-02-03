@@ -8,6 +8,7 @@ import { MarketMaking } from '../entities/market-making.entity';
 import { ExchangeApiKey } from '../entities/exchange-api-key.entity';
 import { Web3IdentityKey } from '../entities/web3-identity-key.entity';
 import { Web3IdentityRpc } from '../entities/web3-identity-rpc.entity';
+import { Contribution } from '../entities/contribution.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -44,6 +45,7 @@ export class TypeormConfig {
         ExchangeApiKey,
         Web3IdentityKey,
         Web3IdentityRpc,
+        Contribution
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,

@@ -23,6 +23,7 @@ export const arbitrageStrategiesDataFixture: Arbitrage[] = [
     updatedAt: new Date(),
     status: StrategyInstanceStatus.CREATED,
     lastTradingAttemptAt: new Date(),
+    pausedReason: 'Manual pause',
   },
   {
     id: 2,
@@ -39,6 +40,7 @@ export const arbitrageStrategiesDataFixture: Arbitrage[] = [
     updatedAt: new Date(),
     status: StrategyInstanceStatus.CREATED,
     lastTradingAttemptAt: new Date(),
+    pausedReason: 'Manual pause',
   },
 ];
 
@@ -64,6 +66,7 @@ export const marketMakingStrategiesDataFixture: MarketMaking[] = [
     updatedAt: new Date(),
     status: StrategyInstanceStatus.CREATED,
     lastTradingAttemptAt: new Date(),
+    pausedReason: 'Manual pause',
   },
   {
     id: 2,
@@ -84,5 +87,6 @@ export const marketMakingStrategiesDataFixture: MarketMaking[] = [
     updatedAt: new Date(),
     status: StrategyInstanceStatus.STOPPED,
     lastTradingAttemptAt: new Date(),
+    pausedReason: 'Manual pause',
   },
 ];

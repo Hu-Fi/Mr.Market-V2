@@ -19,6 +19,10 @@ export class MarketMakingRepository {
     return await this.repository.update({ id }, { status: newState });
   }
 
+  async updateStrategyPausedReasonById(id: number, newReason: string) {
+    return await this.repository.update({ id }, { pausedReason: newReason });
+  }
+
   async updateStrategyLastTradingAttemptById(id: number, newDate: Date) {
     return await this.repository.update(
       { id },

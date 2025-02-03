@@ -43,4 +43,10 @@ export class Web3IdentityRepository {
       },
     });
   }
+
+  findOneRpc(id: number) {
+    return this.web3IdentityRpcRepository.findOne({
+      where: { id: id },
+    });
+  }
 }
