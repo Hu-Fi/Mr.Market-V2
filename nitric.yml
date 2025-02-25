@@ -1,0 +1,25 @@
+resources:
+  - name: hufi-database
+    type: postgres
+  - name: hufi-bucket
+    type: storage
+
+policies:
+  - name: allow-api-to-database
+    targets:
+      - type: api
+        name: hufi-backend
+      - type: postgres
+        name: hufi-database
+    actions:
+      - databases:read
+      - databases:write
+  - name: allow-api-to-storage
+    targets:
+      - type: api
+        name: hufi-backend
+      - type: storage
+        name: hufi-bucket
+    actions:
+      - storage:read
+      - storage:write
