@@ -16,6 +16,10 @@ import {
   ExchangeApiKeyCommand,
   ExchangeApiKeyDto,
 } from './model/exchange-api-key.model';
+import {
+  ExchangeApiKeyReadonlyCommand,
+  ExchangeApiKeyReadonlyDto,
+} from './model/exchange-api-key-readonly.model';
 
 @ApiTags('exchange api key')
 @UsePipes(new ValidationPipe())
@@ -41,5 +45,16 @@ export class ExchangeApiKeyController {
 
   @Delete('/') async removeExchangeApiKeys(@Query('id') id: number) {
     await this.service.removeExchangeApiKey(id);
+  }
+
+  @Post('/readonly') async addExchangeApiKeyReadonly(
+    @Body() dto: ExchangeApiKeyReadonlyDto,
+  ) {
+    const command = this.mapper.map(
+      dto,
+      ExchangeApiKeyReadonlyDto,
+      ExchangeApiKeyReadonlyCommand,
+    );
+    return await this.service.addExchangeApiKeyReadonly(command);
   }
 }
