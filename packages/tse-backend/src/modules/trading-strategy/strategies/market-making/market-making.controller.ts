@@ -1,5 +1,5 @@
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
@@ -10,6 +10,7 @@ import {
 } from './model/market-making.dto';
 import { MarketMakingStrategy } from './market-making.strategy';
 
+@UsePipes(new ValidationPipe())
 @ApiTags('trading-strategy')
 @Controller('trading-strategy')
 export class MarketMakingController {
