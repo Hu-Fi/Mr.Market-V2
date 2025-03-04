@@ -6,6 +6,11 @@ import {
   ExchangeApiKeyData,
   ExchangeApiKeyDto,
 } from './model/exchange-api-key.model';
+import {
+  ExchangeApiKeyReadonlyCommand,
+  ExchangeApiKeyReadonlyData,
+  ExchangeApiKeyReadonlyDto,
+} from './model/exchange-api-key-readonly.model';
 
 @Injectable()
 export class ExchangeApiKeyProfile extends AutomapperProfile {
@@ -17,6 +22,16 @@ export class ExchangeApiKeyProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(mapper, ExchangeApiKeyDto, ExchangeApiKeyCommand);
       createMap(mapper, ExchangeApiKeyCommand, ExchangeApiKeyData);
+      createMap(
+        mapper,
+        ExchangeApiKeyReadonlyDto,
+        ExchangeApiKeyReadonlyCommand,
+      );
+      createMap(
+        mapper,
+        ExchangeApiKeyReadonlyCommand,
+        ExchangeApiKeyReadonlyData,
+      );
     };
   }
 }

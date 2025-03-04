@@ -9,11 +9,13 @@ import { ExchangeApiKeyController } from './exchange-manager/exchange-api-key.co
 import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
 import { EncryptionService } from '../../common/utils/encryption.service';
 import { ConfigModule } from '@nestjs/config';
+import { ExchangeApiKeyReadonlyRepository } from './exchange-manager/exchange-api-key-readonly.repository';
+import { ExchangeApiKeyReadOnly } from '../../common/entities/exchange-api-key-read-only.entity';
 
 @Module({
   imports: [
     IntegrationsModule,
-    TypeOrmModule.forFeature([ExchangeApiKey]),
+    TypeOrmModule.forFeature([ExchangeApiKey, ExchangeApiKeyReadOnly]),
     ConfigModule,
   ],
   providers: [
@@ -22,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     ExchangeApiKeyRepository,
     ExchangeApiKeyProfile,
     EncryptionService,
+    ExchangeApiKeyReadonlyRepository,
   ],
   controllers: [ExchangeApiKeyController],
   exports: [ExchangeRegistryService, ExchangeApiKeyService],

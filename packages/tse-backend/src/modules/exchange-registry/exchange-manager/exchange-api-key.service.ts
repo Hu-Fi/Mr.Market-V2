@@ -8,11 +8,17 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { EncryptionService } from '../../../common/utils/encryption.service';
 import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
+import {
+  ExchangeApiKeyReadonlyCommand,
+  ExchangeApiKeyReadonlyData,
+} from './model/exchange-api-key-readonly.model';
+import { ExchangeApiKeyReadonlyRepository } from './exchange-api-key-readonly.repository';
 
 @Injectable()
 export class ExchangeApiKeyService {
   constructor(
-    private repository: ExchangeApiKeyRepository,
+    private exchangeApiKeyRepository: ExchangeApiKeyRepository,
+    private exchangeApiKeyReadonlyRepository: ExchangeApiKeyReadonlyRepository,
     @InjectMapper() private readonly mapper: Mapper,
     private readonly ccxtGateway: CcxtIntegrationService,
     private readonly encryptionService: EncryptionService,
@@ -43,14 +49,14 @@ export class ExchangeApiKeyService {
 
     data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
 
-    return await this.repository.save(data);
+    return await this.exchangeApiKeyRepository.save(data);
   }
 
   async getExchangeApiKeys(
     exchangeName: string,
   ): Promise<ExchangeApiKeyData[]> {
     const existingExchangeApiKeys =
-      await this.repository.findByName(exchangeName);
+      await this.exchangeApiKeyRepository.findByName(exchangeName);
     if (!existingExchangeApiKeys) {
       throw new BadRequestException(
         `No exchange API keys found for exchange: ${exchangeName}`,
@@ -60,16 +66,30 @@ export class ExchangeApiKeyService {
   }
 
   async getAllExchangeApiKeys(): Promise<ExchangeApiKeyData[]> {
-    return await this.repository.find();
+    return await this.exchangeApiKeyRepository.find();
   }
 
   async removeExchangeApiKey(id: number) {
-    const existingExchangeApiKey = await this.repository.findOne(id);
+    const existingExchangeApiKey =
+      await this.exchangeApiKeyRepository.findOne(id);
     if (!existingExchangeApiKey) {
       throw new BadRequestException(`Exchange API key not found: ${id}`);
     }
 
     existingExchangeApiKey.removed = true;
-    await this.repository.save(existingExchangeApiKey);
+    await this.exchangeApiKeyRepository.save(existingExchangeApiKey);
+  }
+
+  async addExchangeApiKeyReadonly(command: ExchangeApiKeyReadonlyCommand) {
+    const data = this.mapper.map(
+      command,
+      ExchangeApiKeyReadonlyCommand,
+      ExchangeApiKeyReadonlyData,
+    );
+
+    // TODO: pass userId, clientId from JWT token
+    data.userId = 'temporaryValue';
+    data.clientId = 'temporaryValue';
+    return await this.exchangeApiKeyReadonlyRepository.save(data);
   }
 }
