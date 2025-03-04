@@ -28,7 +28,7 @@ import { CampaignRepository } from './campaign.repository';
     Web3IdentityRepository,
     Web3IdentityProfile,
     Web3IdentityService,
-    CampaignRepository
+    CampaignRepository,
   ],
   controllers: [Web3IdentityController, CampaignController],
   exports: [CampaignService],

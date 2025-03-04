@@ -1,8 +1,11 @@
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
-  Controller, Delete, Get,
-  Post, Query,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';

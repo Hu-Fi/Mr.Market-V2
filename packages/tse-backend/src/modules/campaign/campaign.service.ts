@@ -73,7 +73,7 @@ export class CampaignService {
           chainId: campaign.chainId,
           exchangeName: campaign.exchangeName,
           campaignAddress: campaign.address,
-        })
+        });
       } catch (error) {
         if (
           error instanceof Error &&
