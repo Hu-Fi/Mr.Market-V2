@@ -31,10 +31,10 @@ export class MarketMaking {
   @Column()
   exchangeName: string;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('decimal', { precision: 6, scale: 3 })
   bidSpread: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('decimal', { precision: 6, scale: 3 })
   askSpread: number;
 
   @Column('decimal', { precision: 16, scale: 8 })

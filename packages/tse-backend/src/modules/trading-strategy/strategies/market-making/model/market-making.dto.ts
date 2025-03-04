@@ -5,7 +5,7 @@ import {
   PriceSourceType,
   StrategyInstanceStatus,
 } from '../../../../../common/enums/strategy-type.enums';
-import { Matches } from 'class-validator';
+import { IsNumber, Matches, Max, Min } from 'class-validator';
 
 export class MarketMakingStrategyDto {
   @AutoMap()
@@ -26,11 +26,17 @@ export class MarketMakingStrategyDto {
   exchangeName: string;
 
   @AutoMap()
-  @ApiProperty({ description: 'Bid spread as a percentage', example: 0.1 })
+  @ApiProperty({ description: 'Bid spread as a percentage', example: 0.01 })
+  @IsNumber({ maxDecimalPlaces: 3 }, { message: 'bidSpread must have at most 3 decimal places' })
+  @Min(0.001, { message: 'bidSpread must be at least 0.001' })
+  @Max(1, { message: 'bidSpread must not exceed 100%' })
   bidSpread: number;
 
   @AutoMap()
-  @ApiProperty({ description: 'Ask spread as a percentage', example: 0.1 })
+  @ApiProperty({ description: 'Ask spread as a percentage', example: 0.01 })
+  @IsNumber({ maxDecimalPlaces: 3 }, { message: 'askSpread must have at most 3 decimal places' })
+  @Min(0.001, { message: 'askSpread must be at least 0.001' })
+  @Max(1, { message: 'askSpread must not exceed 100%' })
   askSpread: number;
 
   @AutoMap()
