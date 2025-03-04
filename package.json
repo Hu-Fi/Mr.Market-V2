@@ -6,9 +6,15 @@
     "migrations"
   ],
   "scripts": {
+    "start:tse": "pnpm --filter tse-backend start",
+    "start:mm": "pnpm --filter mm-backend start",
+    "start": "concurrently --kill-others --success first \"pnpm run start:tse\" \"pnpm run start:mm\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
   }
 }
