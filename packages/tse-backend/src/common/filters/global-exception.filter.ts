@@ -37,15 +37,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private getErrorDetails(exception: unknown): Array<{
     field?: string;
-    message: string
+    message: string;
   }> {
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
 
-      if (Array.isArray(response['message']) && this.isValidationError(response)) {
+      if (
+        Array.isArray(response['message']) &&
+        this.isValidationError(response)
+      ) {
         return response['message'].map((err: ValidationError) => ({
           field: err.property,
-          message: Object.values(err.constraints || {})[0] || 'Invalid value'
+          message: Object.values(err.constraints || {})[0] || 'Invalid value',
         }));
       }
 
@@ -63,18 +66,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return (
       response.statusCode === HttpStatus.BAD_REQUEST &&
       Array.isArray(response.message) &&
-      response.message.every(item => item instanceof ValidationError)
+      response.message.every((item) => item instanceof ValidationError)
     );
   }
 
   private logError(exception: unknown, responseBody: any): void {
-    const errorMessage = exception instanceof Error
-      ? exception.stack
-      : JSON.stringify(exception);
+    const errorMessage =
+      exception instanceof Error ? exception.stack : JSON.stringify(exception);
 
     this.logger.error(
       `Error ${responseBody.statusCode}: ${JSON.stringify(responseBody.errors)}`,
-      errorMessage
+      errorMessage,
     );
   }
 }
