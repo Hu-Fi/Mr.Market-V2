@@ -118,7 +118,6 @@ export class CampaignService {
       const responses = await Promise.all(campaignPromises);
       
       const allCampaigns = responses.flatMap(response => response.data);
-      console.log(allCampaigns);
       return allCampaigns.filter((campaign: Campaign) =>
         this.isRunningCampaign(campaign),
       );
