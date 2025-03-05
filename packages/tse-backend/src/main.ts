@@ -1,6 +1,11 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BadRequestException, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -13,14 +18,16 @@ async function bootstrap() {
 
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new GlobalExceptionFilter(httpAdapterHost));
-  app.useGlobalPipes(  new ValidationPipe({
-    exceptionFactory: (errors) => {
-      return new BadRequestException(errors);
-    },
-    forbidUnknownValues: true,
-    stopAtFirstError: false,
-    transform: true
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      exceptionFactory: (errors) => {
+        return new BadRequestException(errors);
+      },
+      forbidUnknownValues: true,
+      stopAtFirstError: false,
+      transform: true,
+    }),
+  );
 
   const configService: ConfigService = app.get(ConfigService);
   const corsConfig = configService.get<string>('CORS_ORIGIN', '*');
