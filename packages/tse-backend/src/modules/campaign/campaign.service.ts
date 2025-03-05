@@ -20,7 +20,9 @@ export class CampaignService {
   RECORDING_ORACLE_API_URL: string;
   RECORDING_ORACLE_API_KEY: string;
 
-  GET_ALL_CAMPAIGNS_ENDPOINT: string = '/campaign?chainId=-1';
+  private readonly SUPPORTED_CHAIN_IDS: number[] = [137, 1];
+  private readonly CAMPAIGN_ENDPOINT: string = '/campaign?chainId=';
+
   REGISTER_TO_CAMPAIGN_ENDPOINT: string = '/mr-market/campaign';
 
   constructor(
@@ -105,16 +107,23 @@ export class CampaignService {
 
   async fetchRunningCampaigns() {
     try {
-      const response = await lastValueFrom(
-        this.httpService.get(
-          `${this.CAMPAIGN_LAUNCHER_API_URL}${this.GET_ALL_CAMPAIGNS_ENDPOINT}`,
+      const campaignPromises = this.SUPPORTED_CHAIN_IDS.map(chainId =>
+        lastValueFrom(
+          this.httpService.get(
+            `${this.CAMPAIGN_LAUNCHER_API_URL}${this.CAMPAIGN_ENDPOINT}${chainId}`,
+          ),
         ),
       );
-      const campaigns: Campaign[] = response.data;
-      return campaigns.filter((campaign: Campaign) =>
+
+      const responses = await Promise.all(campaignPromises);
+      
+      const allCampaigns = responses.flatMap(response => response.data);
+      console.log(allCampaigns);
+      return allCampaigns.filter((campaign: Campaign) =>
         this.isRunningCampaign(campaign),
       );
-    } catch {
+    } catch (error) {
+      this.logger.error('Error fetching campaigns:', error);
       throw new Error('Error fetching campaigns from campaign launcher API');
     }
   }
