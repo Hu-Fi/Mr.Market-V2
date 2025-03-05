@@ -31,6 +31,12 @@ export class MarketMaking {
   @Column()
   exchangeName: string;
 
+  @Column({ nullable: true })
+  oracleExchangeName?: string;
+
+  @Column('decimal', { precision: 16, scale: 8 })
+  startPrice: number;
+
   @Column('decimal', { precision: 6, scale: 3 })
   bidSpread: number;
 

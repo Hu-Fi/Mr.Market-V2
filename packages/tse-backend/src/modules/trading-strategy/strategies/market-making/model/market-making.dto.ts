@@ -1,5 +1,5 @@
 import { AutoMap } from '@automapper/classes';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   AmountChangeType,
   PriceSourceType,
@@ -22,19 +22,36 @@ export class MarketMakingStrategyDto {
   pair: string;
 
   @AutoMap()
-  @ApiProperty({ description: 'Exchange name', example: 'binance' })
+  @ApiProperty({
+    description: 'Exchange name used for execution',
+    example: 'binance',
+  })
   exchangeName: string;
 
   @AutoMap()
+  @ApiPropertyOptional({
+    description:
+      'If provided, this exchange is used as an oracle for price data instead of `exchangeName`',
+    example: 'mexc',
+  })
+  oracleExchangeName?: string;
+
+  @AutoMap()
   @ApiProperty({ description: 'Bid spread as a percentage', example: 0.01 })
-  @IsNumber({ maxDecimalPlaces: 3 }, { message: 'bidSpread must have at most 3 decimal places' })
+  @IsNumber(
+    { maxDecimalPlaces: 3 },
+    { message: 'bidSpread must have at most 3 decimal places' },
+  )
   @Min(0.001, { message: 'bidSpread must be at least 0.001' })
   @Max(1, { message: 'bidSpread must not exceed 100%' })
   bidSpread: number;
 
   @AutoMap()
   @ApiProperty({ description: 'Ask spread as a percentage', example: 0.01 })
-  @IsNumber({ maxDecimalPlaces: 3 }, { message: 'askSpread must have at most 3 decimal places' })
+  @IsNumber(
+    { maxDecimalPlaces: 3 },
+    { message: 'askSpread must have at most 3 decimal places' },
+  )
   @Min(0.001, { message: 'askSpread must be at least 0.001' })
   @Max(1, { message: 'askSpread must not exceed 100%' })
   askSpread: number;
@@ -82,14 +99,14 @@ export class MarketMakingStrategyDto {
   amountChangeType: AmountChangeType;
 
   @AutoMap()
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Ceiling Price, No orders above this price',
     example: '0',
   })
   ceilingPrice?: number;
 
   @AutoMap()
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Floor price, No orders below this price.',
     example: '0',
   })
@@ -105,6 +122,8 @@ export class MarketMakingStrategyCommand {
   sideB: string;
   @AutoMap()
   exchangeName: string;
+  @AutoMap()
+  oracleExchangeName?: string;
   @AutoMap()
   bidSpread: number;
   @AutoMap()
@@ -134,6 +153,7 @@ export class MarketMakingStrategyData {
   sideA: string;
   sideB: string;
   exchangeName: string;
+  oracleExchangeName?: string;
   bidSpread: number;
   askSpread: number;
   orderAmount: number;

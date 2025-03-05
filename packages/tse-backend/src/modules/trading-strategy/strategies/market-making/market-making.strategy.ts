@@ -46,12 +46,23 @@ export class MarketMakingStrategy implements Strategy {
   async create(command: MarketMakingStrategyCommand): Promise<void> {
     await this.validateExchangesAndPairs(command);
 
+    const exchangeInstance =
+      await this.exchangeRegistryService.getExchangeByName(
+        command.exchangeName,
+      );
+
+    const ticker = await exchangeInstance.fetchTicker(
+      `${command.sideA}/${command.sideB}`,
+    );
+
     await this.marketMakingService.createStrategy({
       userId: command.userId,
       clientId: command.clientId,
       sideA: command.sideA,
       sideB: command.sideB,
       exchangeName: command.exchangeName,
+      oracleExchangeName: command.oracleExchangeName,
+      startPrice: ticker.last,
       bidSpread: command.bidSpread,
       askSpread: command.askSpread,
       orderAmount: command.orderAmount,
@@ -194,6 +205,7 @@ export class MarketMakingStrategy implements Strategy {
       sideA,
       sideB,
       exchangeName,
+      oracleExchangeName,
       bidSpread,
       askSpread,
       orderAmount,
@@ -218,11 +230,21 @@ export class MarketMakingStrategy implements Strategy {
     const exchangeInstance =
       await this.exchangeRegistryService.getExchangeByName(exchangeName);
 
-    const priceSource = await getPriceSource(
-      exchangeInstance,
-      pair,
-      priceSourceType,
-    );
+    let source: any;
+
+    if (oracleExchangeName) {
+      source =
+        await this.exchangeRegistryService.getExchangeByName(
+          oracleExchangeName,
+        );
+      this.logger.debug(
+        `Oracle exchange provided, price is calculated from ${source.name}`,
+      );
+    } else {
+      source = exchangeInstance;
+    }
+
+    const priceSource = await getPriceSource(source, pair, priceSourceType);
 
     const orderDetails: OrderDetail[] = calculateOrderDetails(
       orderAmount,

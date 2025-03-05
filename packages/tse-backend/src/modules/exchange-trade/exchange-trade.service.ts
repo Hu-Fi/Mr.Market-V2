@@ -126,7 +126,14 @@ export class ExchangeTradeService {
 
   async cancelUnfilledOrders(exchangeName: string, pair: string) {
     const exchangeInstance = await this.getExchangeInstance(exchangeName);
-    const openOrders = await exchangeInstance.fetchOpenOrders(pair);
+    let openOrders: { id: string }[];
+
+    try {
+      openOrders = await exchangeInstance.fetchOpenOrders(pair);
+    } catch (e) {
+      this.logger.error(`Error fetching open orders: ${e.message}`);
+      return 0;
+    }
 
     const cancelPromises = openOrders.map(async (order: { id: string }) => {
       try {
