@@ -1,49 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import {
-  ExchangeErrorException,
-  NetworkErrorException,
-} from '../common/filters/withdrawal.exception.filter';
+import { ExchangeErrorException, NetworkErrorException } from '../common/filters/withdrawal.exception.filter';
 import { ConfigService } from '@nestjs/config';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class CcxtIntegrationService {
-  constructor(private readonly configService: ConfigService) {}
-  private readonly exchanges = new Map<string, ccxt.Exchange>();
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    ) {}
 
-  addExchange(name: string, exchange: ccxt.Exchange): void {
-    this.exchanges.set(name, exchange);
+  async addExchange(name: string, exchange: ccxt.Exchange) {
+    await this.cacheManager.set(name, "");
   }
 
-  getExchangeInstances(exchangeName: string): ccxt.Exchange[] | undefined {
-    const exchangeInstances: ccxt.Exchange[] = [];
-    for (const [key, exchangeInstance] of this.exchanges.entries()) {
-      const identifier = key.split('-')[0];
-      if (identifier?.startsWith(exchangeName)) {
-        exchangeInstances.push(exchangeInstance);
+  async getDefaultExchange(exchangeName: string) {
+    return await this.cacheManager.get(`${exchangeName}-true`);
+  }
+
+  async getExchangeNames(): Promise<Set<string>> {
+    if (typeof this.cacheManager.store.keys !== 'function') {
+      throw new Error('Cache store does not support key listing.');
+    }
+
+    const keys: string[] = await this.cacheManager.store.keys('*');
+
+    const exchangeNames = new Set<string>();
+
+    keys.forEach(key => {
+      const parts = key.split('-');
+      if (parts[1] === 'true') {
+        exchangeNames.add(parts[0]);
       }
-    }
-    return exchangeInstances;
+    });
+
+    return exchangeNames;
   }
 
-  getExchangeNames(): Set<string> {
-    const uniqueNames = new Set<string>();
-    for (const key of this.exchanges.keys()) {
-      const exchangeName = key.split('-')[0];
-      uniqueNames.add(exchangeName);
-    }
-    return uniqueNames;
-  }
-
-  async initializeExchange(name: string, apiKey: string, secret: string) {
-    const exchangeClass = this.getExchangeClass(name);
+  async initializeExchange(
+    exchangeIdentifier: string,
+    config : { name: string, key: string, secret: string }
+  ) {
+    const exchangeClass = this.getExchangeClass(config.name);
     if (exchangeClass) {
-      const exchange = new exchangeClass({ apiKey, secret });
-      this.configureSandboxMode(exchange);
-      await exchange.loadMarkets();
-      return exchange;
+      try {
+        const exchange = new exchangeClass({ apiKey: config.key, secret: config.secret });
+        this.configureSandboxMode(exchange);
+        await exchange.loadMarkets(); // TODO: check if we need its response data
+        return exchange;
+      } catch (e) {
+        const toRemoveExchange = await this.cacheManager.get(exchangeIdentifier);
+        if (toRemoveExchange) {
+          await this.cacheManager.del(exchangeIdentifier);
+        }
+       throw new Error(e)
+      }
     } else {
-      throw new Error(`Exchange class for ${name} not found`);
+      throw new Error(`Exchange class for ${config.name} not found`);
     }
   }
 

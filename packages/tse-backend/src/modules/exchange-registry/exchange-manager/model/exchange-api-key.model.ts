@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class ExchangeApiKeyDto {
   @AutoMap()
@@ -13,6 +13,11 @@ export class ExchangeApiKeyDto {
   @ApiProperty({ example: 'binance' })
   @IsString()
   exchangeName: string;
+
+  @AutoMap()
+  @ApiProperty({ example: 'false' })
+  @IsBoolean()
+  isDefaultAccount: boolean;
 
   @AutoMap()
   @ApiProperty({ example: 'api_key' })
@@ -46,9 +51,15 @@ export class ExchangeApiKeyCommand {
 
   @AutoMap()
   apiPassphrase?: string;
+
+  @AutoMap()
+  isDefaultAccount: boolean;
 }
 
 export class ExchangeApiKeyData {
+  userId: string;
+  clientId: string;
+
   @AutoMap()
   description?: string;
 
@@ -63,6 +74,9 @@ export class ExchangeApiKeyData {
 
   @AutoMap()
   apiPassphrase?: string;
+
+  @AutoMap()
+  isDefaultAccount: boolean;
 
   @AutoMap()
   removed: boolean;

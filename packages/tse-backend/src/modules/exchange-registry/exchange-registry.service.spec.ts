@@ -3,7 +3,7 @@ import { ExchangeRegistryService } from './exchange-registry.service';
 import { CustomLogger } from '../logger/logger.service';
 import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
-import { FirstExchangeStrategy } from './exchange-manager/strategies/first-exchange.strategy';
+import { GetDefaultAccountStrategy } from './exchange-manager/strategies/get-default-account.strategy';
 import * as ccxt from 'ccxt';
 import { EncryptionService } from '../../common/utils/encryption.service';
 jest.mock('../logger/logger.service');
@@ -76,12 +76,12 @@ describe('ExchangeRegistryService', () => {
   describe('getExchangeByName', () => {
     it('should initialize exchanges if none exist', async () => {
       const exchangeName = 'binance';
-      jest.spyOn(ccxtGateway, 'getExchangeInstances').mockReturnValue([]);
-      const strategy = new FirstExchangeStrategy();
+      jest.spyOn(ccxtGateway, 'getDefaultExchange').mockReturnValue([]);
+      const strategy = new GetDefaultAccountStrategy();
 
       const result = await service.getExchangeByName(exchangeName, strategy);
 
-      expect(ccxtGateway.getExchangeInstances).toHaveBeenCalledWith(
+      expect(ccxtGateway.getDefaultExchange).toHaveBeenCalledWith(
         exchangeName,
       );
       expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
@@ -93,13 +93,13 @@ describe('ExchangeRegistryService', () => {
     it('should return an existing exchange if already initialized', async () => {
       const exchangeName = 'binance';
       jest
-        .spyOn(ccxtGateway, 'getExchangeInstances')
+        .spyOn(ccxtGateway, 'getDefaultExchange')
         .mockReturnValue(mockExchangeInstances);
-      const strategy = new FirstExchangeStrategy();
+      const strategy = new GetDefaultAccountStrategy();
 
       const result = await service.getExchangeByName(exchangeName, strategy);
 
-      expect(ccxtGateway.getExchangeInstances).toHaveBeenCalledWith(
+      expect(ccxtGateway.getDefaultExchange).toHaveBeenCalledWith(
         exchangeName,
       );
       expect(ccxtGateway.initializeExchange).not.toHaveBeenCalled();
