@@ -14,4 +14,14 @@ export class ExchangeApiKeyReadonlyRepository {
   save(data: ExchangeApiKeyReadonlyData) {
     return this.repository.save(data);
   }
+
+  async findByName(
+    exchangeName: string,
+  ): Promise<ExchangeApiKeyReadOnly[] | undefined> {
+    return await this.repository.find({
+      where: {
+        exchangeName
+      },
+    });
+  }
 }

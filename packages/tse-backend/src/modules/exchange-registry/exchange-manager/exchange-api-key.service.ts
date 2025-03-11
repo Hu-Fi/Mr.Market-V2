@@ -54,15 +54,20 @@ export class ExchangeApiKeyService {
 
   async getExchangeApiKeys(
     exchangeName: string,
-  ): Promise<ExchangeApiKeyData[]> {
+  ) {
     const existingExchangeApiKeys =
       await this.exchangeApiKeyRepository.findByName(exchangeName);
-    if (!existingExchangeApiKeys) {
+    const existingExchangeReadOnlyApiKeys =
+      await this.exchangeApiKeyReadonlyRepository.findByName(exchangeName);
+    if (!existingExchangeApiKeys && !existingExchangeReadOnlyApiKeys) {
       throw new BadRequestException(
         `No exchange API keys found for exchange: ${exchangeName}`,
       );
     }
-    return existingExchangeApiKeys;
+    return [
+      ...(existingExchangeApiKeys || []),
+      ...(existingExchangeReadOnlyApiKeys || []),
+    ];
   }
 
   async getAllExchangeApiKeys(): Promise<ExchangeApiKeyData[]> {
@@ -81,6 +86,22 @@ export class ExchangeApiKeyService {
   }
 
   async addExchangeApiKeyReadonly(command: ExchangeApiKeyReadonlyCommand) {
+    const { exchangeName } = command;
+
+    if (!this.ccxtGateway.getExchangeClass(exchangeName)) {
+      throw new BadRequestException(`Invalid exchange name: ${exchangeName}`);
+    }
+
+    const existingExchangeApiKeys = await this.getExchangeApiKeys(exchangeName);
+
+    if (
+      existingExchangeApiKeys.some((apiKey) => apiKey.apiKey === command.apiKey)
+    ) {
+      throw new BadRequestException(
+        `Exchange API key already exists for exchange: ${exchangeName}. Please remove the existing one to add the new one.`,
+      );
+    }
+
     const data = this.mapper.map(
       command,
       ExchangeApiKeyReadonlyCommand,
@@ -90,6 +111,8 @@ export class ExchangeApiKeyService {
     // TODO: pass userId, clientId from JWT token
     data.userId = 'temporaryValue';
     data.clientId = 'temporaryValue';
+
+    data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
     return await this.exchangeApiKeyReadonlyRepository.save(data);
   }
 }
