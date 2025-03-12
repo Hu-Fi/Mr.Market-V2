@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { ExchangeErrorException, NetworkErrorException } from '../common/filters/withdrawal.exception.filter';
+import {
+  ExchangeErrorException,
+  NetworkErrorException,
+} from '../common/filters/withdrawal.exception.filter';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -10,10 +13,10 @@ export class CcxtIntegrationService {
   constructor(
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    ) {}
+  ) {}
 
-  async addExchange(name: string, exchange: ccxt.Exchange) {
-    await this.cacheManager.set(name, "");
+  async addExchange(name: string, marketsData: string) {
+    await this.cacheManager.set(name, marketsData);
   }
 
   async getDefaultExchange(exchangeName: string) {
@@ -29,7 +32,7 @@ export class CcxtIntegrationService {
 
     const exchangeNames = new Set<string>();
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       const parts = key.split('-');
       if (parts[1] === 'true') {
         exchangeNames.add(parts[0]);
@@ -41,21 +44,25 @@ export class CcxtIntegrationService {
 
   async initializeExchange(
     exchangeIdentifier: string,
-    config : { name: string, key: string, secret: string }
+    config: { name: string; key: string; secret: string },
   ) {
     const exchangeClass = this.getExchangeClass(config.name);
     if (exchangeClass) {
       try {
-        const exchange = new exchangeClass({ apiKey: config.key, secret: config.secret });
+        const exchange = new exchangeClass({
+          apiKey: config.key,
+          secret: config.secret,
+        });
         this.configureSandboxMode(exchange);
         await exchange.loadMarkets(); // TODO: check if we need its response data
         return exchange;
       } catch (e) {
-        const toRemoveExchange = await this.cacheManager.get(exchangeIdentifier);
+        const toRemoveExchange =
+          await this.cacheManager.get(exchangeIdentifier);
         if (toRemoveExchange) {
           await this.cacheManager.del(exchangeIdentifier);
         }
-       throw new Error(e)
+        throw new Error(e);
       }
     } else {
       throw new Error(`Exchange class for ${config.name} not found`);

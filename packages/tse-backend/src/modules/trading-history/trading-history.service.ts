@@ -22,7 +22,7 @@ export class TradingHistoryService {
     private readonly orderRepository: OrderRepository,
     private readonly marketMakingRepository: MarketMakingRepository,
     private readonly arbitrageRepository: ArbitrageStrategyRepository,
-    private readonly volumeRepository: VolumeStrategyRepository
+    private readonly volumeRepository: VolumeStrategyRepository,
   ) {}
 
   async getUserTradingHistory(
@@ -66,10 +66,9 @@ export class TradingHistoryService {
       await this.arbitrageRepository.findStrategiesByUserId(
         params.userId.toString(),
       );
-    const volumeStrategies =
-      await this.volumeRepository.findStrategiesByUserId(
-        params.userId.toString(),
-      );
+    const volumeStrategies = await this.volumeRepository.findStrategiesByUserId(
+      params.userId.toString(),
+    );
 
     const marketMakingResponse = marketMakingStrategies.map((strategy) => ({
       id: strategy.id,
@@ -145,7 +144,7 @@ export class TradingHistoryService {
       pausedReason: strategy.pausedReason,
       createdAt: strategy.createdAt,
       updatedAt: strategy.updatedAt,
-    }))
+    }));
 
     return [...marketMakingResponse, ...arbitrageResponse, ...volumeResponse];
   }

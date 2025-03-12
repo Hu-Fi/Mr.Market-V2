@@ -23,12 +23,8 @@ import { VolumeService } from './strategies/volume/volume.service';
 import { VolumeStrategyRepository } from './strategies/volume/volume.repository';
 import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
 import { Volume } from '../../common/entities/volume.entity';
-import {
-  GetAdditionalAccountStrategy
-} from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
-import {
-  GetDefaultAccountStrategy
-} from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
+import { GetAdditionalAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
+import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
 
 @Module({
   imports: [
@@ -53,7 +49,7 @@ import {
     ArbitrageStrategyProfile,
     VolumeStrategyProfile,
     GetDefaultAccountStrategy,
-    GetAdditionalAccountStrategy
+    GetAdditionalAccountStrategy,
   ],
   exports: [
     ArbitrageStrategy,

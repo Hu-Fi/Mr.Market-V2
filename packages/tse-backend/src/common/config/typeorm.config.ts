@@ -49,7 +49,7 @@ export class TypeormConfig {
         Web3IdentityRpc,
         Contribution,
         ExchangeApiKeyReadOnly,
-        Volume
+        Volume,
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,

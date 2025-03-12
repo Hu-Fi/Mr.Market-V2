@@ -3,7 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn, Unique,
+  UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 
 @Unique(['userId', 'clientId', 'exchangeName'])

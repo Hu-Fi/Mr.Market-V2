@@ -20,7 +20,7 @@ export class ExchangeApiKeyReadonlyRepository {
   ): Promise<ExchangeApiKeyReadOnly[] | undefined> {
     return await this.repository.find({
       where: {
-        exchangeName
+        exchangeName,
       },
     });
   }

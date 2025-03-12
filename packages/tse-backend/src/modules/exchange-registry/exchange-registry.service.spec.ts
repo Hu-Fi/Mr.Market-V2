@@ -81,9 +81,7 @@ describe('ExchangeRegistryService', () => {
 
       const result = await service.getExchangeByName(exchangeName, strategy);
 
-      expect(ccxtGateway.getDefaultExchange).toHaveBeenCalledWith(
-        exchangeName,
-      );
+      expect(ccxtGateway.getDefaultExchange).toHaveBeenCalledWith(exchangeName);
       expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
         mockApiKeys.length,
       );
@@ -99,9 +97,7 @@ describe('ExchangeRegistryService', () => {
 
       const result = await service.getExchangeByName(exchangeName, strategy);
 
-      expect(ccxtGateway.getDefaultExchange).toHaveBeenCalledWith(
-        exchangeName,
-      );
+      expect(ccxtGateway.getDefaultExchange).toHaveBeenCalledWith(exchangeName);
       expect(ccxtGateway.initializeExchange).not.toHaveBeenCalled();
       expect(result).toEqual(mockExchangeInstances[0]);
     });

@@ -52,7 +52,10 @@ export class VolumeStrategyRepository {
     });
   }
 
-  async updateStrategyAfterTrade(id: number, data: { tradesExecuted: number, currentMakerPrice: any}) {
+  async updateStrategyAfterTrade(
+    id: number,
+    data: { tradesExecuted: number; currentMakerPrice: any },
+  ) {
     return await this.repository.update({ id }, data);
   }
 }

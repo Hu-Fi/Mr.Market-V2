@@ -33,7 +33,7 @@ export class Volume {
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   incrementPercentage: number;
 
-  @Column({ type: 'int'})
+  @Column({ type: 'int' })
   tradeIntervalSeconds: number;
 
   @Column({ type: 'int' })

@@ -43,28 +43,30 @@ export class VolumeStrategyDto {
   @AutoMap()
   @ApiProperty({
     example: '5',
-    description: 'Percentage increment for offsetting from midPrice (initial offset)'
+    description:
+      'Percentage increment for offsetting from midPrice (initial offset)',
   })
   incrementPercentage: number;
 
   @AutoMap()
   @ApiProperty({
     example: 10,
-    description: 'Time interval (in seconds) between each trade execution'
+    description: 'Time interval (in seconds) between each trade execution',
   })
   tradeIntervalSeconds: number;
 
   @AutoMap()
   @ApiProperty({
     example: 1,
-    description: 'Number of total trades to execute'
+    description: 'Number of total trades to execute',
   })
   numTotalTrades: number;
 
   @AutoMap()
   @ApiProperty({
     example: 1,
-    description: 'Rate at which to push the price upward after each successful trade, in percent',
+    description:
+      'Rate at which to push the price upward after each successful trade, in percent',
   })
   pricePushRate: number;
 }

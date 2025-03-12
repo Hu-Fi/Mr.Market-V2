@@ -29,11 +29,7 @@ export class VolumeStrategyProfile extends AutomapperProfile {
           mapFrom((source) => source.pair.split('/')[1].toUpperCase()),
         ),
       );
-      createMap(
-        mapper,
-        VolumeStrategyActionDto,
-        VolumeStrategyActionCommand,
-      );
+      createMap(mapper, VolumeStrategyActionDto, VolumeStrategyActionCommand);
     };
   }
 }

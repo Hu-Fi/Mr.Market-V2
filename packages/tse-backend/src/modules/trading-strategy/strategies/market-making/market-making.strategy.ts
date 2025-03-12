@@ -170,7 +170,8 @@ export class MarketMakingStrategy implements Strategy {
   ): Promise<void> {
     const { exchangeName, sideA, sideB } = command;
     await this.exchangeRegistryService.getExchangeByName(exchangeName);
-    const supportedExchanges = await this.exchangeRegistryService.getSupportedExchanges();
+    const supportedExchanges =
+      await this.exchangeRegistryService.getSupportedExchanges();
 
     if (!isExchangeSupported(exchangeName, supportedExchanges)) {
       throw new NotFoundException(

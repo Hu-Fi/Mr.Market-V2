@@ -49,7 +49,8 @@ export class ExchangeDataController {
   @Get('/tickers/pairs')
   @ApiOperation({ summary: 'Get supported pairs' })
   async getSupportedPairs() {
-    const supportedExchanges = await this.exchangeDataService.getSupportedExchanges();
+    const supportedExchanges =
+      await this.exchangeDataService.getSupportedExchanges();
     if (!supportedExchanges.length) {
       throw new Error('No supported exchanges found');
     }

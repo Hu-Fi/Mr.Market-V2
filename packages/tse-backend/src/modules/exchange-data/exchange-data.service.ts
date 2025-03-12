@@ -90,9 +90,7 @@ export class ExchangeDataService {
 
   async getSupportedPairs(exchangeName: string) {
     const pairs: string[] = [];
-    this.logger.log(
-      `Fetching supported pairs for ${exchangeName}`,
-    );
+    this.logger.log(`Fetching supported pairs for ${exchangeName}`);
     await this.fetchPairsFromExchange(exchangeName, pairs);
 
     return Array.from(new Set(pairs));

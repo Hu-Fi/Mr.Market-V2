@@ -41,11 +41,10 @@ export class ExecutionWorkerService {
     }
 
     try {
-        const volumeStrategies =
-          await this.volumeService.findRunningStrategies();
-        await this.volumeStrategy.start(volumeStrategies);
-      } catch (error) {
-        this.logger.error('Error executing volume strategies', error.stack);
-      }
+      const volumeStrategies = await this.volumeService.findRunningStrategies();
+      await this.volumeStrategy.start(volumeStrategies);
+    } catch (error) {
+      this.logger.error('Error executing volume strategies', error.stack);
+    }
   }
 }

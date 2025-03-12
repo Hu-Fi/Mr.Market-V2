@@ -9,7 +9,8 @@ export class ExchangesHealthService {
 
   async checkExchanges() {
     this.logger.debug('Checking exchanges configuration health...');
-    const actualExchanges: Set<string> = await this.ccxtGateway.getExchangeNames();
+    const actualExchanges: Set<string> =
+      await this.ccxtGateway.getExchangeNames();
 
     const status = actualExchanges.size > 0 ? 'UP' : 'DOWN';
     return {

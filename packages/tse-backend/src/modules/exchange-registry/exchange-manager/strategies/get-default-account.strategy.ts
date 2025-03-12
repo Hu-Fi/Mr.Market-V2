@@ -4,13 +4,14 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetDefaultAccountStrategy implements ExchangeSelectionStrategy {
-  constructor() {
-  }
-  async selectExchange(initializedExchanges: any): Promise<ccxt.Exchange | undefined> {
-
+  constructor() {}
+  async selectExchange(
+    initializedExchanges: any,
+  ): Promise<ccxt.Exchange | undefined> {
     const filteredExchange = initializedExchanges.filter(
-        (exchange: { exchangeIdentifier: string; }) => exchange.exchangeIdentifier.split('-')[1] === 'true'
-    )
+      (exchange: { exchangeIdentifier: string }) =>
+        exchange.exchangeIdentifier.split('-')[1] === 'true',
+    );
     return filteredExchange.pop()?.exchange;
   }
 }

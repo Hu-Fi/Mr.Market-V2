@@ -15,15 +15,19 @@ export class ExchangeRegistryService {
     private readonly ccxtGateway: CcxtIntegrationService,
     private readonly exchangeApiKeyService: ExchangeApiKeyService,
     private readonly encryptionService: EncryptionService,
-    private readonly defaultStrategy: GetDefaultAccountStrategy
+    private readonly defaultStrategy: GetDefaultAccountStrategy,
   ) {}
 
   async getExchangeByName(
     exchangeName: string,
     strategy: ExchangeSelectionStrategy = this.defaultStrategy,
   ) {
-    const freshInitializedExchanges = await this.initializeExchanges(exchangeName);
-    const manager = new ExchangeManagerService(freshInitializedExchanges, strategy);
+    const freshInitializedExchanges =
+      await this.initializeExchanges(exchangeName);
+    const manager = new ExchangeManagerService(
+      freshInitializedExchanges,
+      strategy,
+    );
     return manager.getExchange();
   }
 
@@ -31,7 +35,7 @@ export class ExchangeRegistryService {
     const apiKeys = await this.getApiKeys(exchangeName);
     const initializedExchanges = [];
 
-    const primaryApiKey = apiKeys.find(apiKey => apiKey.isDefaultAccount);
+    const primaryApiKey = apiKeys.find((apiKey) => apiKey.isDefaultAccount);
     if (primaryApiKey) {
       const exchangeIdentifier = `${exchangeName}-true`;
       const exchange = await this.ccxtGateway.initializeExchange(
@@ -39,34 +43,36 @@ export class ExchangeRegistryService {
         {
           name: exchangeName,
           key: primaryApiKey.apiKey,
-          secret: primaryApiKey.apiSecret
-        }
+          secret: primaryApiKey.apiSecret,
+        },
       );
       initializedExchanges.push({
         exchangeIdentifier,
-        exchange
+        exchange,
       });
-      await this.ccxtGateway.addExchange(exchangeIdentifier, exchange);
+      await this.ccxtGateway.addExchange(exchangeIdentifier, 'loadMarkets');
     }
 
     let index = 1;
-    for (const apiKey of apiKeys.filter(apiKey => !apiKey.isDefaultAccount)) {
+    for (const apiKey of apiKeys.filter((apiKey) => !apiKey.isDefaultAccount)) {
       const exchangeIdentifier = `${exchangeName}-false-${index++}`;
       const exchange = await this.ccxtGateway.initializeExchange(
         exchangeIdentifier,
         {
           name: exchangeName,
           key: apiKey.apiKey,
-          secret: apiKey.apiSecret
-        }
+          secret: apiKey.apiSecret,
+        },
       );
-      initializedExchanges.push(exchangeIdentifier);
-      await this.ccxtGateway.addExchange(exchangeIdentifier, exchange);
+      initializedExchanges.push({
+        exchangeIdentifier,
+        exchange,
+      });
+      await this.ccxtGateway.addExchange(exchangeIdentifier, 'loadMarkets');
     }
 
     return initializedExchanges;
   }
-
 
   async getApiKeys(exchangeName: string) {
     const data =
@@ -76,7 +82,7 @@ export class ExchangeRegistryService {
       data.map(async (apiKey) => ({
         apiKey: apiKey.apiKey,
         apiSecret: await this.encryptionService.decrypt(apiKey.apiSecret),
-        isDefaultAccount: apiKey.isDefaultAccount
+        isDefaultAccount: apiKey.isDefaultAccount,
       })),
     );
   }

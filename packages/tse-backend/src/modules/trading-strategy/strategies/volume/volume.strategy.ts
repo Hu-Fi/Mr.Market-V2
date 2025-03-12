@@ -14,13 +14,13 @@ import {
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 import { VolumeService } from './volume.service';
 import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
+import { GetDefaultAccountStrategy } from '../../../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
+import { GetAdditionalAccountStrategy } from '../../../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
 import {
-  GetDefaultAccountStrategy
-} from '../../../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
-import {
-  GetAdditionalAccountStrategy
-} from '../../../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
-import { MarketOrderType, OrderStatus, TradeSideType } from '../../../../common/enums/exchange-operation.enums';
+  MarketOrderType,
+  OrderStatus,
+  TradeSideType,
+} from '../../../../common/enums/exchange-operation.enums';
 
 @Injectable()
 export class VolumeStrategy implements Strategy {
@@ -40,9 +40,8 @@ export class VolumeStrategy implements Strategy {
     private readonly tradeService: ExchangeTradeService,
     private readonly volumeService: VolumeService,
     private readonly defaultStrategy: GetDefaultAccountStrategy,
-    private readonly additionalAccountStrategy: GetAdditionalAccountStrategy
-  ) {
-  }
+    private readonly additionalAccountStrategy: GetAdditionalAccountStrategy,
+  ) {}
 
   async create(command: VolumeStrategyCommand): Promise<void> {
     await this.validateExchangesAndPairs(command);
@@ -156,7 +155,8 @@ export class VolumeStrategy implements Strategy {
 
   private async validateExchange(exchangeName: string): Promise<void> {
     await this.exchangeRegistryService.getExchangeByName(exchangeName);
-    const supportedExchanges = await this.exchangeRegistryService.getSupportedExchanges();
+    const supportedExchanges =
+      await this.exchangeRegistryService.getSupportedExchanges();
     if (!isExchangeSupported(exchangeName, supportedExchanges)) {
       throw new NotFoundException(
         VolumeStrategy.ERROR_MESSAGES.EXCHANGE_NOT_SUPPORTED(exchangeName),
@@ -215,10 +215,7 @@ export class VolumeStrategy implements Strategy {
   }
 
   private async updateStrategyPausedReasonById(id: number, reason: string) {
-    return await this.volumeService.updateStrategyPausedReasonById(
-      id,
-      reason,
-    );
+    return await this.volumeService.updateStrategyPausedReasonById(id, reason);
   }
 
   private async cancelStrategyOrders(
@@ -244,27 +241,38 @@ export class VolumeStrategy implements Strategy {
       numTotalTrades,
       pricePushRate,
       tradesExecuted = 0,
-      currentMakerPrice = null
+      currentMakerPrice = null,
     } = data;
 
     if (data.lastTradingAttemptAt) {
-      const nextAllowedTime = new Date(data.lastTradingAttemptAt.getTime() + tradeIntervalSeconds * 1000);
+      const nextAllowedTime = new Date(
+        data.lastTradingAttemptAt.getTime() + tradeIntervalSeconds * 1000,
+      );
       if (now < nextAllowedTime) {
-        this.logger.debug(`Strategy ${id} for ${sideA}/${sideB} not executed: waiting until ${nextAllowedTime.toISOString()}.`);
+        this.logger.debug(
+          `Strategy ${id} for ${sideA}/${sideB} not executed: waiting until ${nextAllowedTime.toISOString()}.`,
+        );
         return;
       }
     }
 
-    const defaultAccount =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName, this.defaultStrategy);
+    const defaultAccount = await this.exchangeRegistryService.getExchangeByName(
+      exchangeName,
+      this.defaultStrategy,
+    );
     const additionalAccount =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName, this.additionalAccountStrategy);
+      await this.exchangeRegistryService.getExchangeByName(
+        exchangeName,
+        this.additionalAccountStrategy,
+      );
 
     const pair = `${sideA}/${sideB}`;
 
     if (tradesExecuted >= numTotalTrades) {
-      this.logger.log(`Volume strategy ${id} for ${pair} has completed all ${numTotalTrades} trades.`);
-      await this.delete({ id })
+      this.logger.log(
+        `Volume strategy ${id} for ${pair} has completed all ${numTotalTrades} trades.`,
+      );
+      await this.delete({ id });
       return;
     }
 
@@ -282,8 +290,12 @@ export class VolumeStrategy implements Strategy {
       this.logger.log(`Best bid: ${bestBid}, best ask: ${bestAsk} for ${pair}`);
 
       const useAccount1AsMaker = tradesExecuted % 2 === 0;
-      const makerExchange = useAccount1AsMaker ? defaultAccount : additionalAccount;
-      const takerExchange = useAccount1AsMaker ? additionalAccount : defaultAccount;
+      const makerExchange = useAccount1AsMaker
+        ? defaultAccount
+        : additionalAccount;
+      const takerExchange = useAccount1AsMaker
+        ? additionalAccount
+        : defaultAccount;
 
       const randomFactor = 1 + (Math.random() * 0.1 - 0.05);
       const tradeAmount = amountToTrade * randomFactor;
@@ -325,16 +337,30 @@ export class VolumeStrategy implements Strategy {
       const makerResult = await makerExchange.fetchOrder(makerOrder.id, pair);
       const takerResult = await takerExchange.fetchOrder(takerOrder.id, pair);
 
-      if (makerResult.status === OrderStatus.CLOSED || makerResult.status === OrderStatus.FILLED) {
-        this.logger.log(`Maker order on ${makerExchange.id} filled at ${newMakerPrice}`);
+      if (
+        makerResult.status === OrderStatus.CLOSED ||
+        makerResult.status === OrderStatus.FILLED
+      ) {
+        this.logger.log(
+          `Maker order on ${makerExchange.id} filled at ${newMakerPrice}`,
+        );
       } else {
-        this.logger.warn(`Maker order on ${makerExchange.id} status: ${makerResult.status}`);
+        this.logger.warn(
+          `Maker order on ${makerExchange.id} status: ${makerResult.status}`,
+        );
       }
 
-      if (takerResult.status === OrderStatus.CLOSED || takerResult.status === OrderStatus.FILLED) {
-        this.logger.log(`Taker order on ${takerExchange.id} filled at ${newMakerPrice}`);
+      if (
+        takerResult.status === OrderStatus.CLOSED ||
+        takerResult.status === OrderStatus.FILLED
+      ) {
+        this.logger.log(
+          `Taker order on ${takerExchange.id} filled at ${newMakerPrice}`,
+        );
       } else {
-        this.logger.warn(`Taker order on ${takerExchange.id} status: ${takerResult.status}`);
+        this.logger.warn(
+          `Taker order on ${takerExchange.id} status: ${takerResult.status}`,
+        );
       }
 
       const updatedTradesExecuted = tradesExecuted + 1;
@@ -351,11 +377,14 @@ export class VolumeStrategy implements Strategy {
       this.logger.error(
         `Failed executing trade for strategy ${data.id}: ${error instanceof Error ? error.message : error}`,
       );
-      await this.updateStrategyStatusById(data.id, StrategyInstanceStatus.PAUSED);
+      await this.updateStrategyStatusById(
+        data.id,
+        StrategyInstanceStatus.PAUSED,
+      );
       await this.updateStrategyPausedReasonById(
         data.id,
         error instanceof Error ? error.message : String(error),
       );
     }
-  };
+  }
 }

@@ -28,9 +28,13 @@ import { GetDefaultAccountStrategy } from './exchange-manager/strategies/get-def
     EncryptionService,
     ExchangeApiKeyReadonlyService,
     ExchangeApiKeyReadonlyRepository,
-    GetDefaultAccountStrategy
+    GetDefaultAccountStrategy,
   ],
   controllers: [ExchangeApiKeyController],
-  exports: [ExchangeRegistryService, ExchangeApiKeyService, ExchangeApiKeyReadonlyService],
+  exports: [
+    ExchangeRegistryService,
+    ExchangeApiKeyService,
+    ExchangeApiKeyReadonlyService,
+  ],
 })
 export class ExchangeRegistryModule {}

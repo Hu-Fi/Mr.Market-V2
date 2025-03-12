@@ -3,7 +3,10 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { EncryptionService } from '../../../common/utils/encryption.service';
 import { CcxtIntegrationService } from '../../../integrations/ccxt.integration.service';
-import { ExchangeApiKeyReadonlyCommand, ExchangeApiKeyReadonlyData } from './model/exchange-api-key-readonly.model';
+import {
+  ExchangeApiKeyReadonlyCommand,
+  ExchangeApiKeyReadonlyData,
+} from './model/exchange-api-key-readonly.model';
 import { ExchangeApiKeyReadonlyRepository } from './exchange-api-key-readonly.repository';
 
 @Injectable()
@@ -47,9 +50,12 @@ export class ExchangeApiKeyReadonlyService {
   }
 
   async getExchangeApiKeys(exchangeName: string) {
-    const existingApiKeys = await this.exchangeApiKeyReadonlyRepository.findByName(exchangeName);
+    const existingApiKeys =
+      await this.exchangeApiKeyReadonlyRepository.findByName(exchangeName);
     if (!existingApiKeys) {
-      throw new BadRequestException(`No exchange API keys found for exchange: ${exchangeName}`);
+      throw new BadRequestException(
+        `No exchange API keys found for exchange: ${exchangeName}`,
+      );
     }
 
     return existingApiKeys;
