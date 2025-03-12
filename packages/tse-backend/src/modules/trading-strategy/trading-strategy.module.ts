@@ -17,10 +17,18 @@ import { MarketMakingStrategyProfile } from './strategies/market-making/market-m
 import { MarketMakingController } from './strategies/market-making/market-making.controller';
 import { ExchangeDataModule } from '../exchange-data/exchange-data.module';
 import { IntegrationsModule } from '../../integrations/integrations.module';
+import { VolumeController } from './strategies/volume/volume.controller';
+import { VolumeStrategy } from './strategies/volume/volume.strategy';
+import { VolumeService } from './strategies/volume/volume.service';
+import { VolumeStrategyRepository } from './strategies/volume/volume.repository';
+import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
+import { Volume } from '../../common/entities/volume.entity';
+import { GetAdditionalAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
+import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Arbitrage, MarketMaking]),
+    TypeOrmModule.forFeature([Arbitrage, MarketMaking, Volume]),
     ExchangeRegistryModule,
     ExchangeOperationModule,
     ExchangeDataModule,
@@ -29,20 +37,28 @@ import { IntegrationsModule } from '../../integrations/integrations.module';
   providers: [
     ArbitrageStrategy,
     MarketMakingStrategy,
+    VolumeStrategy,
     ArbitrageService,
     MarketMakingService,
+    VolumeService,
     ArbitrageStrategyRepository,
     MarketMakingRepository,
+    VolumeStrategyRepository,
     ExchangeTradeService,
     MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
+    VolumeStrategyProfile,
+    GetDefaultAccountStrategy,
+    GetAdditionalAccountStrategy,
   ],
   exports: [
     ArbitrageStrategy,
     ArbitrageService,
     MarketMakingStrategy,
     MarketMakingService,
+    VolumeStrategy,
+    VolumeService,
   ],
-  controllers: [ArbitrageController, MarketMakingController],
+  controllers: [ArbitrageController, MarketMakingController, VolumeController],
 })
 export class TradingStrategyModule {}

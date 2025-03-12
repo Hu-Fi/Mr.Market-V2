@@ -27,6 +27,9 @@ export class ExchangeApiKeyReadOnly {
   @Column()
   apiSecret: string;
 
+  @Column({ nullable: true })
+  apiPassphrase: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

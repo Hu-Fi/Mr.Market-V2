@@ -1,11 +1,10 @@
 import { ExchangeSelectionStrategy } from './exchange-selection-strategy.interface';
-import * as ccxt from 'ccxt';
 
 export class ExchangeManagerService {
   private strategy: ExchangeSelectionStrategy;
 
   constructor(
-    private exchangeInstances: ccxt.Exchange[],
+    private exchangeInstances: any[],
     strategy: ExchangeSelectionStrategy,
   ) {
     this.strategy = strategy;

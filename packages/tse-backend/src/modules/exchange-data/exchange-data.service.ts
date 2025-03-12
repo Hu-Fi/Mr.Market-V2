@@ -84,18 +84,15 @@ export class ExchangeDataService {
     }
   }
 
-  async getSupportedPairs(exchangeName?: string) {
-    const exchangeNames = exchangeName
-      ? [exchangeName]
-      : this.exchangeRegistryService.getSupportedExchanges();
-    const pairs: string[] = [];
-    this.logger.log(
-      `Fetching supported pairs from ${exchangeNames.length} exchanges`,
-    );
+  async getSupportedExchanges() {
+    return await this.exchangeRegistryService.getSupportedExchanges();
+  }
 
-    for (const name of exchangeNames) {
-      await this.fetchPairsFromExchange(name, pairs);
-    }
+  async getSupportedPairs(exchangeName: string) {
+    const pairs: string[] = [];
+    this.logger.log(`Fetching supported pairs for ${exchangeName}`);
+    await this.fetchPairsFromExchange(exchangeName, pairs);
+
     return Array.from(new Set(pairs));
   }
 

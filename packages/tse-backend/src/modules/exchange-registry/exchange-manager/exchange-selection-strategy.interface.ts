@@ -1,3 +1,5 @@
+import * as ccxt from 'ccxt';
+
 export interface ExchangeSelectionStrategy {
-  selectExchange(exchangeInstances: any[]);
+  selectExchange(instance: any): Promise<ccxt.Exchange | undefined>;
 }

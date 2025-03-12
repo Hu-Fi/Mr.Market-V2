@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import { IsString, Matches } from 'class-validator';
+import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 
-export class ArbitrageStrategyDto {
+export class VolumeStrategyDto {
   @AutoMap()
   @ApiProperty({
     example: '123',
@@ -17,6 +17,13 @@ export class ArbitrageStrategyDto {
     description: 'Client ID associated with the user.',
   })
   clientId: string;
+
+  @AutoMap()
+  @ApiProperty({
+    example: 'binance',
+    description: 'Name of the exchange.',
+  })
+  exchangeName: string;
 
   @AutoMap()
   @ApiProperty({
@@ -35,77 +42,84 @@ export class ArbitrageStrategyDto {
 
   @AutoMap()
   @ApiProperty({
-    example: 0.01,
+    example: '5',
     description:
-      'Minimum profitability threshold as a decimal (e.g., 0.01 for 1%).',
+      'Percentage increment for offsetting from midPrice (initial offset)',
   })
-  minProfitability: number;
+  incrementPercentage: number;
 
   @AutoMap()
   @ApiProperty({
-    example: 'binance',
-    description: 'Name of the first exchange.',
+    example: 10,
+    description: 'Time interval (in seconds) between each trade execution',
   })
-  exchangeAName: string;
+  tradeIntervalSeconds: number;
 
   @AutoMap()
-  @ApiProperty({ example: 'mexc', description: 'Name of the second exchange.' })
-  exchangeBName: string;
+  @ApiProperty({
+    example: 1,
+    description: 'Number of total trades to execute',
+  })
+  numTotalTrades: number;
 
   @AutoMap()
-  @ApiProperty({ example: 10, description: 'interval to run arbitrage scan' })
-  checkIntervalSeconds: number;
-
-  @AutoMap()
-  @ApiProperty({ example: 1, description: 'Max number of orders' })
-  maxOpenOrders?: number;
+  @ApiProperty({
+    example: 1,
+    description:
+      'Rate at which to push the price upward after each successful trade, in percent',
+  })
+  pricePushRate: number;
 }
 
-export class ArbitrageStrategyCommand {
+export class VolumeStrategyCommand {
   @AutoMap()
   userId: string;
   @AutoMap()
   clientId: string;
+  @AutoMap()
+  exchangeName: string;
+
   sideA: string;
   sideB: string;
+
   @AutoMap()
   amountToTrade: number;
   @AutoMap()
-  minProfitability: number;
+  incrementPercentage: number;
   @AutoMap()
-  exchangeAName: string;
+  tradeIntervalSeconds: number;
   @AutoMap()
-  exchangeBName: string;
+  numTotalTrades: number;
   @AutoMap()
-  checkIntervalSeconds: number;
-  @AutoMap()
-  maxOpenOrders?: number;
+  pricePushRate: number;
 }
 
-export class ArbitrageStrategyData {
+export class VolumeStrategyData {
   id: number;
   userId: string;
   clientId: string;
+  exchangeName: string;
   sideA: string;
   sideB: string;
   amountToTrade: number;
-  minProfitability: number;
-  exchangeAName: string;
-  exchangeBName: string;
-  checkIntervalSeconds: number;
-  maxOpenOrders?: number;
+  incrementPercentage: number;
+  tradeIntervalSeconds: number;
+  numTotalTrades: number;
+  pricePushRate: number;
+  tradesExecuted: number;
+  currentMakerPrice: number;
   status: StrategyInstanceStatus;
   lastTradingAttemptAt: Date;
 }
 
-export class ArbitrageStrategyActionDto {
+export class VolumeStrategyActionDto {
   @AutoMap()
   @ApiProperty({ example: '1' })
   @IsString()
   id: string;
 }
 
-export class ArbitrageStrategyActionCommand {
+export class VolumeStrategyActionCommand {
   @AutoMap()
   id: number;
 }

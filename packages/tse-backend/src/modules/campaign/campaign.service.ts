@@ -107,7 +107,7 @@ export class CampaignService {
 
   async fetchRunningCampaigns() {
     try {
-      const campaignPromises = this.SUPPORTED_CHAIN_IDS.map(chainId =>
+      const campaignPromises = this.SUPPORTED_CHAIN_IDS.map((chainId) =>
         lastValueFrom(
           this.httpService.get(
             `${this.CAMPAIGN_LAUNCHER_API_URL}${this.CAMPAIGN_ENDPOINT}${chainId}`,
@@ -116,8 +116,8 @@ export class CampaignService {
       );
 
       const responses = await Promise.all(campaignPromises);
-      
-      const allCampaigns = responses.flatMap(response => response.data);
+
+      const allCampaigns = responses.flatMap((response) => response.data);
       return allCampaigns.filter((campaign: Campaign) =>
         this.isRunningCampaign(campaign),
       );

@@ -3,6 +3,8 @@ import { ArbitrageStrategy } from '../trading-strategy/strategies/arbitrage/arbi
 import { MarketMakingStrategy } from '../trading-strategy/strategies/market-making/market-making.strategy';
 import { ArbitrageService } from '../trading-strategy/strategies/arbitrage/arbitrage.service';
 import { MarketMakingService } from '../trading-strategy/strategies/market-making/market-making.service';
+import { VolumeService } from '../trading-strategy/strategies/volume/volume.service';
+import { VolumeStrategy } from '../trading-strategy/strategies/volume/volume.strategy';
 
 @Injectable()
 export class ExecutionWorkerService {
@@ -13,6 +15,8 @@ export class ExecutionWorkerService {
     private readonly arbitrageStrategy: ArbitrageStrategy,
     private readonly marketMakingService: MarketMakingService,
     private readonly marketMakingStrategy: MarketMakingStrategy,
+    private readonly volumeService: VolumeService,
+    private readonly volumeStrategy: VolumeStrategy,
   ) {}
 
   async executeStrategies() {
@@ -34,6 +38,13 @@ export class ExecutionWorkerService {
         'Error executing market making strategies',
         error.stack,
       );
+    }
+
+    try {
+      const volumeStrategies = await this.volumeService.findRunningStrategies();
+      await this.volumeStrategy.start(volumeStrategies);
+    } catch (error) {
+      this.logger.error('Error executing volume strategies', error.stack);
     }
   }
 }

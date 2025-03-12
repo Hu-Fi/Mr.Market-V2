@@ -5,8 +5,11 @@ export enum MarketOrderType {
 
 export enum OrderStatus {
   PENDING = 'pending',
+  OPEN = 'open',
   EXECUTED = 'executed',
-  CANCELLED = 'cancelled',
+  FILLED = 'filled',
+  CLOSED = 'closed',
+  CANCELED = 'canceled',
   FAILED = 'failed',
 }
 

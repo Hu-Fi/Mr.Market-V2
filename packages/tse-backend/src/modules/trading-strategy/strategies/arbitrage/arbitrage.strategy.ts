@@ -160,7 +160,7 @@ export class ArbitrageStrategy implements Strategy {
   private async validateExchange(exchangeName: string): Promise<void> {
     await this.exchangeRegistryService.getExchangeByName(exchangeName);
     const supportedExchanges =
-      this.exchangeRegistryService.getSupportedExchanges();
+      await this.exchangeRegistryService.getSupportedExchanges();
     if (!isExchangeSupported(exchangeName, supportedExchanges)) {
       throw new NotFoundException(
         ArbitrageStrategy.ERROR_MESSAGES.EXCHANGE_NOT_SUPPORTED(exchangeName),
@@ -181,7 +181,7 @@ export class ArbitrageStrategy implements Strategy {
     ) {
       throw new NotFoundException(
         ArbitrageStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
-          symbol,
+          altSymbol,
           exchangeName,
         ),
       );

@@ -11,6 +11,8 @@ import { EncryptionService } from '../../common/utils/encryption.service';
 import { ConfigModule } from '@nestjs/config';
 import { ExchangeApiKeyReadonlyRepository } from './exchange-manager/exchange-api-key-readonly.repository';
 import { ExchangeApiKeyReadOnly } from '../../common/entities/exchange-api-key-read-only.entity';
+import { ExchangeApiKeyReadonlyService } from './exchange-manager/exchange-api-key-readonly.service';
+import { GetDefaultAccountStrategy } from './exchange-manager/strategies/get-default-account.strategy';
 
 @Module({
   imports: [
@@ -24,9 +26,15 @@ import { ExchangeApiKeyReadOnly } from '../../common/entities/exchange-api-key-r
     ExchangeApiKeyRepository,
     ExchangeApiKeyProfile,
     EncryptionService,
+    ExchangeApiKeyReadonlyService,
     ExchangeApiKeyReadonlyRepository,
+    GetDefaultAccountStrategy,
   ],
   controllers: [ExchangeApiKeyController],
-  exports: [ExchangeRegistryService, ExchangeApiKeyService],
+  exports: [
+    ExchangeRegistryService,
+    ExchangeApiKeyService,
+    ExchangeApiKeyReadonlyService,
+  ],
 })
 export class ExchangeRegistryModule {}

@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class ExchangeApiKeyReadonlyDto {
   @AutoMap()
@@ -17,6 +17,12 @@ export class ExchangeApiKeyReadonlyDto {
   @ApiProperty({ example: 'api_secret' })
   @IsString()
   apiSecret: string;
+
+  @AutoMap()
+  @ApiPropertyOptional({ example: 'api_passphrase' })
+  @IsOptional()
+  @IsString()
+  apiPassphrase: string;
 }
 
 export class ExchangeApiKeyReadonlyCommand {
@@ -28,6 +34,9 @@ export class ExchangeApiKeyReadonlyCommand {
 
   @AutoMap()
   apiSecret: string;
+
+  @AutoMap()
+  apiPassphrase?: string;
 }
 
 export class ExchangeApiKeyReadonlyData {
@@ -42,4 +51,7 @@ export class ExchangeApiKeyReadonlyData {
 
   @AutoMap()
   apiSecret: string;
+
+  @AutoMap()
+  apiPassphrase?: string;
 }
