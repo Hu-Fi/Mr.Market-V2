@@ -13,6 +13,8 @@ import {
 } from './model/trading-history.model';
 import { MarketMakingRepository } from '../trading-strategy/strategies/market-making/market-making.repository';
 import { ArbitrageStrategyRepository } from '../trading-strategy/strategies/arbitrage/arbitrage.repository';
+import { VolumeStrategyRepository } from '../trading-strategy/strategies/volume/volume.repository';
+import { StrategyTypeEnums } from '../../common/enums/strategy-type.enums';
 
 @Injectable()
 export class TradingHistoryService {
@@ -20,6 +22,7 @@ export class TradingHistoryService {
     private readonly orderRepository: OrderRepository,
     private readonly marketMakingRepository: MarketMakingRepository,
     private readonly arbitrageRepository: ArbitrageStrategyRepository,
+    private readonly volumeRepository: VolumeStrategyRepository
   ) {}
 
   async getUserTradingHistory(
@@ -63,12 +66,16 @@ export class TradingHistoryService {
       await this.arbitrageRepository.findStrategiesByUserId(
         params.userId.toString(),
       );
+    const volumeStrategies =
+      await this.volumeRepository.findStrategiesByUserId(
+        params.userId.toString(),
+      );
 
     const marketMakingResponse = marketMakingStrategies.map((strategy) => ({
       id: strategy.id,
       userId: strategy.userId,
       clientId: strategy.clientId,
-      strategyType: 'marketMaking',
+      strategyType: StrategyTypeEnums.MARKET_MAKING,
       parameters: {
         userId: strategy.userId,
         clientId: strategy.clientId,
@@ -96,7 +103,7 @@ export class TradingHistoryService {
       id: strategy.id,
       userId: strategy.userId,
       clientId: strategy.clientId,
-      strategyType: 'arbitrage',
+      strategyType: StrategyTypeEnums.ARBITRAGE,
       parameters: {
         userId: strategy.userId,
         clientId: strategy.clientId,
@@ -115,6 +122,31 @@ export class TradingHistoryService {
       updatedAt: strategy.updatedAt,
     }));
 
-    return [...marketMakingResponse, ...arbitrageResponse];
+    const volumeResponse = volumeStrategies.map((strategy) => ({
+      id: strategy.id,
+      userId: strategy.userId,
+      clientId: strategy.clientId,
+      strategyType: StrategyTypeEnums.VOLUME,
+      parameters: {
+        userId: strategy.userId,
+        clientId: strategy.clientId,
+        pair: `${strategy.sideA}/${strategy.sideB}`,
+        exchangeName: strategy.exchangeName,
+        amountToTrade: strategy.amountToTrade,
+        incrementPercentage: strategy.incrementPercentage,
+        tradeIntervalSeconds: strategy.tradeIntervalSeconds,
+        numTotalTrades: strategy.numTotalTrades,
+        pricePushRate: strategy.pricePushRate,
+        tradesExecuted: strategy.tradesExecuted,
+        currentMakerPrice: strategy.currentMakerPrice,
+      },
+      lastTradingAttemptAt: strategy.lastTradingAttemptAt,
+      status: strategy.status,
+      pausedReason: strategy.pausedReason,
+      createdAt: strategy.createdAt,
+      updatedAt: strategy.updatedAt,
+    }))
+
+    return [...marketMakingResponse, ...arbitrageResponse, ...volumeResponse];
   }
 }

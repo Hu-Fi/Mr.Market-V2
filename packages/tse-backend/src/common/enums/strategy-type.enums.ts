@@ -1,6 +1,7 @@
 export enum StrategyTypeEnums {
   ARBITRAGE = 'arbitrage',
   MARKET_MAKING = 'market_making',
+  VOLUME = 'volume',
 }
 
 export enum StrategyInstanceStatus {

@@ -17,6 +17,11 @@ import { MarketMakingStrategyProfile } from './strategies/market-making/market-m
 import { MarketMakingController } from './strategies/market-making/market-making.controller';
 import { ExchangeDataModule } from '../exchange-data/exchange-data.module';
 import { IntegrationsModule } from '../../integrations/integrations.module';
+import { VolumeController } from './strategies/volume/volume.controller';
+import { VolumeStrategy } from './strategies/volume/volume.strategy';
+import { VolumeService } from './strategies/volume/volume.service';
+import { VolumeStrategyRepository } from './strategies/volume/volume.repository';
+import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
 
 @Module({
   imports: [
@@ -29,20 +34,26 @@ import { IntegrationsModule } from '../../integrations/integrations.module';
   providers: [
     ArbitrageStrategy,
     MarketMakingStrategy,
+    VolumeStrategy,
     ArbitrageService,
     MarketMakingService,
+    VolumeService,
     ArbitrageStrategyRepository,
     MarketMakingRepository,
+    VolumeStrategyRepository,
     ExchangeTradeService,
     MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
+    VolumeStrategyProfile
   ],
   exports: [
     ArbitrageStrategy,
     ArbitrageService,
     MarketMakingStrategy,
     MarketMakingService,
+    VolumeStrategy,
+    VolumeService,
   ],
-  controllers: [ArbitrageController, MarketMakingController],
+  controllers: [ArbitrageController, MarketMakingController, VolumeController],
 })
 export class TradingStrategyModule {}
