@@ -30,7 +30,7 @@ export class VolumeStrategyRepository {
   }
 
   async findRunningStrategies(): Promise<Volume[]> {
-    return this.repository.findBy({ status: StrategyInstanceStatus.CREATED });
+    return this.repository.findBy({ status: StrategyInstanceStatus.RUNNING });
   }
 
   async findLatestStrategyByUserId(userId: string): Promise<Volume | null> {

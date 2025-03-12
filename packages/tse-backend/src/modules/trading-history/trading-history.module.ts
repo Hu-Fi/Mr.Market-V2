@@ -10,9 +10,10 @@ import { MarketMaking } from '../../common/entities/market-making.entity';
 import { ArbitrageStrategyRepository } from '../trading-strategy/strategies/arbitrage/arbitrage.repository';
 import { Arbitrage } from '../../common/entities/arbitrage.entity';
 import { VolumeStrategyRepository } from '../trading-strategy/strategies/volume/volume.repository';
+import { Volume } from '../../common/entities/volume.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, MarketMaking, Arbitrage])],
+  imports: [TypeOrmModule.forFeature([Order, MarketMaking, Arbitrage, Volume])],
   providers: [
     TradingHistoryService,
     TradingHistoryProfile,

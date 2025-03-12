@@ -22,10 +22,17 @@ import { VolumeStrategy } from './strategies/volume/volume.strategy';
 import { VolumeService } from './strategies/volume/volume.service';
 import { VolumeStrategyRepository } from './strategies/volume/volume.repository';
 import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
+import { Volume } from '../../common/entities/volume.entity';
+import {
+  GetAdditionalAccountStrategy
+} from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
+import {
+  GetDefaultAccountStrategy
+} from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Arbitrage, MarketMaking]),
+    TypeOrmModule.forFeature([Arbitrage, MarketMaking, Volume]),
     ExchangeRegistryModule,
     ExchangeOperationModule,
     ExchangeDataModule,
@@ -44,7 +51,9 @@ import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
     ExchangeTradeService,
     MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
-    VolumeStrategyProfile
+    VolumeStrategyProfile,
+    GetDefaultAccountStrategy,
+    GetAdditionalAccountStrategy
   ],
   exports: [
     ArbitrageStrategy,

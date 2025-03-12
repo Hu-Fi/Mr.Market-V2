@@ -61,6 +61,7 @@ export class VolumeStrategyDto {
   })
   numTotalTrades: number;
 
+  @AutoMap()
   @ApiProperty({
     example: 1,
     description: 'Rate at which to push the price upward after each successful trade, in percent',
