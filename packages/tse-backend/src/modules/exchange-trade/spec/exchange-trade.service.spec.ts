@@ -260,7 +260,7 @@ describe('ExchangeTradeService', () => {
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
         orderExtId: 'order123',
-        status: OrderStatus.CANCELLED,
+        status: OrderStatus.CANCELED,
         details: { id: 'order123' },
       } as CancelOperationCommand);
     });

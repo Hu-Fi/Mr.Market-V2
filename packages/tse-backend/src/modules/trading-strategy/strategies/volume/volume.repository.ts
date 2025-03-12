@@ -51,4 +51,8 @@ export class VolumeStrategyRepository {
       where: { id: id },
     });
   }
+
+  async updateStrategyAfterTrade(id: number, data: { tradesExecuted: number, currentMakerPrice: any}) {
+    return await this.repository.update({ id }, data);
+  }
 }

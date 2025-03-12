@@ -56,4 +56,10 @@ export class Volume {
 
   @Column({ nullable: true })
   pausedReason: string;
+
+  @Column({ type: 'int', default: 0 })
+  tradesExecuted: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 6, nullable: true })
+  currentMakerPrice: number;
 }

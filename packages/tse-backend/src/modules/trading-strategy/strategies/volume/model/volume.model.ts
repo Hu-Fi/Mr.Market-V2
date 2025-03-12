@@ -103,6 +103,8 @@ export class VolumeStrategyData {
   tradeIntervalSeconds: number;
   numTotalTrades: number;
   pricePushRate: number;
+  tradesExecuted: number;
+  currentMakerPrice: number;
   status: StrategyInstanceStatus;
   lastTradingAttemptAt: Date;
 }

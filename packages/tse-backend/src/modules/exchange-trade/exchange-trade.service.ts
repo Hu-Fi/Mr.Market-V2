@@ -115,7 +115,7 @@ export class ExchangeTradeService {
       );
       this.logger.log(`Order ${command.orderId} cancelled successfully.`);
       await this.saveExchangeOperation({
-        status: OrderStatus.CANCELLED,
+        status: OrderStatus.CANCELED,
         orderExtId: command.orderId,
         details: result,
       } as CancelOperationCommand);
