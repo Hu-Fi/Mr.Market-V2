@@ -30,14 +30,7 @@ export class ArbitrageStrategyRepository {
   }
 
   async findRunningStrategies(): Promise<Arbitrage[]> {
-    return this.repository.findBy({ status: StrategyInstanceStatus.CREATED });
-  }
-
-  async findLatestStrategyByUserId(userId: string): Promise<Arbitrage | null> {
-    return this.repository.findOne({
-      where: { userId: userId },
-      order: { createdAt: 'DESC' },
-    });
+    return this.repository.findBy({ status: StrategyInstanceStatus.RUNNING });
   }
 
   async findStrategiesByUserId(userId: string): Promise<Arbitrage[]> {
