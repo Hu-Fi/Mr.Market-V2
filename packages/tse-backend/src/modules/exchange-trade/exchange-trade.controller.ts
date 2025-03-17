@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  Post,
+  Post, UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -16,11 +16,14 @@ import {
 } from './model/exchange-trade.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
 
 @ApiTags('exchange trade service')
 @UsePipes(new ValidationPipe())
 @Controller('exchange-trade')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ExchangeTradeController {
   constructor(
     private readonly tradeService: ExchangeTradeService,

@@ -1,12 +1,12 @@
 import {
   Controller,
   Get,
-  Query,
+  Query, UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ExchangeDataService } from './exchange-data.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   GetMultipleTickerPricesCommand,
   GetMultipleTickerPricesDto,
@@ -21,10 +21,13 @@ import {
 } from './model/exchange-data.model';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
+import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
 
 @ApiTags('exchange data service')
 @UsePipes(new ValidationPipe())
 @Controller('exchange-data')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ExchangeDataController {
   constructor(
     private readonly exchangeDataService: ExchangeDataService,
