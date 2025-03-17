@@ -54,7 +54,7 @@ export class ExchangeDataController {
   async getSupportedPairs() {
     const supportedExchanges =
       await this.exchangeDataService.getSupportedExchanges();
-    if (!supportedExchanges.length) {
+    if (!supportedExchanges?.length) {
       throw new Error('No supported exchanges found');
     }
     const supportedPairs: string[] = [];
