@@ -25,6 +25,10 @@
     {
       "path": "/api/v1/cron/campaign/execute",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/v1/cron/order-clear/execute",
+      "schedule": "0 0 * * 0"
     }
   ]
 }
