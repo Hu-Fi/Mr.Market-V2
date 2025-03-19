@@ -1,4 +1,4 @@
-import { FindManyOptions, Repository } from 'typeorm';
+import { DeleteResult, FindManyOptions, LessThan, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '../../common/entities/order.entity';
@@ -28,5 +28,11 @@ export class OrderRepository {
 
   async find(query: FindManyOptions) {
     return await this.repository.find(query);
+  }
+
+  async delete(dateThreshold: Date): Promise<DeleteResult> {
+    return await this.repository.delete({
+      createdAt: LessThan(dateThreshold),
+    });
   }
 }

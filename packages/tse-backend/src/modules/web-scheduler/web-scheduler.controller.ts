@@ -18,4 +18,10 @@ export class WebSchedulerController {
   async triggerCampaignCronJob() {
     await this.service.triggerCampaignCronJob();
   }
+
+  @Get('order-clear/execute')
+  @ApiOperation({ summary: 'Clear old orders and operations' })
+  async clearOldOrdersAndOperations() {
+    return await this.service.clearOldOrdersAndOperations();
+  }
 }
