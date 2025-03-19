@@ -27,7 +27,7 @@ describe('ExchangesHealthService', () => {
 
   describe('checkExchanges', () => {
     it('should return UP when there are initialized exchanges', async () => {
-      mockCcxtGateway.getExchangeNames.mockReturnValue(
+      mockCcxtGateway.getExchangeNames.mockResolvedValue(
         new Set(['binance', 'kraken']),
       );
 
@@ -43,7 +43,7 @@ describe('ExchangesHealthService', () => {
     });
 
     it('should return DOWN when there are no initialized exchanges', async () => {
-      mockCcxtGateway.getExchangeNames.mockReturnValue(new Set());
+      mockCcxtGateway.getExchangeNames.mockResolvedValue(new Set());
 
       const result = await exchangesHealthService.checkExchanges();
 

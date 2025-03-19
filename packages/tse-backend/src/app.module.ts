@@ -18,6 +18,9 @@ import { ExchangeDepositModule } from './modules/exchange-deposit/exchange-depos
 import { ExchangeWithdrawalModule } from './modules/exchange-withdrawal/exchange-withdrawal.module';
 import { WebSchedulerModule } from './modules/web-scheduler/web-scheduler.module';
 import { CampaignModule } from './modules/campaign/campaign.module';
+import { SecretUtils } from './common/utils/auth/secret-fetcher.utils';
+import { JwtStrategy } from './common/utils/auth/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -37,6 +40,7 @@ import { CampaignModule } from './modules/campaign/campaign.module';
       strategyInitializer: classes(),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),
+    PassportModule,
     IntegrationsModule,
     ExchangeRegistryModule,
     ExchangeOperationModule,
@@ -50,5 +54,17 @@ import { CampaignModule } from './modules/campaign/campaign.module';
     WebSchedulerModule,
     CampaignModule,
   ],
+  providers: [
+    SecretUtils,
+    {
+      provide: JwtStrategy,
+      useFactory: async (util: SecretUtils) => {
+        const secret = await util.getSecret();
+        return new JwtStrategy(secret);
+      },
+      inject: [SecretUtils],
+    },
+  ],
+  exports: [SecretUtils],
 })
 export class AppModule {}

@@ -2,11 +2,11 @@ import {
   Controller,
   Get,
   Param,
-  Query,
+  Query, Request, UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TradingHistoryService } from './trading-history.service';
 import {
   GetUserStrategyHistoryParamsCommand,
@@ -18,10 +18,13 @@ import {
 } from './model/trading-history.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
 
 @ApiTags('trading history service')
 @UsePipes(new ValidationPipe())
 @Controller('history')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TradingHistoryController {
   constructor(
     private readonly service: TradingHistoryService,
@@ -33,7 +36,9 @@ export class TradingHistoryController {
   async getUserTradingHistory(
     @Param() params: GetUserTradingHistoryParamsDto,
     @Query() query: GetUserTradingHistoryQueryDto,
+    @Request() req,
   ) {
+    console.log(req.user.userId);
     const paramsCommand = this.mapper.map(
       params,
       GetUserTradingHistoryParamsDto,

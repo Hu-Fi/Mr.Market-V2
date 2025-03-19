@@ -44,6 +44,7 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Trading Strategy Execution API')
     .setDescription('Documentation of API endpoints')
     .setVersion('0.0.1')

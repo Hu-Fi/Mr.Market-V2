@@ -11,6 +11,9 @@ import {
   OrderStatus,
   TradeSideType,
 } from '../../../common/enums/exchange-operation.enums';
+import { MarketMakingRepository } from '../../trading-strategy/strategies/market-making/market-making.repository';
+import { ArbitrageStrategyRepository } from '../../trading-strategy/strategies/arbitrage/arbitrage.repository';
+import { VolumeStrategyRepository } from '../../trading-strategy/strategies/volume/volume.repository';
 
 describe('TradingHistoryService', () => {
   let service: TradingHistoryService;
@@ -25,6 +28,9 @@ describe('TradingHistoryService', () => {
       providers: [
         TradingHistoryService,
         { provide: OrderRepository, useValue: mockOrderRepository },
+        { provide: MarketMakingRepository, useValue: {} },
+        { provide: ArbitrageStrategyRepository, useValue: {} },
+        { provide: VolumeStrategyRepository, useValue: {} },
       ],
     }).compile();
 
@@ -32,40 +38,45 @@ describe('TradingHistoryService', () => {
     repository = module.get<OrderRepository>(OrderRepository);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
   describe('getUserTradingHistory', () => {
-    const params: GetUserTradingHistoryParamsCommand = { userId: 1 };
-    const queries: GetUserTradingHistoryQueryCommand = {
-      startDate: '2024-01-01',
-      endDate: '2024-01-31',
-      exchangeName: 'Binance',
-      symbol: 'BTC/USD',
-      type: MarketOrderType.LIMIT_ORDER,
-      status: OrderStatus.EXECUTED,
-      side: TradeSideType.BUY,
-      page: 1,
-      limit: 10,
-      sortBy: 'createdAt',
-      sortOrder: 'DESC',
-    };
+    const params: GetUserTradingHistoryParamsCommand = { userId: '1' };
 
-    it('should call repository with correct query filters', async () => {
+    it('should filter trading history correctly with a full set of filters', async () => {
+      const queries: GetUserTradingHistoryQueryCommand = {
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        exchangeName: 'Binance',
+        symbol: 'BTC/USD',
+        type: MarketOrderType.LIMIT_ORDER,
+        status: OrderStatus.EXECUTED,
+        side: TradeSideType.BUY,
+        page: 1,
+        limit: 10,
+        sortBy: 'createdAt',
+        sortOrder: 'DESC',
+      };
+
       mockOrderRepository.find.mockResolvedValue([{ id: 1 }]);
 
       const result = await service.getUserTradingHistory(params, queries);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {
-          userId: 1,
+          userId: params.userId,
           createdAt: Between(new Date('2024-01-01'), new Date('2024-01-31')),
           exchangeName: 'Binance',
           symbol: 'BTC/USD',
-          type: 'limit',
-          status: 'executed',
-          side: 'buy',
+          type: MarketOrderType.LIMIT_ORDER,
+          status: OrderStatus.EXECUTED,
+          side: TradeSideType.BUY,
         },
         take: 10,
         skip: 0,
@@ -77,26 +88,24 @@ describe('TradingHistoryService', () => {
       expect(result).toEqual([{ id: 1 }]);
     });
 
-    it('should apply pagination and sorting', async () => {
-      const paginatedQueries = {
-        ...queries,
+    it('should apply pagination and sorting properly', async () => {
+      const queries = {
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
         page: 2,
         limit: 5,
         sortBy: 'price',
         sortOrder: 'ASC',
       };
 
-      await service.getUserTradingHistory(params, paginatedQueries);
+      mockOrderRepository.find.mockResolvedValue([]);
+
+      const result = await service.getUserTradingHistory(params, queries);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {
-          userId: 1,
+          userId: params.userId,
           createdAt: Between(new Date('2024-01-01'), new Date('2024-01-31')),
-          exchangeName: 'Binance',
-          symbol: 'BTC/USD',
-          type: 'limit',
-          status: 'executed',
-          side: 'buy',
         },
         take: 5,
         skip: 5,
@@ -104,6 +113,79 @@ describe('TradingHistoryService', () => {
           price: 'ASC',
         },
       });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle no results returned from the repository', async () => {
+      mockOrderRepository.find.mockResolvedValue([]);
+
+      const queries = {};
+
+      const result = await service.getUserTradingHistory(params, queries);
+
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { userId: params.userId },
+        take: 10,
+        skip: 0,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle partial filter parameters', async () => {
+      const queries = {
+        exchangeName: 'Coinbase',
+        type: MarketOrderType.MARKET_ORDER,
+      };
+
+      mockOrderRepository.find.mockResolvedValue([{ id: 5 }]);
+
+      const result = await service.getUserTradingHistory(params, queries);
+
+      expect(repository.find).toHaveBeenCalledWith({
+        where: {
+          userId: params.userId,
+          exchangeName: 'Coinbase',
+          type: MarketOrderType.MARKET_ORDER,
+        },
+        take: 10,
+        skip: 0,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      expect(result).toEqual([{ id: 5 }]);
+    });
+
+    it('should correctly convert string filters to enums', async () => {
+      const queries = {
+        status: 'executed',
+        side: 'buy',
+      };
+
+      mockOrderRepository.find.mockResolvedValue([{ id: 10 }]);
+
+      const result = await service.getUserTradingHistory(params, queries as any);
+
+      expect(repository.find).toHaveBeenCalledWith({
+        where: {
+          userId: params.userId,
+          status: OrderStatus.EXECUTED,
+          side: TradeSideType.BUY,
+        },
+        take: 10,
+        skip: 0,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      expect(result).toEqual([{ id: 10 }]);
     });
   });
 });
