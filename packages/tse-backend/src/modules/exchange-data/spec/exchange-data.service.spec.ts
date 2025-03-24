@@ -181,37 +181,24 @@ describe('ExchangeDataService', () => {
   describe('getSupportedPairs', () => {
     it('should fetch supported pairs from all exchanges', async () => {
       const mockPairsExchange1 = { 'ETH/USDT': {}, 'BTC/USDT': {} };
-      const mockPairsExchange2 = { 'XRP/USDT': {}, 'BTC/USDT': {} };
 
       mockExchangeRegistryService.getSupportedExchanges.mockReturnValue([
         'exchange1',
         'exchange2',
       ]);
 
-      mockExchangeRegistryService.getExchangeByName
-        .mockResolvedValueOnce({
-          ...mockExchangeInstance,
-          name: 'exchange1',
-          fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange1),
-        })
-        .mockResolvedValueOnce({
-          ...mockExchangeInstance,
-          name: 'exchange2',
-          fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange2),
-        });
+      mockExchangeRegistryService.getExchangeByName.mockResolvedValueOnce({
+        ...mockExchangeInstance,
+        name: 'exchange1',
+        fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange1),
+      });
 
-      const result = await service.getSupportedPairs();
+      const result = await service.getSupportedPairs('exchange1');
 
-      expect(result).toEqual(['ETH/USDT', 'BTC/USDT', 'XRP/USDT']);
-      expect(
-        mockExchangeRegistryService.getSupportedExchanges,
-      ).toHaveBeenCalled();
+      expect(result).toEqual(['ETH/USDT', 'BTC/USDT']);
       expect(
         mockExchangeRegistryService.getExchangeByName,
       ).toHaveBeenCalledWith('exchange1');
-      expect(
-        mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('exchange2');
     });
   });
 

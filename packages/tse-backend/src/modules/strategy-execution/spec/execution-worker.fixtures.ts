@@ -5,6 +5,7 @@ import {
 } from '../../../common/enums/strategy-type.enums';
 import { Arbitrage } from '../../../common/entities/arbitrage.entity';
 import { MarketMaking } from '../../../common/entities/market-making.entity';
+import { Volume } from '../../../common/entities/volume.entity';
 
 export const arbitrageStrategiesDataFixture: Arbitrage[] = [
   {
@@ -92,5 +93,68 @@ export const marketMakingStrategiesDataFixture: MarketMaking[] = [
     status: StrategyInstanceStatus.STOPPED,
     lastTradingAttemptAt: new Date(),
     pausedReason: 'Manual pause',
+  },
+];
+
+export const volumeStrategiesDataFixture: Volume[] = [
+  {
+    id: 1,
+    userId: 'user123',
+    clientId: 'clientA',
+    exchangeName: 'Binance',
+    sideA: 'ETH',
+    sideB: 'USDT',
+    amountToTrade: 1500.0,
+    incrementPercentage: 3.5,
+    tradeIntervalSeconds: 45,
+    numTotalTrades: 10,
+    pricePushRate: 0.75,
+    tradesExecuted: 3,
+    currentMakerPrice: 2540.123456,
+    status: StrategyInstanceStatus.CREATED,
+    createdAt: new Date('2024-04-10T10:00:00Z'),
+    updatedAt: new Date('2024-04-10T11:00:00Z'),
+    lastTradingAttemptAt: new Date('2024-04-10T11:00:00Z'),
+    pausedReason: null,
+  },
+  {
+    id: 2,
+    userId: 'user456',
+    clientId: 'clientB',
+    exchangeName: 'Coinbase',
+    sideA: 'BTC',
+    sideB: 'USD',
+    amountToTrade: 25000.0,
+    incrementPercentage: 1.2,
+    tradeIntervalSeconds: 60,
+    numTotalTrades: 15,
+    pricePushRate: 1.25,
+    tradesExecuted: 8,
+    currentMakerPrice: 47300.654321,
+    status: StrategyInstanceStatus.PAUSED,
+    createdAt: new Date('2024-04-09T09:30:00Z'),
+    updatedAt: new Date('2024-04-09T10:30:00Z'),
+    lastTradingAttemptAt: new Date('2024-04-09T10:30:00Z'),
+    pausedReason: 'Manual pause for maintenance',
+  },
+  {
+    id: 3,
+    userId: 'user789',
+    clientId: 'clientC',
+    exchangeName: 'Kraken',
+    sideA: 'ADA',
+    sideB: 'EUR',
+    amountToTrade: 5000.0,
+    incrementPercentage: 2.0,
+    tradeIntervalSeconds: 30,
+    numTotalTrades: 20,
+    pricePushRate: 0.5,
+    tradesExecuted: 20,
+    currentMakerPrice: 1.234567,
+    status: StrategyInstanceStatus.STOPPED,
+    createdAt: new Date('2024-04-08T08:15:00Z'),
+    updatedAt: new Date('2024-04-08T09:15:00Z'),
+    lastTradingAttemptAt: new Date('2024-04-08T09:15:00Z'),
+    pausedReason: 'Strategy completed successfully',
   },
 ];

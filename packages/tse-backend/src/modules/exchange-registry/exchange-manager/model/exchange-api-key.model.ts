@@ -38,6 +38,12 @@ export class ExchangeApiKeyDto {
 
 export class ExchangeApiKeyCommand {
   @AutoMap()
+  userId: string;
+
+  @AutoMap()
+  clientId: string;
+
+  @AutoMap()
   description?: string;
 
   @AutoMap()
@@ -57,7 +63,10 @@ export class ExchangeApiKeyCommand {
 }
 
 export class ExchangeApiKeyData {
+  @AutoMap()
   userId: string;
+
+  @AutoMap()
   clientId: string;
 
   @AutoMap()

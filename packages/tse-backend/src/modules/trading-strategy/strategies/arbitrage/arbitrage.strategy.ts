@@ -98,7 +98,10 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async pause(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.id);
+    const strategyEntity = await this.getStrategyEntity(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     if (strategyEntity.status === StrategyInstanceStatus.RUNNING) {
       await this.updateStrategyStatusById(
         strategyEntity.id,
@@ -113,7 +116,10 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async stop(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.id);
+    const strategyEntity = await this.getStrategyEntity(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.STOPPED,
@@ -128,7 +134,10 @@ export class ArbitrageStrategy implements Strategy {
   }
 
   async delete(command: ArbitrageStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.id);
+    const strategyEntity = await this.getStrategyEntity(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.DELETED,
@@ -190,9 +199,12 @@ export class ArbitrageStrategy implements Strategy {
 
   private async getStrategyEntity(
     strategyId: number,
+    options?: any,
   ): Promise<ArbitrageStrategyData> {
-    const strategyEntity =
-      await this.arbitrageService.findStrategyById(strategyId);
+    const strategyEntity = await this.arbitrageService.findStrategyById(
+      strategyId,
+      options,
+    );
     if (!strategyEntity) {
       throw new NotFoundException(
         ArbitrageStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,

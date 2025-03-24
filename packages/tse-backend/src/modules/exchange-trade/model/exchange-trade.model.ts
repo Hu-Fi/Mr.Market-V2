@@ -7,16 +7,6 @@ export class MarketTradeDto {
   @AutoMap()
   @ApiProperty()
   @IsString()
-  userId: string;
-
-  @AutoMap()
-  @ApiProperty()
-  @IsString()
-  clientId: string;
-
-  @AutoMap()
-  @ApiProperty()
-  @IsString()
   exchange: string;
 
   @AutoMap()
@@ -39,16 +29,6 @@ export class MarketTradeDto {
 }
 
 export class MarketLimitDto {
-  @AutoMap()
-  @ApiProperty()
-  @IsString()
-  userId: string;
-
-  @AutoMap()
-  @ApiProperty()
-  @IsString()
-  clientId: string;
-
   @AutoMap()
   @ApiProperty()
   @IsString()
@@ -141,6 +121,9 @@ export class CancelOrderDto {
 }
 
 export class CancelOrderCommand {
+  userId: string;
+  clientId: string;
+
   @AutoMap()
   exchange: string;
 

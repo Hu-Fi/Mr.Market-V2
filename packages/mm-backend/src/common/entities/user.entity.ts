@@ -22,17 +22,6 @@ export class User {
   })
   type: string;
 
-  @Column()
-  identityNumber: string;
-
-  @Column()
-  fullName: string;
-
-  @Column({
-    nullable: true,
-  })
-  avatarUrl: string;
-
   @CreateDateColumn()
   createdAt: Date;
 

@@ -4,22 +4,24 @@ import { ArbitrageService } from '../../trading-strategy/strategies/arbitrage/ar
 import { ArbitrageStrategy } from '../../trading-strategy/strategies/arbitrage/arbitrage.strategy';
 import { MarketMakingService } from '../../trading-strategy/strategies/market-making/market-making.service';
 import { MarketMakingStrategy } from '../../trading-strategy/strategies/market-making/market-making.strategy';
-import { Arbitrage } from '../../../common/entities/arbitrage.entity';
-import { MarketMaking } from '../../../common/entities/market-making.entity';
+import { VolumeService } from '../../trading-strategy/strategies/volume/volume.service';
+import { VolumeStrategy } from '../../trading-strategy/strategies/volume/volume.strategy';
 import {
   arbitrageStrategiesDataFixture,
   marketMakingStrategiesDataFixture,
+  volumeStrategiesDataFixture,
 } from './execution-worker.fixtures';
-import { ConfigService } from '@nestjs/config';
-import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { SchedulerUtil } from '../../../common/utils/scheduler.utils';
+import { Logger } from '@nestjs/common';
 
 describe('ExecutionWorkerService', () => {
   let service: ExecutionWorkerService;
+
   let arbitrageService: ArbitrageService;
   let arbitrageStrategy: ArbitrageStrategy;
   let marketMakingService: MarketMakingService;
   let marketMakingStrategy: MarketMakingStrategy;
+  let volumeService: VolumeService;
+  let volumeStrategy: VolumeStrategy;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,84 +44,132 @@ describe('ExecutionWorkerService', () => {
           useValue: { start: jest.fn() },
         },
         {
-          provide: ConfigService,
+          provide: VolumeService,
+          useValue: { findRunningStrategies: jest.fn() },
+        },
+        {
+          provide: VolumeStrategy,
+          useValue: { start: jest.fn() },
+        },
+        {
+          provide: Logger,
           useValue: {
-            get: jest.fn().mockReturnValue({
-              CRON_EXPRESSION: CronExpression.EVERY_5_SECONDS,
-            }),
+            debug: jest.fn(),
+            error: jest.fn(),
           },
         },
-        SchedulerRegistry,
-        SchedulerUtil,
       ],
     }).compile();
 
     service = module.get<ExecutionWorkerService>(ExecutionWorkerService);
+
     arbitrageService = module.get<ArbitrageService>(ArbitrageService);
     arbitrageStrategy = module.get<ArbitrageStrategy>(ArbitrageStrategy);
     marketMakingService = module.get<MarketMakingService>(MarketMakingService);
     marketMakingStrategy =
       module.get<MarketMakingStrategy>(MarketMakingStrategy);
+    volumeService = module.get<VolumeService>(VolumeService);
+    volumeStrategy = module.get<VolumeStrategy>(VolumeStrategy);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('handleCron', () => {
-    it('should execute the strategies correctly', async () => {
-      const mockArbitrageStrategies: Arbitrage[] =
-        arbitrageStrategiesDataFixture;
-      const mockMarketMakingStrategies: MarketMaking[] =
-        marketMakingStrategiesDataFixture;
-
+  describe('executeStrategies', () => {
+    it('should execute arbitrage, market making and volume strategies successfully', async () => {
       jest
         .spyOn(arbitrageService, 'findRunningStrategies')
-        .mockResolvedValue(mockArbitrageStrategies);
-      jest.spyOn(arbitrageStrategy, 'start').mockResolvedValue(undefined);
-      jest
-        .spyOn(marketMakingService, 'findRunningStrategies')
-        .mockResolvedValue(mockMarketMakingStrategies);
-      jest.spyOn(marketMakingStrategy, 'start').mockResolvedValue(undefined);
-
-      await service.handleCron();
-
-      expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
-      expect(arbitrageStrategy.start).toHaveBeenCalledWith(
-        mockArbitrageStrategies,
-      );
-      expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
-      expect(marketMakingStrategy.start).toHaveBeenCalledWith(
-        mockMarketMakingStrategies,
-      );
-    });
-
-    it('should skip execution if a job is already running', async () => {
-      service['isJobRunning'] = true;
-
-      await service.handleCron();
-
-      expect(arbitrageService.findRunningStrategies).not.toHaveBeenCalled();
-      expect(arbitrageStrategy.start).not.toHaveBeenCalled();
-      expect(marketMakingService.findRunningStrategies).not.toHaveBeenCalled();
-      expect(marketMakingStrategy.start).not.toHaveBeenCalled();
-    });
-
-    it('should handle errors robustly for arbitrage and continue with market making', async () => {
-      jest
-        .spyOn(arbitrageService, 'findRunningStrategies')
-        .mockRejectedValue(new Error('Test Error'));
+        .mockResolvedValue(arbitrageStrategiesDataFixture);
       jest
         .spyOn(marketMakingService, 'findRunningStrategies')
         .mockResolvedValue(marketMakingStrategiesDataFixture);
-      jest.spyOn(marketMakingStrategy, 'start').mockResolvedValue(undefined);
+      jest
+        .spyOn(volumeService, 'findRunningStrategies')
+        .mockResolvedValue(volumeStrategiesDataFixture);
 
-      await service.handleCron();
+      await service.executeStrategies();
 
-      expect(arbitrageStrategy.start).not.toHaveBeenCalled();
+      expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
+      expect(arbitrageStrategy.start).toHaveBeenCalledWith(
+        arbitrageStrategiesDataFixture,
+      );
+
       expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
       expect(marketMakingStrategy.start).toHaveBeenCalledWith(
         marketMakingStrategiesDataFixture,
+      );
+
+      expect(volumeService.findRunningStrategies).toHaveBeenCalled();
+      expect(volumeStrategy.start).toHaveBeenCalledWith(
+        volumeStrategiesDataFixture,
+      );
+    });
+
+    it('should handle errors thrown by arbitrage strategy execution', async () => {
+      const mockError = new Error('Mock Arbitrage Error');
+
+      jest
+        .spyOn(arbitrageService, 'findRunningStrategies')
+        .mockResolvedValue(arbitrageStrategiesDataFixture);
+      jest.spyOn(arbitrageStrategy, 'start').mockRejectedValue(mockError);
+
+      await service.executeStrategies();
+
+      expect(arbitrageStrategy.start).toHaveBeenCalledWith(
+        arbitrageStrategiesDataFixture,
+      );
+      expect(volumeService.findRunningStrategies).toHaveBeenCalled();
+      expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
+    });
+
+    it('should handle errors thrown by market making strategy execution', async () => {
+      const mockError = new Error('Mock Market Making Error');
+
+      jest
+        .spyOn(marketMakingService, 'findRunningStrategies')
+        .mockResolvedValue(marketMakingStrategiesDataFixture);
+      jest.spyOn(marketMakingStrategy, 'start').mockRejectedValue(mockError);
+
+      await service.executeStrategies();
+
+      expect(marketMakingStrategy.start).toHaveBeenCalledWith(
+        marketMakingStrategiesDataFixture,
+      );
+      expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
+      expect(volumeService.findRunningStrategies).toHaveBeenCalled();
+    });
+
+    it('should handle errors thrown by volume strategy execution', async () => {
+      const mockError = new Error('Mock Volume Error');
+
+      jest
+        .spyOn(volumeService, 'findRunningStrategies')
+        .mockResolvedValue(volumeStrategiesDataFixture);
+      jest.spyOn(volumeStrategy, 'start').mockRejectedValue(mockError);
+
+      await service.executeStrategies();
+
+      expect(volumeStrategy.start).toHaveBeenCalledWith(
+        volumeStrategiesDataFixture,
+      );
+      expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
+      expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
+    });
+
+    it('should log appropriate debug and error messages', async () => {
+      const loggerSpy = jest.spyOn(service['logger'], 'error');
+
+      const mockError = new Error('Mock Logging Error');
+      jest
+        .spyOn(arbitrageService, 'findRunningStrategies')
+        .mockRejectedValue(mockError);
+
+      await service.executeStrategies();
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'Error executing arbitrage strategies',
+        mockError.stack,
       );
     });
   });

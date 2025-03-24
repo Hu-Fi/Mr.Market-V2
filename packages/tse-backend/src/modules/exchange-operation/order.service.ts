@@ -50,4 +50,14 @@ export class OrderService {
 
     return deleteResult.affected || 0;
   }
+
+  async getOrderByExtId(
+    orderExtId: string,
+    user: { userId: string; clientId: string },
+  ) {
+    return await this.repository.findByOrderExtId(orderExtId, {
+      userId: user.userId,
+      clientId: user.clientId,
+    });
+  }
 }

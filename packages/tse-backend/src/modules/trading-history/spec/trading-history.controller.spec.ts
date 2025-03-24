@@ -65,6 +65,7 @@ describe('TradingHistoryController', () => {
       const result = await controller.getUserTradingHistory(
         paramsDto,
         queryDto,
+        { user: { id: 1 } },
       );
 
       expect(service.getUserTradingHistory).toHaveBeenCalledWith(

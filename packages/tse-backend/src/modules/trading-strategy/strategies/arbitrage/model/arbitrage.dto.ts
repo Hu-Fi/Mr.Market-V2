@@ -6,20 +6,6 @@ import { IsString, Matches } from 'class-validator';
 export class ArbitrageStrategyDto {
   @AutoMap()
   @ApiProperty({
-    example: '123',
-    description: 'User ID for whom the strategy is being executed.',
-  })
-  userId: string;
-
-  @AutoMap()
-  @ApiProperty({
-    example: '456',
-    description: 'Client ID associated with the user.',
-  })
-  clientId: string;
-
-  @AutoMap()
-  @ApiProperty({
     example: 'ETH/USDT',
     description: 'The trading pair to monitor for arbitrage opportunities.',
   })
@@ -62,9 +48,7 @@ export class ArbitrageStrategyDto {
 }
 
 export class ArbitrageStrategyCommand {
-  @AutoMap()
   userId: string;
-  @AutoMap()
   clientId: string;
   sideA: string;
   sideB: string;
@@ -108,4 +92,7 @@ export class ArbitrageStrategyActionDto {
 export class ArbitrageStrategyActionCommand {
   @AutoMap()
   id: number;
+
+  userId: string;
+  clientId: string;
 }

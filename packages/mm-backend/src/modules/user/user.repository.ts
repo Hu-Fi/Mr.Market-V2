@@ -21,4 +21,8 @@ export class UserRepository {
 
     await queryBuilder.execute();
   }
+
+  async findByUserId(userId: string): Promise<User | undefined> {
+    return this.repository.findOne({ where: { userId: userId } });
+  }
 }

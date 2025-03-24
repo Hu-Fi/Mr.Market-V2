@@ -27,6 +27,12 @@ export class ExchangeApiKeyReadonlyDto {
 
 export class ExchangeApiKeyReadonlyCommand {
   @AutoMap()
+  userId: string;
+
+  @AutoMap()
+  clientId: string;
+
+  @AutoMap()
   exchangeName: string;
 
   @AutoMap()
@@ -40,7 +46,10 @@ export class ExchangeApiKeyReadonlyCommand {
 }
 
 export class ExchangeApiKeyReadonlyData {
+  @AutoMap()
   userId: string;
+
+  @AutoMap()
   clientId: string;
 
   @AutoMap()

@@ -49,9 +49,6 @@ describe('UserRepository', () => {
         userId: 'some-uuid',
         role: Role.USER,
         type: 'type',
-        identityNumber: '12345',
-        fullName: 'John Doe',
-        avatarUrl: 'https://example.com/avatar.png',
       };
 
       await repository.create(userData);

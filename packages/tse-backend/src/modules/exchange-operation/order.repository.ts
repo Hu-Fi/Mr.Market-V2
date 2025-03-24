@@ -14,12 +14,14 @@ export class OrderRepository {
     return this.repository.save(transactionData);
   }
 
-  async findById(id: number) {
-    return await this.repository.findOne({ where: { id } });
+  async findById(id: number, options?: any) {
+    return await this.repository.findOne({ where: { id, ...options } });
   }
 
-  async findByOrderExtId(orderId: string) {
-    return await this.repository.findOne({ where: { orderExtId: orderId } });
+  async findByOrderExtId(orderId: string, options?: any) {
+    return await this.repository.findOne({
+      where: { orderExtId: orderId, ...options },
+    });
   }
 
   async save(data: Partial<Order>) {

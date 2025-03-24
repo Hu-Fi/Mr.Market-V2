@@ -49,9 +49,6 @@ export class ExchangeApiKeyService {
       ExchangeApiKeyCommand,
       ExchangeApiKeyData,
     );
-    // TODO: pass userId, clientId from JWT token
-    data.userId = 'temporaryValue';
-    data.clientId = 'temporaryValue';
 
     data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
 
@@ -70,13 +67,19 @@ export class ExchangeApiKeyService {
     return existingApiKeys;
   }
 
-  async getAllExchangeApiKeys(): Promise<ExchangeApiKeyData[]> {
-    return await this.exchangeApiKeyRepository.find();
+  async getAllExchangeApiKeys(
+    userId: string,
+    clientId: string,
+  ): Promise<ExchangeApiKeyData[]> {
+    return await this.exchangeApiKeyRepository.find({ userId, clientId });
   }
 
-  async removeExchangeApiKey(id: number) {
-    const existingExchangeApiKey =
-      await this.exchangeApiKeyRepository.findOne(id);
+  async removeExchangeApiKey(id: number, userId: string, clientId: string) {
+    const existingExchangeApiKey = await this.exchangeApiKeyRepository.findOne(
+      id,
+      userId,
+      clientId,
+    );
     if (!existingExchangeApiKey) {
       throw new BadRequestException(`Exchange API key not found: ${id}`);
     }

@@ -39,9 +39,9 @@ export class ArbitrageStrategyRepository {
     });
   }
 
-  async findStrategyById(id: number): Promise<Arbitrage> {
+  async findStrategyById(id: number, options?: any): Promise<Arbitrage> {
     return this.repository.findOne({
-      where: { id: id },
+      where: { id: id, ...options },
     });
   }
 }

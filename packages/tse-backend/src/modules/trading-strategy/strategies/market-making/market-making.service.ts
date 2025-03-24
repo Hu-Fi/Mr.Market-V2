@@ -63,9 +63,12 @@ export class MarketMakingService {
     }
   }
 
-  async findStrategyById(id: number): Promise<MarketMaking | null> {
+  async findStrategyById(
+    id: number,
+    options?: any,
+  ): Promise<MarketMaking | null> {
     try {
-      return this.repository.findStrategyById(id);
+      return this.repository.findStrategyById(id, options);
     } catch (error) {
       this.logger.error('Error finding market making strategy by od', error);
       throw error;

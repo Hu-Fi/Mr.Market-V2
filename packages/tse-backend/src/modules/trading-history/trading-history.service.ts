@@ -6,11 +6,7 @@ import {
   OrderStatus,
   TradeSideType,
 } from '../../common/enums/exchange-operation.enums';
-import {
-  GetUserStrategyHistoryParamsCommand,
-  GetUserTradingHistoryParamsCommand,
-  GetUserTradingHistoryQueryCommand,
-} from './model/trading-history.model';
+import { GetUserTradingHistoryQueryCommand } from './model/trading-history.model';
 import { MarketMakingRepository } from '../trading-strategy/strategies/market-making/market-making.repository';
 import { ArbitrageStrategyRepository } from '../trading-strategy/strategies/arbitrage/arbitrage.repository';
 import { VolumeStrategyRepository } from '../trading-strategy/strategies/volume/volume.repository';
@@ -26,7 +22,7 @@ export class TradingHistoryService {
   ) {}
 
   async getUserTradingHistory(
-    params: GetUserTradingHistoryParamsCommand,
+    userId: string,
     queries: GetUserTradingHistoryQueryCommand,
   ) {
     const { startDate, endDate, exchangeName, symbol, type, status, side } =
@@ -36,7 +32,7 @@ export class TradingHistoryService {
 
     const query: FindManyOptions = {
       where: {
-        userId: params.userId,
+        userId: userId,
         ...(startDate &&
           endDate && {
             createdAt: Between(new Date(startDate), new Date(endDate)),
@@ -57,17 +53,15 @@ export class TradingHistoryService {
     return await this.orderRepository.find(query);
   }
 
-  async getUserStrategyHistory(params: GetUserStrategyHistoryParamsCommand) {
+  async getUserStrategyHistory(userId: string) {
     const marketMakingStrategies =
       await this.marketMakingRepository.findStrategiesByUserId(
-        params.userId.toString(),
+        userId.toString(),
       );
     const arbitrageStrategies =
-      await this.arbitrageRepository.findStrategiesByUserId(
-        params.userId.toString(),
-      );
+      await this.arbitrageRepository.findStrategiesByUserId(userId.toString());
     const volumeStrategies = await this.volumeRepository.findStrategiesByUserId(
-      params.userId.toString(),
+      userId.toString(),
     );
 
     const marketMakingResponse = marketMakingStrategies.map((strategy) => ({

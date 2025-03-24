@@ -52,4 +52,18 @@ export class ExchangeOperationService {
       );
     }
   }
+
+  async getExchangeOperation(
+    orderExtId: string,
+    user: { userId: string; clientId: string },
+  ) {
+    try {
+      return await this.orderService.getOrderByExtId(orderExtId, user);
+    } catch (error) {
+      this.logger.error(`Failed to get exchange operation: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to get exchange operation: ${error.message}`,
+      );
+    }
+  }
 }
