@@ -1,6 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { SchedulerUtil } from '../../common/utils/scheduler.utils';
-import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
 import {
   ExchangeDepositStatus,
@@ -16,21 +14,10 @@ export class TransactionService {
   private isJobRunning: boolean = false;
 
   constructor(
-    private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly schedulerUtils: SchedulerUtil,
     private readonly mixinGateway: MixinIntegrationService,
     private readonly mixinTransactionUtils: MixinTransactionUtils,
     private readonly exchangeTransactionUtils: ExchangeTransactionUtils,
   ) {}
-
-  onModuleInit() {
-    this.schedulerUtils.addCronJob(
-      TransactionService.name,
-      CronExpression.EVERY_5_MINUTES,
-      this.handleCron.bind(this),
-      this.schedulerRegistry,
-    );
-  }
 
   async processData() {
     this.logger.debug('Worker checking transactions in progress started');

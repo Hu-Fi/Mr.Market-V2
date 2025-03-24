@@ -5,9 +5,6 @@ export interface JwtResponse {
 export interface ClientDetails {
   clientId: string;
   type: string;
-  identityNumber: string;
-  fullName: string;
-  avatarUrl: string;
 }
 
 export interface ClientSession {

@@ -187,12 +187,11 @@ describe('ExchangeDataService', () => {
         'exchange2',
       ]);
 
-      mockExchangeRegistryService.getExchangeByName
-        .mockResolvedValueOnce({
-          ...mockExchangeInstance,
-          name: 'exchange1',
-          fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange1),
-        })
+      mockExchangeRegistryService.getExchangeByName.mockResolvedValueOnce({
+        ...mockExchangeInstance,
+        name: 'exchange1',
+        fetchTickers: jest.fn().mockResolvedValue(mockPairsExchange1),
+      });
 
       const result = await service.getSupportedPairs('exchange1');
 

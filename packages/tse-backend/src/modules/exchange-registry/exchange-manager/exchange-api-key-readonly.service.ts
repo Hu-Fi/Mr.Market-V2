@@ -40,9 +40,6 @@ export class ExchangeApiKeyReadonlyService {
       ExchangeApiKeyReadonlyCommand,
       ExchangeApiKeyReadonlyData,
     );
-    // TODO: pass userId, clientId from JWT token
-    data.userId = 'temporaryValue';
-    data.clientId = 'temporaryValue';
 
     data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
 

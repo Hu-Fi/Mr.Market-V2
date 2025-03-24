@@ -170,7 +170,10 @@ describe('TradingHistoryService', () => {
 
       mockOrderRepository.find.mockResolvedValue([{ id: 10 }]);
 
-      const result = await service.getUserTradingHistory(params, queries as any);
+      const result = await service.getUserTradingHistory(
+        params,
+        queries as any,
+      );
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {

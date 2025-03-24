@@ -28,7 +28,7 @@ describe('ExchangeRegistryService', () => {
   createExchangeInstances(exchangeConfigs);
   const mockApiKeys = [
     { apiKey: 'mockApiKey1', apiSecret: 'encrypted', isDefaultAccount: true },
-    { apiKey: 'mockApiKey2', apiSecret: 'encrypted', isDefaultAccount: false }
+    { apiKey: 'mockApiKey2', apiSecret: 'encrypted', isDefaultAccount: false },
   ];
   let mockEncryptionService: { decrypt: jest.Mock };
 
@@ -40,8 +40,9 @@ describe('ExchangeRegistryService', () => {
         return Promise.resolve({ id, config });
       }),
       addExchange: jest.fn(),
-      getExchangeNames: jest.fn().mockResolvedValue(new Set(['binance', 'bybit'])),
-
+      getExchangeNames: jest
+        .fn()
+        .mockResolvedValue(new Set(['binance', 'bybit'])),
     };
 
     const mockExchangeApiKeyService = {
@@ -49,7 +50,9 @@ describe('ExchangeRegistryService', () => {
     };
 
     mockEncryptionService = {
-      decrypt: jest.fn().mockImplementation(secret => Promise.resolve(`decrypted-${secret}`)),
+      decrypt: jest
+        .fn()
+        .mockImplementation((secret) => Promise.resolve(`decrypted-${secret}`)),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -59,7 +62,7 @@ describe('ExchangeRegistryService', () => {
         { provide: ExchangeApiKeyService, useValue: mockExchangeApiKeyService },
         { provide: EncryptionService, useValue: mockEncryptionService },
         CustomLogger,
-        GetDefaultAccountStrategy
+        GetDefaultAccountStrategy,
       ],
     }).compile();
 
@@ -81,16 +84,24 @@ describe('ExchangeRegistryService', () => {
 
       const result = await service.getExchangeByName(exchangeName, strategy);
 
-      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(exchangeName);
+      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
+        exchangeName,
+      );
 
       expect(mockEncryptionService.decrypt).toHaveBeenCalledWith('encrypted');
 
-      expect(ccxtGateway.initializeExchange).toHaveBeenCalledWith('binance-true', {
-        name: 'binance',
-        key: 'mockApiKey1',
-        secret: 'decrypted-encrypted',
-      });
-      expect(ccxtGateway.addExchange).toHaveBeenCalledWith('binance-true', 'loadMarkets');
+      expect(ccxtGateway.initializeExchange).toHaveBeenCalledWith(
+        'binance-true',
+        {
+          name: 'binance',
+          key: 'mockApiKey1',
+          secret: 'decrypted-encrypted',
+        },
+      );
+      expect(ccxtGateway.addExchange).toHaveBeenCalledWith(
+        'binance-true',
+        'loadMarkets',
+      );
 
       expect(result).toEqual({
         id: 'binance-true',
@@ -119,13 +130,18 @@ describe('ExchangeRegistryService', () => {
         .spyOn(ccxtGateway, 'initializeExchange')
         .mockResolvedValue(existingExchange);
 
-      const firstResult = await service.getExchangeByName(exchangeName, strategy);
+      const firstResult = await service.getExchangeByName(
+        exchangeName,
+        strategy,
+      );
       expect(firstResult).toEqual(existingExchange);
 
-      const secondResult = await service.getExchangeByName(exchangeName, strategy);
+      const secondResult = await service.getExchangeByName(
+        exchangeName,
+        strategy,
+      );
       expect(secondResult).toEqual(existingExchange);
     });
-
   });
 
   describe('initializeExchanges', () => {

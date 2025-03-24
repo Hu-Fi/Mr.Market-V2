@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
@@ -24,6 +24,11 @@ export class AuthController {
   async login(@Body() dto: AdminLoginDto): Promise<JwtResponse> {
     const command = this.mapper.map(dto, AdminLoginDto, AdminLoginCommand);
     return await this.authService.validateUser(command);
+  }
+
+  @Get('mixin/oauth/get-link')
+  async getOauthLink(): Promise<string> {
+    return await this.authService.getOauthLink();
   }
 
   @Post('mixin/oauth')

@@ -60,9 +60,9 @@ export class VolumeService {
     }
   }
 
-  async findStrategyById(id: number) {
+  async findStrategyById(id: number, options?: any) {
     try {
-      return this.repository.findStrategyById(id);
+      return this.repository.findStrategyById(id, options);
     } catch (error) {
       this.logger.error(`Error finding strategy by ID ${id}: ${error.message}`);
       throw error;

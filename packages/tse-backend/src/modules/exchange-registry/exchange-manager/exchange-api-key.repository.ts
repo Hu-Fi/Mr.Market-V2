@@ -26,17 +26,24 @@ export class ExchangeApiKeyRepository {
     });
   }
 
-  async find() {
+  async find(user: { userId: string; clientId: string }) {
     return await this.exchangeApiKeyRepository.find({
       where: {
+        userId: user.userId,
+        clientId: user.clientId,
         removed: false,
       },
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: string, clientId: string) {
     return await this.exchangeApiKeyRepository.findOne({
-      where: { id: id },
+      where: {
+        id: id,
+        userId: userId,
+        clientId: clientId,
+        removed: false,
+      },
     });
   }
 }

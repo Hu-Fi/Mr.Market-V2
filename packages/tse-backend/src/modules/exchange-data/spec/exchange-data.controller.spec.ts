@@ -127,17 +127,23 @@ describe('ExchangeDataController', () => {
   describe('getSupportedPairs', () => {
     it('should call getSupportedExchanges method of the service and throw Error', async () => {
       expect(service.getSupportedExchanges).toHaveBeenCalled();
-      await expect(controller.getSupportedPairs()).rejects.toThrow('No supported exchanges found');
+      await expect(controller.getSupportedPairs()).rejects.toThrow(
+        'No supported exchanges found',
+      );
     });
 
     it('should handle the case when some exchange returns empty pairs', async () => {
       const supportedExchangesMock = ['binance', 'gate'];
       const pairsBinanceMock = ['ETH/USDT', 'BTC/USDT'];
       const pairsGateMock: string[] = [];
-      mockExchangeDataService.getSupportedExchanges.mockResolvedValue(supportedExchangesMock);
-      mockExchangeDataService.getSupportedPairs.mockImplementation(async (exchange: string) => {
-        return exchange === 'binance' ? pairsBinanceMock : pairsGateMock;
-      });
+      mockExchangeDataService.getSupportedExchanges.mockResolvedValue(
+        supportedExchangesMock,
+      );
+      mockExchangeDataService.getSupportedPairs.mockImplementation(
+        async (exchange: string) => {
+          return exchange === 'binance' ? pairsBinanceMock : pairsGateMock;
+        },
+      );
 
       const result = await controller.getSupportedPairs();
       expect(result).toEqual([...pairsBinanceMock]);

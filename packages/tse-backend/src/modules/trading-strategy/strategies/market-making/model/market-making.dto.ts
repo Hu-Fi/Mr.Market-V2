@@ -9,14 +9,6 @@ import { IsNumber, IsString, Matches, Max, Min } from 'class-validator';
 
 export class MarketMakingStrategyDto {
   @AutoMap()
-  @ApiProperty({ description: 'User ID', example: '123' })
-  userId: string;
-
-  @AutoMap()
-  @ApiProperty({ description: 'Client ID', example: '456' })
-  clientId: string;
-
-  @AutoMap()
   @ApiProperty({ description: 'Trading pair', example: 'BTC/USDT' })
   @Matches(/^[^/]+\/[^/]+$/)
   pair: string;
@@ -114,9 +106,7 @@ export class MarketMakingStrategyDto {
 }
 
 export class MarketMakingStrategyCommand {
-  @AutoMap()
   userId: string;
-  @AutoMap()
   clientId: string;
   sideA: string;
   sideB: string;
@@ -178,4 +168,7 @@ export class MarketMakingStrategyActionDto {
 export class MarketMakingStrategyActionCommand {
   @AutoMap()
   id: number;
+
+  userId: string;
+  clientId: string;
 }

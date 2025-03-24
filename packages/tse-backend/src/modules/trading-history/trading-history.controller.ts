@@ -1,18 +1,15 @@
 import {
   Controller,
   Get,
-  Param,
-  Query, Request, UseGuards,
+  Query,
+  Request,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TradingHistoryService } from './trading-history.service';
 import {
-  GetUserStrategyHistoryParamsCommand,
-  GetUserStrategyHistoryParamsDto,
-  GetUserTradingHistoryParamsCommand,
-  GetUserTradingHistoryParamsDto,
   GetUserTradingHistoryQueryCommand,
   GetUserTradingHistoryQueryDto,
 } from './model/trading-history.model';
@@ -31,39 +28,23 @@ export class TradingHistoryController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Get('/trading/user/:userId')
+  @Get('/trading/user')
   @ApiOperation({ summary: 'Retrieve user trading history' })
   async getUserTradingHistory(
-    @Param() params: GetUserTradingHistoryParamsDto,
     @Query() query: GetUserTradingHistoryQueryDto,
     @Request() req,
   ) {
-    console.log(req.user.userId);
-    const paramsCommand = this.mapper.map(
-      params,
-      GetUserTradingHistoryParamsDto,
-      GetUserTradingHistoryParamsCommand,
-    );
     const queryCommand = this.mapper.map(
       query,
       GetUserTradingHistoryQueryDto,
       GetUserTradingHistoryQueryCommand,
     );
-
-    return this.service.getUserTradingHistory(paramsCommand, queryCommand);
+    return this.service.getUserTradingHistory(req.user.userId, queryCommand);
   }
 
-  @Get('/strategy/user/:userId')
+  @Get('/strategy/user')
   @ApiOperation({ summary: 'Retrieve user trading strategies' })
-  async getUserStrategyHistory(
-    @Param() params: GetUserStrategyHistoryParamsDto,
-  ) {
-    const paramsCommand = this.mapper.map(
-      params,
-      GetUserStrategyHistoryParamsDto,
-      GetUserStrategyHistoryParamsCommand,
-    );
-
-    return this.service.getUserStrategyHistory(paramsCommand);
+  async getUserStrategyHistory(@Request() req) {
+    return this.service.getUserStrategyHistory(req.user.userId);
   }
 }

@@ -1,5 +1,11 @@
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
 

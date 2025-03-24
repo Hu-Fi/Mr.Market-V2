@@ -6,20 +6,6 @@ import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-typ
 export class VolumeStrategyDto {
   @AutoMap()
   @ApiProperty({
-    example: '123',
-    description: 'User ID for whom the strategy is being executed.',
-  })
-  userId: string;
-
-  @AutoMap()
-  @ApiProperty({
-    example: '456',
-    description: 'Client ID associated with the user.',
-  })
-  clientId: string;
-
-  @AutoMap()
-  @ApiProperty({
     example: 'binance',
     description: 'Name of the exchange.',
   })
@@ -72,10 +58,9 @@ export class VolumeStrategyDto {
 }
 
 export class VolumeStrategyCommand {
-  @AutoMap()
   userId: string;
-  @AutoMap()
   clientId: string;
+
   @AutoMap()
   exchangeName: string;
 
@@ -122,4 +107,7 @@ export class VolumeStrategyActionDto {
 export class VolumeStrategyActionCommand {
   @AutoMap()
   id: number;
+
+  userId: string;
+  clientId: string;
 }

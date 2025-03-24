@@ -66,7 +66,8 @@ describe('ExecutionWorkerService', () => {
     arbitrageService = module.get<ArbitrageService>(ArbitrageService);
     arbitrageStrategy = module.get<ArbitrageStrategy>(ArbitrageStrategy);
     marketMakingService = module.get<MarketMakingService>(MarketMakingService);
-    marketMakingStrategy = module.get<MarketMakingStrategy>(MarketMakingStrategy);
+    marketMakingStrategy =
+      module.get<MarketMakingStrategy>(MarketMakingStrategy);
     volumeService = module.get<VolumeService>(VolumeService);
     volumeStrategy = module.get<VolumeStrategy>(VolumeStrategy);
   });
@@ -77,31 +78,47 @@ describe('ExecutionWorkerService', () => {
 
   describe('executeStrategies', () => {
     it('should execute arbitrage, market making and volume strategies successfully', async () => {
-      jest.spyOn(arbitrageService, 'findRunningStrategies').mockResolvedValue(arbitrageStrategiesDataFixture);
-      jest.spyOn(marketMakingService, 'findRunningStrategies').mockResolvedValue(marketMakingStrategiesDataFixture);
-      jest.spyOn(volumeService, 'findRunningStrategies').mockResolvedValue(volumeStrategiesDataFixture);
+      jest
+        .spyOn(arbitrageService, 'findRunningStrategies')
+        .mockResolvedValue(arbitrageStrategiesDataFixture);
+      jest
+        .spyOn(marketMakingService, 'findRunningStrategies')
+        .mockResolvedValue(marketMakingStrategiesDataFixture);
+      jest
+        .spyOn(volumeService, 'findRunningStrategies')
+        .mockResolvedValue(volumeStrategiesDataFixture);
 
       await service.executeStrategies();
 
       expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
-      expect(arbitrageStrategy.start).toHaveBeenCalledWith(arbitrageStrategiesDataFixture);
+      expect(arbitrageStrategy.start).toHaveBeenCalledWith(
+        arbitrageStrategiesDataFixture,
+      );
 
       expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
-      expect(marketMakingStrategy.start).toHaveBeenCalledWith(marketMakingStrategiesDataFixture);
+      expect(marketMakingStrategy.start).toHaveBeenCalledWith(
+        marketMakingStrategiesDataFixture,
+      );
 
       expect(volumeService.findRunningStrategies).toHaveBeenCalled();
-      expect(volumeStrategy.start).toHaveBeenCalledWith(volumeStrategiesDataFixture);
+      expect(volumeStrategy.start).toHaveBeenCalledWith(
+        volumeStrategiesDataFixture,
+      );
     });
 
     it('should handle errors thrown by arbitrage strategy execution', async () => {
       const mockError = new Error('Mock Arbitrage Error');
 
-      jest.spyOn(arbitrageService, 'findRunningStrategies').mockResolvedValue(arbitrageStrategiesDataFixture);
+      jest
+        .spyOn(arbitrageService, 'findRunningStrategies')
+        .mockResolvedValue(arbitrageStrategiesDataFixture);
       jest.spyOn(arbitrageStrategy, 'start').mockRejectedValue(mockError);
 
       await service.executeStrategies();
 
-      expect(arbitrageStrategy.start).toHaveBeenCalledWith(arbitrageStrategiesDataFixture);
+      expect(arbitrageStrategy.start).toHaveBeenCalledWith(
+        arbitrageStrategiesDataFixture,
+      );
       expect(volumeService.findRunningStrategies).toHaveBeenCalled();
       expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
     });
@@ -109,12 +126,16 @@ describe('ExecutionWorkerService', () => {
     it('should handle errors thrown by market making strategy execution', async () => {
       const mockError = new Error('Mock Market Making Error');
 
-      jest.spyOn(marketMakingService, 'findRunningStrategies').mockResolvedValue(marketMakingStrategiesDataFixture);
+      jest
+        .spyOn(marketMakingService, 'findRunningStrategies')
+        .mockResolvedValue(marketMakingStrategiesDataFixture);
       jest.spyOn(marketMakingStrategy, 'start').mockRejectedValue(mockError);
 
       await service.executeStrategies();
 
-      expect(marketMakingStrategy.start).toHaveBeenCalledWith(marketMakingStrategiesDataFixture);
+      expect(marketMakingStrategy.start).toHaveBeenCalledWith(
+        marketMakingStrategiesDataFixture,
+      );
       expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
       expect(volumeService.findRunningStrategies).toHaveBeenCalled();
     });
@@ -122,12 +143,16 @@ describe('ExecutionWorkerService', () => {
     it('should handle errors thrown by volume strategy execution', async () => {
       const mockError = new Error('Mock Volume Error');
 
-      jest.spyOn(volumeService, 'findRunningStrategies').mockResolvedValue(volumeStrategiesDataFixture);
+      jest
+        .spyOn(volumeService, 'findRunningStrategies')
+        .mockResolvedValue(volumeStrategiesDataFixture);
       jest.spyOn(volumeStrategy, 'start').mockRejectedValue(mockError);
 
       await service.executeStrategies();
 
-      expect(volumeStrategy.start).toHaveBeenCalledWith(volumeStrategiesDataFixture);
+      expect(volumeStrategy.start).toHaveBeenCalledWith(
+        volumeStrategiesDataFixture,
+      );
       expect(arbitrageService.findRunningStrategies).toHaveBeenCalled();
       expect(marketMakingService.findRunningStrategies).toHaveBeenCalled();
     });
@@ -136,11 +161,16 @@ describe('ExecutionWorkerService', () => {
       const loggerSpy = jest.spyOn(service['logger'], 'error');
 
       const mockError = new Error('Mock Logging Error');
-      jest.spyOn(arbitrageService, 'findRunningStrategies').mockRejectedValue(mockError);
+      jest
+        .spyOn(arbitrageService, 'findRunningStrategies')
+        .mockRejectedValue(mockError);
 
       await service.executeStrategies();
 
-      expect(loggerSpy).toHaveBeenCalledWith('Error executing arbitrage strategies', mockError.stack);
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'Error executing arbitrage strategies',
+        mockError.stack,
+      );
     });
   });
 });

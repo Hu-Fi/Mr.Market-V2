@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MixinAuthSession } from '../../common/entities/mixin-auth-session.entity';
+import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 @Injectable()
 export class AuthSessionRepository {
@@ -14,14 +15,16 @@ export class AuthSessionRepository {
     return this.mixinAuthRepository.save(mixinAuth);
   }
 
-  async findByUserId(userId: string): Promise<MixinAuthSession | undefined> {
-    return this.mixinAuthRepository.findOne({ where: { userId: userId } });
+  async findAuthSessionByClientId(
+    clientId: string,
+  ): Promise<MixinAuthSession | undefined> {
+    return this.mixinAuthRepository.findOne({ where: { clientId: clientId } });
   }
 
   async update(
     id: number,
     updateData: Partial<MixinAuthSession>,
-  ): Promise<void> {
-    await this.mixinAuthRepository.update(id, updateData);
+  ): Promise<UpdateResult> {
+    return await this.mixinAuthRepository.update(id, updateData);
   }
 }

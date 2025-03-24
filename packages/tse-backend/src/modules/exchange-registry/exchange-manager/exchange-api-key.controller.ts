@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -6,6 +6,8 @@ import {
   Get,
   Post,
   Query,
+  Request,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -21,10 +23,13 @@ import {
   ExchangeApiKeyReadonlyDto,
 } from './model/exchange-api-key-readonly.model';
 import { ExchangeApiKeyReadonlyService } from './exchange-api-key-readonly.service';
+import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
 
 @ApiTags('exchange api key')
 @UsePipes(new ValidationPipe())
 @Controller('exchange-api-key')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ExchangeApiKeyController {
   constructor(
     private readonly exchangeApiKeyService: ExchangeApiKeyService,
@@ -32,24 +37,40 @@ export class ExchangeApiKeyController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/') async addExchangeApiKey(@Body() dto: ExchangeApiKeyDto) {
+  @Post('/') async addExchangeApiKey(
+    @Request() req,
+    @Body() dto: ExchangeApiKeyDto,
+  ) {
     const command = this.mapper.map(
       dto,
       ExchangeApiKeyDto,
       ExchangeApiKeyCommand,
     );
+    command.userId = req.user.userId;
+    command.clientId = req.user.clientId;
     return await this.exchangeApiKeyService.addExchangeApiKey(command);
   }
 
-  @Get('/') async getExchangeApiKeys() {
-    return await this.exchangeApiKeyService.getAllExchangeApiKeys();
+  @Get('/') async getExchangeApiKeys(@Request() req) {
+    return await this.exchangeApiKeyService.getAllExchangeApiKeys(
+      req.user.userId,
+      req.user.clientId,
+    );
   }
 
-  @Delete('/') async removeExchangeApiKeys(@Query('id') id: number) {
-    await this.exchangeApiKeyService.removeExchangeApiKey(id);
+  @Delete('/') async removeExchangeApiKeys(
+    @Request() req,
+    @Query('id') id: number,
+  ) {
+    await this.exchangeApiKeyService.removeExchangeApiKey(
+      id,
+      req.user.userId,
+      req.user.clientId,
+    );
   }
 
   @Post('/readonly') async addExchangeApiKeyReadonly(
+    @Request() req,
     @Body() dto: ExchangeApiKeyReadonlyDto,
   ) {
     const command = this.mapper.map(
@@ -57,6 +78,8 @@ export class ExchangeApiKeyController {
       ExchangeApiKeyReadonlyDto,
       ExchangeApiKeyReadonlyCommand,
     );
+    command.userId = req.user.userId;
+    command.clientId = req.user.clientId;
     return await this.exchangeApiKeyReadonlyService.addExchangeApiKeyReadonly(
       command,
     );

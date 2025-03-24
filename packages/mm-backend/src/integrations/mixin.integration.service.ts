@@ -76,9 +76,6 @@ export class MixinIntegrationService {
       clientDetails: {
         clientId: userProfile.user_id,
         type: userProfile.type,
-        identityNumber: userProfile.identity_number,
-        fullName: userProfile.full_name,
-        avatarUrl: userProfile.avatar_url,
       },
       clientSession: {
         authorizationId: authorization_id,

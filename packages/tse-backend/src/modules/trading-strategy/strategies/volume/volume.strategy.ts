@@ -100,7 +100,10 @@ export class VolumeStrategy implements Strategy {
   }
 
   async pause(command: VolumeStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.id);
+    const strategyEntity = await this.getStrategyEntity(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     if (strategyEntity.status === StrategyInstanceStatus.RUNNING) {
       await this.updateStrategyStatusById(
         strategyEntity.id,
@@ -115,7 +118,10 @@ export class VolumeStrategy implements Strategy {
   }
 
   async stop(command: VolumeStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.id);
+    const strategyEntity = await this.getStrategyEntity(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.STOPPED,
@@ -130,7 +136,10 @@ export class VolumeStrategy implements Strategy {
   }
 
   async delete(command: VolumeStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyEntity(command.id);
+    const strategyEntity = await this.getStrategyEntity(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.DELETED,
@@ -186,9 +195,12 @@ export class VolumeStrategy implements Strategy {
 
   private async getStrategyEntity(
     strategyId: number,
+    options?: any,
   ): Promise<VolumeStrategyData> {
-    const strategyEntity =
-      await this.volumeService.findStrategyById(strategyId);
+    const strategyEntity = await this.volumeService.findStrategyById(
+      strategyId,
+      options,
+    );
     if (!strategyEntity) {
       throw new NotFoundException(
         VolumeStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,
@@ -272,7 +284,7 @@ export class VolumeStrategy implements Strategy {
       this.logger.log(
         `Volume strategy ${id} for ${pair} has completed all ${numTotalTrades} trades.`,
       );
-      await this.delete({ id });
+      await this.delete({ id, userId: data.userId, clientId: data.clientId });
       return;
     }
 

@@ -1,7 +1,8 @@
 import {
   Controller,
   Get,
-  Query, UseGuards,
+  Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';

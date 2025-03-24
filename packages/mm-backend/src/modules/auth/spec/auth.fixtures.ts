@@ -43,9 +43,6 @@ export const oauthResponseFixture: OAuthResponse = {
   clientDetails: {
     clientId: 'clientId',
     type: 'type',
-    identityNumber: 'identityNumber',
-    fullName: 'fullName',
-    avatarUrl: 'avatarUrl',
   },
   clientSession: {
     authorizationId: 'authorization_id',

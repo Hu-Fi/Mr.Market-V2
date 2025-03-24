@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -22,6 +20,7 @@ import { Role } from '../../common/enums/role.enum';
 import { CustomLogger } from '../logger/logger.service';
 import { AuthSessionRepository } from './auth-session.repository';
 import { MixinAuthSession } from '../../common/entities/mixin-auth-session.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -31,9 +30,8 @@ export class AuthService {
     private readonly mixinGateway: MixinIntegrationService,
     private configService: ConfigService,
     private jwtService: JwtService,
-    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
-    private readonly repository: AuthSessionRepository,
+    private readonly authSessionRepository: AuthSessionRepository,
   ) {
     this.adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
   }
@@ -65,23 +63,38 @@ export class AuthService {
     const { clientDetails, clientSession }: OAuthResponse =
       await this.mixinGateway.oauthHandler(code);
 
-    await this.saveUserToDatabase(clientDetails);
-    await this.findAndUpdateAuthId(clientDetails.clientId, clientSession);
+    const foundSession = await this.findAndUpdateAuthId(
+      clientDetails.clientId,
+      clientSession,
+    );
 
-    const payload = { sub: clientDetails.clientId, roles: ['User'] };
+    let userId = foundSession?.userId.userId;
+    if (!foundSession) {
+      userId = await this.saveUserToDatabase(clientDetails);
+      await this.createMixinAuthSession(
+        userId,
+        clientDetails.clientId,
+        clientSession,
+      );
+    }
+
+    const payload = {
+      sub: userId,
+      clientId: clientDetails.clientId,
+      roles: ['User'],
+    };
     return { accessToken: this.jwtService.sign(payload) };
   }
 
-  async saveUserToDatabase(clientDetails: ClientDetails): Promise<void> {
+  async saveUserToDatabase(clientDetails: ClientDetails): Promise<string> {
     try {
+      const userId = uuidv4();
       await this.userService.createUser({
-        userId: clientDetails.clientId,
+        userId,
         role: Role.USER,
         type: clientDetails.type,
-        identityNumber: clientDetails.identityNumber,
-        fullName: clientDetails.fullName,
-        avatarUrl: clientDetails.avatarUrl,
       });
+      return userId;
     } catch (e) {
       this.logger.error(`Error saving user to database: ${e.message}`);
       throw e;
@@ -89,34 +102,51 @@ export class AuthService {
   }
 
   async findAndUpdateAuthId(
-    userId: string,
+    clientId: string,
     clientSession: ClientSession,
-  ): Promise<MixinAuthSession> {
-    let mixinAuthSession = await this.repository.findByUserId(userId);
-
+  ): Promise<MixinAuthSession | null> {
+    const mixinAuthSession =
+      await this.authSessionRepository.findAuthSessionByClientId(clientId);
     if (mixinAuthSession) {
-      mixinAuthSession.authorizationId = clientSession.authorizationId;
-      mixinAuthSession.privateKey = clientSession.privateKey;
-      mixinAuthSession.publicKey = clientSession.publicKey;
-      await this.repository.update(mixinAuthSession.id, { ...clientSession });
-    } else {
-      mixinAuthSession = await this.repository.create({
-        userId: { userId } as any,
+      console.log(mixinAuthSession);
+      await this.authSessionRepository.update(mixinAuthSession.id, {
         ...clientSession,
-      } as MixinAuthSession);
-      await this.repository.create(mixinAuthSession);
+      });
+      return mixinAuthSession;
     }
 
-    return mixinAuthSession;
+    return null;
+  }
+
+  async createMixinAuthSession(
+    userId: string,
+    clientId: string,
+    clientSession: ClientSession,
+  ) {
+    await this.authSessionRepository.create({
+      userId: { id: userId } as any,
+      clientId,
+      ...clientSession,
+    } as MixinAuthSession);
   }
 
   async getMixinUserAuthSession(userId: string) {
-    const mixinAuthSession = await this.repository.findByUserId(userId);
+    const mixinAuthSession =
+      await this.authSessionRepository.findAuthSessionByClientId(userId);
     if (!mixinAuthSession) {
       throw new NotFoundException('User not found');
     }
 
     const { authorizationId, privateKey, publicKey } = mixinAuthSession;
     return { authorizationId, privateKey, publicKey } as ClientSession;
+  }
+
+  async getOauthLink() {
+    const clientId = this.configService.get<string>('MIXIN_APP_ID');
+    const scope = this.configService.get<string>(
+      'MIXIN_OAUTH_SCOPE',
+      'PROFILE:READ+ASSETS:READ+SNAPSHOTS:READ',
+    );
+    return `https://mixin.one/oauth/authorize?client_id=${clientId}&scope=${scope}&response_type=code&return_to=`;
   }
 }

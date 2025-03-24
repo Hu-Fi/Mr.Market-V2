@@ -117,7 +117,10 @@ export class MarketMakingStrategy implements Strategy {
   }
 
   async pause(command: MarketMakingStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyById(command.id);
+    const strategyEntity = await this.getStrategyById(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     if (strategyEntity.status === StrategyInstanceStatus.RUNNING) {
       await this.updateStrategyStatusById(
         strategyEntity.id,
@@ -132,7 +135,10 @@ export class MarketMakingStrategy implements Strategy {
   }
 
   async stop(command: MarketMakingStrategyActionCommand): Promise<void> {
-    const strategyEntity = await this.getStrategyById(command.id);
+    const strategyEntity = await this.getStrategyById(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.STOPPED,
@@ -150,7 +156,10 @@ export class MarketMakingStrategy implements Strategy {
   }
 
   async delete(command: MarketMakingStrategyActionCommand) {
-    const strategyEntity = await this.getStrategyById(command.id);
+    const strategyEntity = await this.getStrategyById(command.id, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
     await this.updateStrategyStatusById(
       strategyEntity.id,
       StrategyInstanceStatus.DELETED,
@@ -386,9 +395,12 @@ export class MarketMakingStrategy implements Strategy {
   }
   private async getStrategyById(
     strategyId: number,
+    options?: any,
   ): Promise<MarketMakingStrategyData> {
-    const strategyEntity =
-      await this.marketMakingService.findStrategyById(strategyId);
+    const strategyEntity = await this.marketMakingService.findStrategyById(
+      strategyId,
+      options,
+    );
     if (!strategyEntity) {
       throw new NotFoundException(
         MarketMakingStrategy.ERROR_MESSAGES.STRATEGY_NOT_FOUND,

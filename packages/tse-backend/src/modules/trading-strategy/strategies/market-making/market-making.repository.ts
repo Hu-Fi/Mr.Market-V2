@@ -36,9 +36,9 @@ export class MarketMakingRepository {
     });
   }
 
-  async findStrategyById(id: number): Promise<MarketMaking> {
+  async findStrategyById(id: number, options?: any): Promise<MarketMaking> {
     return this.repository.findOne({
-      where: { id },
+      where: { id, ...options },
     });
   }
 

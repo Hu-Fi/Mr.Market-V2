@@ -46,9 +46,9 @@ export class VolumeStrategyRepository {
     });
   }
 
-  async findStrategyById(id: number): Promise<Volume> {
+  async findStrategyById(id: number, options?: any): Promise<Volume> {
     return this.repository.findOne({
-      where: { id: id },
+      where: { id: id, ...options },
     });
   }
 

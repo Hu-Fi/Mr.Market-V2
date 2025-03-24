@@ -14,9 +14,12 @@ export class MixinAuthSession {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { eager: true })
   @JoinColumn({ name: 'userId' })
-  userId: string;
+  userId: User;
+
+  @Column()
+  clientId: string;
 
   @Column()
   authorizationId: string;

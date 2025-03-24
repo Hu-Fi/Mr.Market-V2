@@ -3,10 +3,16 @@ import { UserBalanceRepository } from './user-balance.repository';
 import { UserBalance } from '../../common/entities/user-balance.entity';
 import Decimal from 'decimal.js';
 import { TransactionBalance } from '../../common/interfaces/transaction.interfaces';
+import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserBalanceService {
-  constructor(private readonly userBalanceRepository: UserBalanceRepository) {}
+  constructor(
+    private readonly userBalanceRepository: UserBalanceRepository,
+    private readonly mixinGateway: MixinIntegrationService,
+    private readonly authService: AuthService,
+  ) {}
   async findOrCreateUserBalance(
     userId: string,
     assetId: string,
@@ -44,5 +50,11 @@ export class UserBalanceService {
     userBalance.balance = currentBalance.plus(transactionAmount).toNumber();
 
     return this.userBalanceRepository.saveUserBalance(userBalance);
+  }
+
+  async getMixinUserBalance(userId: string) {
+    const clientSession =
+      await this.authService.getMixinUserAuthSession(userId);
+    return await this.mixinGateway.fetchUserBalanceDetails(clientSession);
   }
 }

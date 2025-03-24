@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomLogger } from '../logger/logger.service';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 import { ExchangeOperationService } from '../exchange-operation/exchange-operation.service';
@@ -106,6 +106,13 @@ export class ExchangeTradeService {
   }
 
   async cancelOrder(command: CancelOrderCommand) {
+    const order = await this.getOperationByOrderExtId(command.orderId, {
+      userId: command.userId,
+      clientId: command.clientId,
+    });
+    if (!order) {
+      throw new NotFoundException(`Order ${command.orderId} not found.`);
+    }
     const exchangeInstance = await this.getExchangeInstance(command.exchange);
 
     try {
@@ -173,6 +180,16 @@ export class ExchangeTradeService {
 
   private async saveExchangeOperation(command: OperationCommand) {
     await this.exchangeOperationService.saveExchangeOperation(command);
+  }
+
+  private async getOperationByOrderExtId(
+    orderExtId: string,
+    { userId, clientId }: { userId: string; clientId: string },
+  ) {
+    return await this.exchangeOperationService.getExchangeOperation(
+      orderExtId,
+      { userId, clientId },
+    );
   }
 
   private async handleOrderError(
