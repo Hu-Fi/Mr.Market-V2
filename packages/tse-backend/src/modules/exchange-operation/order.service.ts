@@ -41,4 +41,13 @@ export class OrderService {
       details,
     });
   }
+
+  async deleteOlderOrders(numberOfDays: number): Promise<number> {
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - numberOfDays);
+
+    const deleteResult = await this.repository.delete(dateThreshold);
+
+    return deleteResult.affected || 0;
+  }
 }

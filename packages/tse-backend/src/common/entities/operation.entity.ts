@@ -19,7 +19,7 @@ export class Operation {
   @Column('jsonb', { nullable: true })
   details: Record<string, any>;
 
-  @ManyToOne(() => Order, (order) => order.operations)
+  @ManyToOne(() => Order, (order) => order.operations, { onDelete: 'CASCADE' })
   order: Order;
 
   @CreateDateColumn()
