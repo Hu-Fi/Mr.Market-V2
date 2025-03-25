@@ -8,15 +8,18 @@ import {
   MarketMakingStrategyActionCommand,
   MarketMakingStrategyActionDto,
   MarketMakingStrategyDto,
+  MarketMakingStrategyCommand,
 } from '../model/market-making.dto';
 import {
-  MarketMakingCommandFixture,
-  MarketMakingDtoFixture,
-} from './market-making.fixtures';
+  AmountChangeType,
+  PriceSourceType,
+} from '../../../../../common/enums/strategy-type.enums';
 
 describe('MarketMakingController', () => {
   let controller: MarketMakingController;
   let service: MarketMakingStrategy;
+
+  const reqMock = { user: { id: 'user-123', clientId: 'client-456' } };
 
   beforeEach(async () => {
     const mockService = {
@@ -27,11 +30,7 @@ describe('MarketMakingController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        AutomapperModule.forRoot({
-          strategyInitializer: classes(),
-        }),
-      ],
+      imports: [AutomapperModule.forRoot({ strategyInitializer: classes() })],
       controllers: [MarketMakingController],
       providers: [MarketMakingStrategy, MarketMakingStrategyProfile],
     })
@@ -43,60 +42,96 @@ describe('MarketMakingController', () => {
     service = module.get<MarketMakingStrategy>(MarketMakingStrategy);
   });
 
-  describe('createMarketMaking', () => {
-    it('should call service.create with the mapped command', async () => {
-      const dto: MarketMakingStrategyDto = MarketMakingDtoFixture;
-      const command = MarketMakingCommandFixture;
-      jest.spyOn(service, 'create').mockImplementation(async () => {});
+  describe('createMarketMakingStrategy', () => {
+    it('should call service.create with the correctly mapped command', async () => {
+      const dto: MarketMakingStrategyDto = {
+        pair: 'BTC/USDT',
+        exchangeName: 'binance',
+        bidSpread: 0.01,
+        askSpread: 0.01,
+        orderAmount: 1,
+        checkIntervalSeconds: 10,
+        numberOfLayers: 1,
+        priceSourceType: PriceSourceType.MID_PRICE,
+        amountChangePerLayer: 1,
+        amountChangeType: AmountChangeType.PERCENTAGE,
+        ceilingPrice: 50000,
+        floorPrice: 30000,
+      };
 
-      await controller.createMarketMakingStrategy(dto);
+      const expectedCommand: MarketMakingStrategyCommand = {
+        userId: reqMock.user.id,
+        clientId: reqMock.user.clientId,
+        sideA: 'BTC',
+        sideB: 'USDT',
+        exchangeName: 'binance',
+        bidSpread: 0.01,
+        askSpread: 0.01,
+        orderAmount: 1,
+        checkIntervalSeconds: 10,
+        numberOfLayers: 1,
+        priceSourceType: PriceSourceType.MID_PRICE,
+        amountChangePerLayer: 1,
+        amountChangeType: AmountChangeType.PERCENTAGE,
+        ceilingPrice: 50000,
+        floorPrice: 30000,
+      };
 
-      expect(service.create).toHaveBeenCalledWith(command);
+      jest.spyOn(service, 'create').mockResolvedValue(undefined);
+      await controller.createMarketMakingStrategy(reqMock, dto);
+
+      expect(service.create).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('pauseMarketMakingStrategy', () => {
-    it('should call service.pause with the mapped command', async () => {
-      const dto: MarketMakingStrategyActionDto = {
-        userId: '123',
-        clientId: '456',
+    it('should call service.pause with the correctly mapped command', async () => {
+      const dto: MarketMakingStrategyActionDto = { id: 1 };
+
+      const expectedCommand: MarketMakingStrategyActionCommand = {
+        id: 1,
+        userId: reqMock.user.id,
+        clientId: reqMock.user.clientId,
       };
-      const command = dto as MarketMakingStrategyActionCommand;
-      jest.spyOn(service, 'pause').mockImplementation(async () => {});
 
-      await controller.pauseMarketMakingStrategy(dto);
+      jest.spyOn(service, 'pause').mockResolvedValue(undefined);
+      await controller.pauseMarketMakingStrategy(reqMock, dto);
 
-      expect(service.pause).toHaveBeenCalledWith(command);
+      expect(service.pause).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('stopMarketMakingStrategy', () => {
-    it('should call service.stop with the mapped command', async () => {
-      const dto: MarketMakingStrategyActionDto = {
-        userId: '123',
-        clientId: '456',
+    it('should call service.stop with the correctly mapped command', async () => {
+      const dto: MarketMakingStrategyActionDto = { id: 2 };
+
+      const expectedCommand: MarketMakingStrategyActionCommand = {
+        id: 2,
+        userId: reqMock.user.id,
+        clientId: reqMock.user.clientId,
       };
-      const command = dto as MarketMakingStrategyActionCommand;
-      jest.spyOn(service, 'stop').mockImplementation(async () => {});
 
-      await controller.stopMarketMakingStrategy(dto);
+      jest.spyOn(service, 'stop').mockResolvedValue(undefined);
+      await controller.stopMarketMakingStrategy(reqMock, dto);
 
-      expect(service.stop).toHaveBeenCalledWith(command);
+      expect(service.stop).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('deleteMarketMakingStrategy', () => {
-    it('should call service.delete with the mapped command', async () => {
-      const dto: MarketMakingStrategyActionDto = {
-        userId: '123',
-        clientId: '456',
+    it('should call service.delete with the correctly mapped command', async () => {
+      const dto: MarketMakingStrategyActionDto = { id: 3 };
+
+      const expectedCommand: MarketMakingStrategyActionCommand = {
+        id: 3,
+        userId: reqMock.user.id,
+        clientId: reqMock.user.clientId,
       };
-      const command = dto as MarketMakingStrategyActionCommand;
-      jest.spyOn(service, 'delete').mockImplementation(async () => {});
 
-      await controller.deleteMarketMakingStrategy(dto);
+      jest.spyOn(service, 'delete').mockResolvedValue(undefined);
+      await controller.deleteMarketMakingStrategy(reqMock, dto);
 
-      expect(service.delete).toHaveBeenCalledWith(command);
+      expect(service.delete).toHaveBeenCalledWith(expectedCommand);
     });
   });
 });

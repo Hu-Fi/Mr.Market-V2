@@ -24,9 +24,9 @@ describe('ExchangeTradeController', () => {
     cancelOrder: jest.fn(),
   };
 
+  const mockReq = { user: { userId: 'user123', clientId: 'client456' } };
+
   const marketTradeDtoFixture: MarketTradeDto = {
-    userId: 'user123',
-    clientId: 'client456',
     exchange: 'binance',
     symbol: 'BTC/USDT',
     side: TradeSideType.BUY,
@@ -68,25 +68,25 @@ describe('ExchangeTradeController', () => {
 
   describe('handleMarketTrade', () => {
     it('should call executeMarketTrade with correct arguments', async () => {
-      const command: MarketTradeCommand = {
-        userId: marketTradeDtoFixture.userId,
-        clientId: marketTradeDtoFixture.clientId,
+      const expectedCommand: MarketTradeCommand = {
+        userId: mockReq.user.userId,
+        clientId: mockReq.user.clientId,
         exchange: marketTradeDtoFixture.exchange,
         symbol: marketTradeDtoFixture.symbol,
         side: marketTradeDtoFixture.side,
         amount: marketTradeDtoFixture.amount,
       };
 
-      await controller.handleMarketTrade(marketTradeDtoFixture);
-      expect(service.executeMarketTrade).toHaveBeenCalledWith(command);
+      await controller.handleMarketTrade(mockReq, marketTradeDtoFixture);
+      expect(service.executeMarketTrade).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('handleLimitTrade', () => {
     it('should call executeLimitTrade with correct arguments', async () => {
-      const command: MarketLimitCommand = {
-        userId: marketLimitDtoFixture.userId,
-        clientId: marketLimitDtoFixture.clientId,
+      const expectedCommand: MarketLimitCommand = {
+        userId: mockReq.user.userId,
+        clientId: mockReq.user.clientId,
         exchange: marketLimitDtoFixture.exchange,
         symbol: marketLimitDtoFixture.symbol,
         side: marketLimitDtoFixture.side,
@@ -94,21 +94,23 @@ describe('ExchangeTradeController', () => {
         price: marketLimitDtoFixture.price,
       };
 
-      await controller.handleLimitTrade(marketLimitDtoFixture);
-      expect(service.executeLimitTrade).toHaveBeenCalledWith(command);
+      await controller.handleLimitTrade(mockReq, marketLimitDtoFixture);
+      expect(service.executeLimitTrade).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('cancelOrder', () => {
     it('should call cancelOrder with correct arguments', async () => {
-      const command: CancelOrderCommand = {
+      const expectedCommand: CancelOrderCommand = {
+        userId: mockReq.user.userId,
+        clientId: mockReq.user.clientId,
         exchange: cancelOrderDtoFixture.exchange,
         orderId: cancelOrderDtoFixture.orderId,
         symbol: cancelOrderDtoFixture.symbol,
       };
 
-      await controller.cancelOrder(cancelOrderDtoFixture);
-      expect(service.cancelOrder).toHaveBeenCalledWith(command);
+      await controller.cancelOrder(mockReq, cancelOrderDtoFixture);
+      expect(service.cancelOrder).toHaveBeenCalledWith(expectedCommand);
     });
   });
 });

@@ -19,6 +19,13 @@ describe('ArbitrageController', () => {
   let controller: ArbitrageController;
   let service: ArbitrageStrategy;
 
+  const mockRequest = {
+    user: {
+      id: 'user-123',
+      clientId: 'client-456',
+    },
+  };
+
   beforeEach(async () => {
     const mockService = {
       create: jest.fn(),
@@ -45,59 +52,70 @@ describe('ArbitrageController', () => {
   });
 
   describe('createArbitrage', () => {
-    it('should call service.create with the mapped command', async () => {
+    it('should call service.create with the correctly mapped command', async () => {
       const dto: ArbitrageStrategyDto = ArbitrageDtoFixture;
-      const command: ArbitrageStrategyCommand = ArbitrageCommandFixture;
-      jest.spyOn(service, 'create').mockImplementation(async () => {});
+      const expectedCommand: ArbitrageStrategyCommand = {
+        ...ArbitrageCommandFixture,
+        userId: mockRequest.user.id,
+        clientId: mockRequest.user.clientId,
+      };
 
-      await controller.createArbitrage(dto);
+      jest.spyOn(service, 'create').mockResolvedValue();
 
-      expect(service.create).toHaveBeenCalledWith(command);
+      await controller.createArbitrage(mockRequest, dto);
+
+      expect(service.create).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('pauseArbitrage', () => {
-    it('should call service.pause with the mapped command', async () => {
-      const dto: ArbitrageStrategyActionDto = {
-        userId: '123',
-        clientId: '456',
+    it('should call service.pause with the correctly mapped command', async () => {
+      const dto: ArbitrageStrategyActionDto = { id: 1 };
+      const expectedCommand: ArbitrageStrategyActionCommand = {
+        id: 1,
+        userId: mockRequest.user.id,
+        clientId: mockRequest.user.clientId,
       };
-      const command = dto as ArbitrageStrategyActionCommand;
-      jest.spyOn(service, 'pause').mockImplementation(async () => {});
 
-      await controller.pauseArbitrage(dto);
+      jest.spyOn(service, 'pause').mockResolvedValue();
 
-      expect(service.pause).toHaveBeenCalledWith(command);
+      await controller.pauseArbitrage(mockRequest, dto);
+
+      expect(service.pause).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('stopArbitrage', () => {
-    it('should call service.stop with the mapped command', async () => {
-      const dto: ArbitrageStrategyActionDto = {
-        userId: '123',
-        clientId: '456',
+    it('should call service.stop with the correctly mapped command', async () => {
+      const dto: ArbitrageStrategyActionDto = { id: 2 };
+      const expectedCommand: ArbitrageStrategyActionCommand = {
+        id: 2,
+        userId: mockRequest.user.id,
+        clientId: mockRequest.user.clientId,
       };
-      const command = dto as ArbitrageStrategyActionCommand;
-      jest.spyOn(service, 'stop').mockImplementation(async () => {});
 
-      await controller.stopArbitrage(dto);
+      jest.spyOn(service, 'stop').mockResolvedValue();
 
-      expect(service.stop).toHaveBeenCalledWith(command);
+      await controller.stopArbitrage(mockRequest, dto);
+
+      expect(service.stop).toHaveBeenCalledWith(expectedCommand);
     });
   });
 
   describe('deleteArbitrage', () => {
-    it('should call service.delete with the mapped command', async () => {
-      const dto: ArbitrageStrategyActionDto = {
-        userId: '123',
-        clientId: '456',
+    it('should call service.delete with the correctly mapped command', async () => {
+      const dto: ArbitrageStrategyActionDto = { id: 3 };
+      const expectedCommand: ArbitrageStrategyActionCommand = {
+        id: 3,
+        userId: mockRequest.user.id,
+        clientId: mockRequest.user.clientId,
       };
-      const command = dto as ArbitrageStrategyActionCommand;
-      jest.spyOn(service, 'delete').mockImplementation(async () => {});
 
-      await controller.deleteArbitrage(dto);
+      jest.spyOn(service, 'delete').mockResolvedValue();
 
-      expect(service.delete).toHaveBeenCalledWith(command);
+      await controller.deleteArbitrage(mockRequest, dto);
+
+      expect(service.delete).toHaveBeenCalledWith(expectedCommand);
     });
   });
 });

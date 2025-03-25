@@ -1,11 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserBalanceService } from '../user-balance.service';
 import { UserBalanceRepository } from '../user-balance.repository';
+import { AuthService } from '../../auth/auth.service';
 import { UserBalance } from '../../../common/entities/user-balance.entity';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 
 const mockUserBalanceRepository = {
   findByUserIdAssetId: jest.fn(),
   saveUserBalance: jest.fn(),
+};
+
+const mockMixinIntegrationService = {
+  fetchUserBalanceDetails: jest.fn(),
+};
+
+const mockAuthService = {
+  getMixinUserAuthSession: jest.fn(),
 };
 
 describe('UserBalanceService', () => {
@@ -13,12 +23,22 @@ describe('UserBalanceService', () => {
   let repository: UserBalanceRepository;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserBalanceService,
         {
           provide: UserBalanceRepository,
           useValue: mockUserBalanceRepository,
+        },
+        {
+          provide: MixinIntegrationService,
+          useValue: mockMixinIntegrationService,
+        },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
         },
       ],
     }).compile();
@@ -65,10 +85,9 @@ describe('UserBalanceService', () => {
     jest
       .spyOn(repository, 'findByUserIdAssetId')
       .mockResolvedValue(userBalance);
-    jest.spyOn(repository, 'saveUserBalance').mockResolvedValue({
-      ...userBalance,
-      balance: 200,
-    });
+    jest
+      .spyOn(repository, 'saveUserBalance')
+      .mockResolvedValue({ ...userBalance, balance: 200 });
 
     const result = await service.updateUserBalance({
       userId: '1',

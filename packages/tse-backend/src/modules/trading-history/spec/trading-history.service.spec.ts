@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TradingHistoryService } from '../trading-history.service';
 import { OrderRepository } from '../../exchange-operation/order.repository';
 import { Between } from 'typeorm';
-import {
-  GetUserTradingHistoryParamsCommand,
-  GetUserTradingHistoryQueryCommand,
-} from '../model/trading-history.model';
+import { GetUserTradingHistoryQueryCommand } from '../model/trading-history.model';
 import {
   MarketOrderType,
   OrderStatus,
@@ -47,7 +44,7 @@ describe('TradingHistoryService', () => {
   });
 
   describe('getUserTradingHistory', () => {
-    const params: GetUserTradingHistoryParamsCommand = { userId: '1' };
+    const params: string = '1';
 
     it('should filter trading history correctly with a full set of filters', async () => {
       const queries: GetUserTradingHistoryQueryCommand = {
@@ -70,7 +67,7 @@ describe('TradingHistoryService', () => {
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {
-          userId: params.userId,
+          userId: params,
           createdAt: Between(new Date('2024-01-01'), new Date('2024-01-31')),
           exchangeName: 'Binance',
           symbol: 'BTC/USD',
@@ -104,7 +101,7 @@ describe('TradingHistoryService', () => {
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {
-          userId: params.userId,
+          userId: params,
           createdAt: Between(new Date('2024-01-01'), new Date('2024-01-31')),
         },
         take: 5,
@@ -125,7 +122,7 @@ describe('TradingHistoryService', () => {
       const result = await service.getUserTradingHistory(params, queries);
 
       expect(repository.find).toHaveBeenCalledWith({
-        where: { userId: params.userId },
+        where: { userId: params },
         take: 10,
         skip: 0,
         order: {
@@ -148,7 +145,7 @@ describe('TradingHistoryService', () => {
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {
-          userId: params.userId,
+          userId: params,
           exchangeName: 'Coinbase',
           type: MarketOrderType.MARKET_ORDER,
         },
@@ -177,7 +174,7 @@ describe('TradingHistoryService', () => {
 
       expect(repository.find).toHaveBeenCalledWith({
         where: {
-          userId: params.userId,
+          userId: params,
           status: OrderStatus.EXECUTED,
           side: TradeSideType.BUY,
         },

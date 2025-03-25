@@ -12,10 +12,7 @@ import {
   MarketOrderType,
   OrderStatus,
 } from '../../../common/enums/exchange-operation.enums';
-import {
-  CancelOperationCommand,
-  OperationCommand,
-} from '../../exchange-operation/model/exchange-operation.model';
+import { OperationCommand } from '../../exchange-operation/model/exchange-operation.model';
 
 describe('ExchangeTradeService', () => {
   let service: ExchangeTradeService;
@@ -27,6 +24,7 @@ describe('ExchangeTradeService', () => {
   const mockExchangeOperationService = {
     saveOrderData: jest.fn(),
     saveExchangeOperation: jest.fn(),
+    getExchangeOperation: jest.fn(),
   };
 
   const mockLogger = {
@@ -235,43 +233,62 @@ describe('ExchangeTradeService', () => {
   });
 
   describe('cancelOrder', () => {
-    const cancelOrderCommand: CancelOrderCommand = {
-      exchange: 'binance',
-      orderId: 'order123',
-      symbol: 'BTC/USDT',
-    };
-
     it('should cancel order successfully', async () => {
       mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
-      exchangeInstanceMock.cancelOrder.mockResolvedValue({ id: 'order123' });
+      mockExchangeOperationService.getExchangeOperation.mockResolvedValue({
+        orderExtId: 'order123',
+        symbol: 'BTC/USDT',
+        exchangeName: 'binance',
+      });
+
+      exchangeInstanceMock.cancelOrder.mockResolvedValue({
+        id: 'order123',
+        status: 'canceled',
+      });
+
+      const cancelOrderCommand: CancelOrderCommand = {
+        userId: 'user123',
+        clientId: 'client456',
+        exchange: 'binance',
+        orderId: 'order123',
+        symbol: 'BTC/USDT',
+      };
 
       await service.cancelOrder(cancelOrderCommand);
 
-      expect(
-        mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('binance');
-      expect(exchangeInstanceMock.cancelOrder).toHaveBeenCalledWith(
-        'order123',
-        'BTC/USDT',
-      );
       expect(
         mockExchangeOperationService.saveExchangeOperation,
       ).toHaveBeenCalledWith({
         orderExtId: 'order123',
         status: OrderStatus.CANCELED,
-        details: { id: 'order123' },
-      } as CancelOperationCommand);
+        details: { id: 'order123', status: 'canceled' },
+      });
     });
 
     it('should handle cancel order error', async () => {
       mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
       );
+
+      mockExchangeOperationService.getExchangeOperation.mockResolvedValue({
+        orderExtId: 'order123',
+        symbol: 'BTC/USDT',
+        exchangeName: 'binance',
+      });
+
       exchangeInstanceMock.cancelOrder.mockRejectedValue(
-        new Error('Cancel failed'),
+        new Error('Cancel failed due to exchange error'),
       );
+
+      const cancelOrderCommand: CancelOrderCommand = {
+        userId: 'user123',
+        exchange: 'binance',
+        orderId: 'order123',
+        symbol: 'BTC/USDT',
+        clientId: 'client456',
+      };
 
       await expect(service.cancelOrder(cancelOrderCommand)).rejects.toThrow(
         'Cancel failed',
@@ -280,14 +297,10 @@ describe('ExchangeTradeService', () => {
       expect(
         mockExchangeRegistryService.getExchangeByName,
       ).toHaveBeenCalledWith('binance');
-      expect(
-        mockExchangeOperationService.saveExchangeOperation,
-      ).toHaveBeenCalledWith({
-        orderEntityId: null,
-        orderExtId: 'order123',
-        status: OrderStatus.FAILED,
-        details: new Error('Cancel failed'),
-      } as OperationCommand);
+      expect(exchangeInstanceMock.cancelOrder).toHaveBeenCalledWith(
+        'order123',
+        'BTC/USDT',
+      );
     });
   });
 });

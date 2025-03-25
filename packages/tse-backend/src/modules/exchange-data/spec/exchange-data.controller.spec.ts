@@ -126,10 +126,14 @@ describe('ExchangeDataController', () => {
 
   describe('getSupportedPairs', () => {
     it('should call getSupportedExchanges method of the service and throw Error', async () => {
-      expect(service.getSupportedExchanges).toHaveBeenCalled();
+      const getSupportedExchangesSpy = jest
+        .spyOn(service, 'getSupportedExchanges')
+        .mockResolvedValue([]);
+
       await expect(controller.getSupportedPairs()).rejects.toThrow(
         'No supported exchanges found',
       );
+      expect(getSupportedExchangesSpy).toHaveBeenCalled();
     });
 
     it('should handle the case when some exchange returns empty pairs', async () => {

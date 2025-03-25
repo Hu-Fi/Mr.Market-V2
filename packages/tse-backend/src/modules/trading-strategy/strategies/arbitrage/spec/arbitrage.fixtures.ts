@@ -41,4 +41,6 @@ export const ArbitrageDataFixture = {
   createdAt: new Date(),
   updatedAt: new Date(),
   status: StrategyInstanceStatus.RUNNING,
+  lastTradingAttemptAt: new Date(),
+  pausedReason: undefined,
 };
