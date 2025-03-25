@@ -5,7 +5,8 @@ import {
   PriceSourceType,
   StrategyInstanceStatus,
 } from '../../../../../common/enums/strategy-type.enums';
-import { IsNumber, IsString, Matches, Max, Min } from 'class-validator';
+import { IsNumber, Matches, Max, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class MarketMakingStrategyDto {
   @AutoMap()
@@ -161,8 +162,9 @@ export class MarketMakingStrategyData {
 export class MarketMakingStrategyActionDto {
   @AutoMap()
   @ApiProperty({ example: '1' })
-  @IsString()
-  id: string;
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsNumber()
+  id: number;
 }
 
 export class MarketMakingStrategyActionCommand {

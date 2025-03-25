@@ -19,7 +19,10 @@ describe('ArbitrageService', () => {
           useValue: {
             createStrategy: jest.fn(),
             updateStrategyStatusById: jest.fn(),
+            updateStrategyLastTradingAttemptById: jest.fn(),
+            updateStrategyPausedReasonById: jest.fn(),
             findRunningStrategies: jest.fn(),
+            findStrategyById: jest.fn(),
             findLatestStrategyByUserId: jest.fn(),
           },
         },
@@ -30,6 +33,8 @@ describe('ArbitrageService', () => {
     repository = module.get<ArbitrageStrategyRepository>(
       ArbitrageStrategyRepository,
     );
+
+    jest.clearAllMocks();
   });
 
   describe('createStrategy', () => {
@@ -93,6 +98,75 @@ describe('ArbitrageService', () => {
     });
   });
 
+  describe('updateStrategyLastTradingAttemptById', () => {
+    it('should update the last trading attempt date', async () => {
+      const id = 2;
+      const newDate = new Date();
+
+      jest
+        .spyOn(repository, 'updateStrategyLastTradingAttemptById')
+        .mockResolvedValue(undefined);
+
+      await service.updateStrategyLastTradingAttemptById(id, newDate);
+      expect(
+        repository.updateStrategyLastTradingAttemptById,
+      ).toHaveBeenCalledWith(id, newDate);
+    });
+
+    it('should throw an error if updating the last trading attempt fails', async () => {
+      const id = 2;
+      const newDate = new Date();
+      const error = new Error('Update failed');
+
+      jest
+        .spyOn(repository, 'updateStrategyLastTradingAttemptById')
+        .mockRejectedValue(error);
+      const loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
+
+      await expect(
+        service.updateStrategyLastTradingAttemptById(id, newDate),
+      ).rejects.toThrow(error);
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        `Error updating last trading attempt with ID ${id}: ${error.message}`,
+      );
+    });
+  });
+
+  describe('updateStrategyPausedReasonById', () => {
+    it('should update the paused reason by ID', async () => {
+      const id = 3;
+      const newReason = 'Market fluctuations';
+
+      jest
+        .spyOn(repository, 'updateStrategyPausedReasonById')
+        .mockResolvedValue(undefined);
+
+      await service.updateStrategyPausedReasonById(id, newReason);
+      expect(repository.updateStrategyPausedReasonById).toHaveBeenCalledWith(
+        id,
+        newReason,
+      );
+    });
+
+    it('should throw an error if updating the paused reason fails', async () => {
+      const id = 3;
+      const newReason = 'Market fluctuations';
+      const error = new Error('Update failed');
+
+      jest
+        .spyOn(repository, 'updateStrategyPausedReasonById')
+        .mockRejectedValue(error);
+      const loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
+
+      await expect(
+        service.updateStrategyPausedReasonById(id, newReason),
+      ).rejects.toThrow(error);
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        `Error updating strategy paused reason with ID ${id}: ${error.message}`,
+      );
+    });
+  });
+
   describe('findRunningStrategies', () => {
     it('should return a list of running strategies', async () => {
       const strategies: Arbitrage[] = [ArbitrageDataFixture];
@@ -113,41 +187,16 @@ describe('ArbitrageService', () => {
     });
   });
 
-  describe('findLatestStrategyByUserId', () => {
-    it('should return the latest strategy for the given user ID', async () => {
-      const userId = 'user1';
-      const strategy: Arbitrage = ArbitrageDataFixture;
+  describe('findStrategyById', () => {
+    it('should return a strategy by ID', async () => {
+      const id = 4;
+      const strategy = ArbitrageDataFixture;
+      const options = { relations: ['trades'] };
 
-      jest
-        .spyOn(repository, 'findLatestStrategyByUserId')
-        .mockResolvedValue(strategy);
+      jest.spyOn(repository, 'findStrategyById').mockResolvedValue(strategy);
 
-      expect(await service.findLatestStrategyByUserId(userId)).toEqual(
-        strategy,
-      );
-    });
-
-    it('should return null if no strategy is found for the given user ID', async () => {
-      const userId = 'user1';
-
-      jest
-        .spyOn(repository, 'findLatestStrategyByUserId')
-        .mockResolvedValue(null);
-
-      expect(await service.findLatestStrategyByUserId(userId)).toBeNull();
-    });
-
-    it('should throw an error if finding the latest strategy fails', async () => {
-      const userId = 'user1';
-      const error = new Error('Find latest strategy failed');
-
-      jest
-        .spyOn(repository, 'findLatestStrategyByUserId')
-        .mockRejectedValue(error);
-
-      await expect(service.findLatestStrategyByUserId(userId)).rejects.toThrow(
-        error,
-      );
+      expect(await service.findStrategyById(id, options)).toEqual(strategy);
+      expect(repository.findStrategyById).toHaveBeenCalledWith(id, options);
     });
   });
 });

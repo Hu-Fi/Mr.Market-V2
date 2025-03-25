@@ -79,5 +79,5 @@ export const MarketMakingDataFixture = {
   status: StrategyInstanceStatus.CREATED,
   startPrice: undefined,
   lastTradingAttemptAt: new Date(),
-  pausedReason: undefined
+  pausedReason: undefined,
 };

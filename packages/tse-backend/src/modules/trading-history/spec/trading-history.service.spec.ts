@@ -2,9 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TradingHistoryService } from '../trading-history.service';
 import { OrderRepository } from '../../exchange-operation/order.repository';
 import { Between } from 'typeorm';
-import {
-  GetUserTradingHistoryQueryCommand,
-} from '../model/trading-history.model';
+import { GetUserTradingHistoryQueryCommand } from '../model/trading-history.model';
 import {
   MarketOrderType,
   OrderStatus,

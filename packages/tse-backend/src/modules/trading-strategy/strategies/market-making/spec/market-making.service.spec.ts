@@ -128,10 +128,9 @@ describe('MarketMakingService', () => {
 
       await service.updateStrategyLastTradingAttemptById(id, newDate);
 
-      expect(repository.updateStrategyLastTradingAttemptById).toHaveBeenCalledWith(
-        id,
-        newDate,
-      );
+      expect(
+        repository.updateStrategyLastTradingAttemptById,
+      ).toHaveBeenCalledWith(id, newDate);
     });
 
     it('should throw an error if updating last trading attempt fails', async () => {

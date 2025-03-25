@@ -4,9 +4,7 @@ import { TradingHistoryService } from '../trading-history.service';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { TradingHistoryProfile } from '../trading-history.mapper';
-import {
-  GetUserTradingHistoryQueryDto,
-} from '../model/trading-history.model';
+import { GetUserTradingHistoryQueryDto } from '../model/trading-history.model';
 import {
   MarketOrderType,
   OrderStatus,
@@ -19,6 +17,7 @@ describe('TradingHistoryController', () => {
 
   const mockTradingHistoryService = {
     getUserTradingHistory: jest.fn(),
+    getUserStrategyHistory: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -55,31 +54,47 @@ describe('TradingHistoryController', () => {
       limit: 10,
     };
 
-    it('should call service with mapped params and query', async () => {
+    it('should call service with userId and mapped query command', async () => {
       mockTradingHistoryService.getUserTradingHistory.mockResolvedValue([
         { id: 1 },
       ]);
 
       const result = await controller.getUserTradingHistory(
         queryDto,
-        { user: { id: 1 } },
+        { user: { userId: 1 } }, // corrected here
       );
 
       expect(service.getUserTradingHistory).toHaveBeenCalledWith(
-        expect.objectContaining({ userId: 1 }),
+        1, // explicitly assert userId
         expect.objectContaining({
           startDate: '2024-01-01',
           endDate: '2024-01-31',
           symbol: 'BTC/USD',
-          type: 'limit',
-          status: 'executed',
-          side: 'buy',
+          type: MarketOrderType.LIMIT_ORDER,
+          status: OrderStatus.EXECUTED,
+          side: TradeSideType.BUY,
           page: 1,
           limit: 10,
         }),
       );
 
       expect(result).toEqual([{ id: 1 }]);
+    });
+  });
+
+  describe('getUserStrategyHistory', () => {
+    it('should call service with userId and return strategies', async () => {
+      const mockStrategies = [{ strategyId: 123, name: 'Strategy A' }];
+      mockTradingHistoryService.getUserStrategyHistory.mockResolvedValue(
+        mockStrategies,
+      );
+
+      const result = await controller.getUserStrategyHistory({
+        user: { userId: 2 },
+      });
+
+      expect(service.getUserStrategyHistory).toHaveBeenCalledWith(2);
+      expect(result).toEqual(mockStrategies);
     });
   });
 });

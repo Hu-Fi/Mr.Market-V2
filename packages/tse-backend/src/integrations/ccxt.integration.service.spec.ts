@@ -68,13 +68,18 @@ describe('CcxtIntegrationService', () => {
   describe('addExchange', () => {
     it('should call cacheManager.set with the correct parameters', async () => {
       await service.addExchange('binance', 'marketsData');
-      expect(mockCacheManager.set).toHaveBeenCalledWith('binance', 'marketsData');
+      expect(mockCacheManager.set).toHaveBeenCalledWith(
+        'binance',
+        'marketsData',
+      );
     });
   });
 
   describe('getDefaultExchange', () => {
     it('should return the value from cacheManager.get using key `${exchangeName}-true`', async () => {
-      (mockCacheManager.get as jest.Mock).mockResolvedValue('defaultExchangeData');
+      (mockCacheManager.get as jest.Mock).mockResolvedValue(
+        'defaultExchangeData',
+      );
       const result = await service.getDefaultExchange('binance');
       expect(mockCacheManager.get).toHaveBeenCalledWith('binance-true');
       expect(result).toEqual('defaultExchangeData');
@@ -83,14 +88,20 @@ describe('CcxtIntegrationService', () => {
 
   describe('getExchangeNames', () => {
     it('should return a set of exchange names from cache keys ending with "-true"', async () => {
-      (mockCacheManager.store.keys as jest.Mock).mockResolvedValue(['binance-true', 'kraken-true', 'other-false']);
+      (mockCacheManager.store.keys as jest.Mock).mockResolvedValue([
+        'binance-true',
+        'kraken-true',
+        'other-false',
+      ]);
       const names = await service.getExchangeNames();
       expect(names).toEqual(new Set(['binance', 'kraken']));
     });
 
     it('should throw an error if the cache store does not support key listing', async () => {
       (mockCacheManager.store.keys as any) = undefined;
-      await expect(service.getExchangeNames()).rejects.toThrow('Cache store does not support key listing.');
+      await expect(service.getExchangeNames()).rejects.toThrow(
+        'Cache store does not support key listing.',
+      );
     });
   });
 
@@ -117,7 +128,7 @@ describe('CcxtIntegrationService', () => {
           name: 'nonexistent',
           key: 'testApiKey',
           secret: 'testSecret',
-        })
+        }),
       ).rejects.toThrow('Exchange class for nonexistent not found');
     });
 
@@ -133,8 +144,8 @@ describe('CcxtIntegrationService', () => {
           name: 'binance',
           key: 'testApiKey',
           secret: 'testSecret',
-        })
-      ).rejects.toThrow("Initialization error");
+        }),
+      ).rejects.toThrow('Initialization error');
 
       expect(mockCacheManager.del).toHaveBeenCalledWith('binance');
     });

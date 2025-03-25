@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
-import { IsString, Matches } from 'class-validator';
+import { IsNumber, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class ArbitrageStrategyDto {
   @AutoMap()
@@ -85,8 +86,9 @@ export class ArbitrageStrategyData {
 export class ArbitrageStrategyActionDto {
   @AutoMap()
   @ApiProperty({ example: '1' })
-  @IsString()
-  id: string;
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsNumber()
+  id: number;
 }
 
 export class ArbitrageStrategyActionCommand {

@@ -12,9 +12,7 @@ import {
   MarketOrderType,
   OrderStatus,
 } from '../../../common/enums/exchange-operation.enums';
-import {
-  OperationCommand,
-} from '../../exchange-operation/model/exchange-operation.model';
+import { OperationCommand } from '../../exchange-operation/model/exchange-operation.model';
 
 describe('ExchangeTradeService', () => {
   let service: ExchangeTradeService;
@@ -236,14 +234,19 @@ describe('ExchangeTradeService', () => {
 
   describe('cancelOrder', () => {
     it('should cancel order successfully', async () => {
-      mockExchangeRegistryService.getExchangeByName.mockReturnValue(exchangeInstanceMock);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        exchangeInstanceMock,
+      );
       mockExchangeOperationService.getExchangeOperation.mockResolvedValue({
         orderExtId: 'order123',
         symbol: 'BTC/USDT',
         exchangeName: 'binance',
       });
 
-      exchangeInstanceMock.cancelOrder.mockResolvedValue({ id: 'order123', status: 'canceled' });
+      exchangeInstanceMock.cancelOrder.mockResolvedValue({
+        id: 'order123',
+        status: 'canceled',
+      });
 
       const cancelOrderCommand: CancelOrderCommand = {
         userId: 'user123',
@@ -255,7 +258,9 @@ describe('ExchangeTradeService', () => {
 
       await service.cancelOrder(cancelOrderCommand);
 
-      expect(mockExchangeOperationService.saveExchangeOperation).toHaveBeenCalledWith({
+      expect(
+        mockExchangeOperationService.saveExchangeOperation,
+      ).toHaveBeenCalledWith({
         orderExtId: 'order123',
         status: OrderStatus.CANCELED,
         details: { id: 'order123', status: 'canceled' },
@@ -263,7 +268,9 @@ describe('ExchangeTradeService', () => {
     });
 
     it('should handle cancel order error', async () => {
-      mockExchangeRegistryService.getExchangeByName.mockReturnValue(exchangeInstanceMock);
+      mockExchangeRegistryService.getExchangeByName.mockReturnValue(
+        exchangeInstanceMock,
+      );
 
       mockExchangeOperationService.getExchangeOperation.mockResolvedValue({
         orderExtId: 'order123',
@@ -271,7 +278,9 @@ describe('ExchangeTradeService', () => {
         exchangeName: 'binance',
       });
 
-      exchangeInstanceMock.cancelOrder.mockRejectedValue(new Error('Cancel failed due to exchange error'));
+      exchangeInstanceMock.cancelOrder.mockRejectedValue(
+        new Error('Cancel failed due to exchange error'),
+      );
 
       const cancelOrderCommand: CancelOrderCommand = {
         userId: 'user123',
@@ -281,10 +290,17 @@ describe('ExchangeTradeService', () => {
         clientId: 'client456',
       };
 
-      await expect(service.cancelOrder(cancelOrderCommand)).rejects.toThrow('Cancel failed');
+      await expect(service.cancelOrder(cancelOrderCommand)).rejects.toThrow(
+        'Cancel failed',
+      );
 
-      expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith('binance');
-      expect(exchangeInstanceMock.cancelOrder).toHaveBeenCalledWith('order123', 'BTC/USDT');
+      expect(
+        mockExchangeRegistryService.getExchangeByName,
+      ).toHaveBeenCalledWith('binance');
+      expect(exchangeInstanceMock.cancelOrder).toHaveBeenCalledWith(
+        'order123',
+        'BTC/USDT',
+      );
     });
   });
 });

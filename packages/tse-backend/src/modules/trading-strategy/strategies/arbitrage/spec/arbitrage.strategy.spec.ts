@@ -8,7 +8,8 @@ import {
   calculateVWAPForAmount,
   isArbitrageOpportunityBuyOnA,
   isArbitrageOpportunityBuyOnB,
-  isExchangeSupported, isPairSupported,
+  isExchangeSupported,
+  isPairSupported,
 } from '../../../../../common/utils/trading-strategy.utils';
 import {
   ArbitrageStrategyDto,
@@ -29,7 +30,9 @@ export const ArbitrageDtoFixture: ArbitrageStrategyDto = {
 };
 
 export const ArbitrageDataFixture: Arbitrage = {
-  createdAt: undefined, pausedReason: '', updatedAt: undefined,
+  createdAt: undefined,
+  pausedReason: '',
+  updatedAt: undefined,
   id: 1,
   userId: '123',
   clientId: '456',
@@ -42,7 +45,7 @@ export const ArbitrageDataFixture: Arbitrage = {
   checkIntervalSeconds: 10,
   maxOpenOrders: 1,
   status: StrategyInstanceStatus.CREATED,
-  lastTradingAttemptAt: new Date()
+  lastTradingAttemptAt: new Date(),
 };
 
 jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
@@ -67,7 +70,9 @@ describe('ArbitrageStrategy', () => {
           provide: ExchangeRegistryService,
           useValue: {
             getExchangeByName: jest.fn().mockReturnValue({ name: '' }),
-            getSupportedExchanges: jest.fn().mockReturnValue(['ExchangeA', 'ExchangeB']),
+            getSupportedExchanges: jest
+              .fn()
+              .mockReturnValue(['ExchangeA', 'ExchangeB']),
           },
         },
         {
@@ -98,9 +103,10 @@ describe('ArbitrageStrategy', () => {
 
     (isPairSupported as jest.Mock).mockReturnValue(true);
 
-
     strategy = module.get<ArbitrageStrategy>(ArbitrageStrategy);
-    exchangeRegistryService = module.get<ExchangeRegistryService>(ExchangeRegistryService);
+    exchangeRegistryService = module.get<ExchangeRegistryService>(
+      ExchangeRegistryService,
+    );
     tradeService = module.get<ExchangeTradeService>(ExchangeTradeService);
     arbitrageService = module.get<ArbitrageService>(ArbitrageService);
   });
@@ -115,7 +121,7 @@ describe('ArbitrageStrategy', () => {
         userId: '123',
         clientId: '456',
         sideA: 'ETH',
-        sideB: 'USDT'
+        sideB: 'USDT',
       };
 
       await strategy.create(command);
@@ -157,7 +163,9 @@ describe('ArbitrageStrategy', () => {
 
       jest.spyOn(arbitrageService, 'findStrategyById').mockResolvedValue(null);
 
-      await expect(strategy.pause(actionCommand)).rejects.toThrow(NotFoundException);
+      await expect(strategy.pause(actionCommand)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -169,7 +177,9 @@ describe('ArbitrageStrategy', () => {
         clientId: 'client1',
       };
 
-      jest.spyOn(arbitrageService, 'findStrategyById').mockResolvedValue(ArbitrageDataFixture);
+      jest
+        .spyOn(arbitrageService, 'findStrategyById')
+        .mockResolvedValue(ArbitrageDataFixture);
       jest.spyOn(tradeService, 'cancelUnfilledOrders').mockResolvedValue(0);
 
       await strategy.stop(actionCommand);
@@ -190,7 +200,9 @@ describe('ArbitrageStrategy', () => {
 
       jest.spyOn(arbitrageService, 'findStrategyById').mockResolvedValue(null);
 
-      await expect(strategy.stop(actionCommand)).rejects.toThrow(NotFoundException);
+      await expect(strategy.stop(actionCommand)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -202,13 +214,17 @@ describe('ArbitrageStrategy', () => {
         clientId: 'client1',
       };
 
-      jest.spyOn(arbitrageService, 'findStrategyById').mockResolvedValue(ArbitrageDataFixture);
+      jest
+        .spyOn(arbitrageService, 'findStrategyById')
+        .mockResolvedValue(ArbitrageDataFixture);
 
       const exchange = {
         fetchOpenOrders: jest.fn().mockReturnValue([]),
       };
 
-      jest.spyOn(exchangeRegistryService, 'getExchangeByName').mockReturnValue(exchange as any);
+      jest
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
+        .mockReturnValue(exchange as any);
 
       await strategy.delete(actionCommand);
 
@@ -231,9 +247,11 @@ describe('ArbitrageStrategy', () => {
         fetchOrderBook: jest.fn().mockResolvedValue({ bids: [], asks: [] }),
       };
 
-      jest.spyOn(exchangeRegistryService, 'getExchangeByName').mockImplementation((name: string) => {
-        return name === 'ExchangeA' ? (exchangeA as any) : (exchangeB as any);
-      });
+      jest
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
+        .mockImplementation((name: string) => {
+          return name === 'ExchangeA' ? (exchangeA as any) : (exchangeB as any);
+        });
 
       (calculateVWAPForAmount as jest.Mock).mockReturnValueOnce(2000);
       (isArbitrageOpportunityBuyOnA as jest.Mock).mockReturnValueOnce(true);
@@ -254,9 +272,11 @@ describe('ArbitrageStrategy', () => {
         fetchOrderBook: jest.fn().mockResolvedValue({ bids: [], asks: [] }),
       };
 
-      jest.spyOn(exchangeRegistryService, 'getExchangeByName').mockImplementation((name: string) => {
-        return name === 'binance' ? (exchangeA as any) : (exchangeB as any);
-      });
+      jest
+        .spyOn(exchangeRegistryService, 'getExchangeByName')
+        .mockImplementation((name: string) => {
+          return name === 'binance' ? (exchangeA as any) : (exchangeB as any);
+        });
 
       (calculateVWAPForAmount as jest.Mock).mockReturnValueOnce(2000);
       (isArbitrageOpportunityBuyOnA as jest.Mock).mockReturnValueOnce(false);

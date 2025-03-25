@@ -131,7 +131,7 @@ describe('ExchangeDataController', () => {
         .mockResolvedValue([]);
 
       await expect(controller.getSupportedPairs()).rejects.toThrow(
-        'No supported exchanges found'
+        'No supported exchanges found',
       );
       expect(getSupportedExchangesSpy).toHaveBeenCalled();
     });

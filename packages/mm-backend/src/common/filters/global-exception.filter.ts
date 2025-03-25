@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { ValidationError } from 'class-validator';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -23,45 +24,59 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const responseBody = {
+      success: false,
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      message: this.getErrorMessage(exception),
+      errors: this.getErrorDetails(exception),
     };
 
     this.logError(exception, responseBody);
-
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
   }
 
-  private getErrorMessage(exception: unknown): string {
+  private getErrorDetails(exception: unknown): Array<{
+    field?: string;
+    message: string;
+  }> {
     if (exception instanceof HttpException) {
-      return exception.message;
+      const response = exception.getResponse();
+
+      if (
+        Array.isArray(response['message']) &&
+        this.isValidationError(response)
+      ) {
+        return response['message'].map((err: ValidationError) => ({
+          field: err.property,
+          message: Object.values(err.constraints || {})[0] || 'Invalid value',
+        }));
+      }
+
+      return [{ message: response['message'] || exception.message }];
     }
-    if ((exception as any).response?.data?.message) {
-      return (exception as any).response.data.message;
-    }
+
     if (exception instanceof Error) {
-      return exception.message || 'An unknown error occurred';
+      return [{ message: exception.message }];
     }
-    return 'An unexpected error occurred';
+
+    return [{ message: 'An unexpected error occurred' }];
+  }
+
+  private isValidationError(response: any): boolean {
+    return (
+      response.statusCode === HttpStatus.BAD_REQUEST &&
+      Array.isArray(response.message) &&
+      response.message.every((item) => item instanceof ValidationError)
+    );
   }
 
   private logError(exception: unknown, responseBody: any): void {
-    if (exception instanceof HttpException) {
-      this.logger.error(
-        `Http Status: ${responseBody.statusCode}, Error Message: ${responseBody.message}`,
-        exception.stack,
-      );
-    } else if ((exception as any).response?.data?.message) {
-      this.logger.error(
-        `Axios Error: ${responseBody.message}`,
-        (exception as any).response.data.message,
-      );
-    } else if (exception instanceof Error) {
-      this.logger.error(`Error: ${responseBody.message}`, exception.stack);
-    } else {
-      this.logger.error(`Unknown error: ${JSON.stringify(responseBody)}`);
-    }
+    const errorMessage =
+      exception instanceof Error ? exception.stack : JSON.stringify(exception);
+
+    this.logger.error(
+      `Error ${responseBody.statusCode}: ${JSON.stringify(responseBody.errors)}`,
+      errorMessage,
+    );
   }
 }

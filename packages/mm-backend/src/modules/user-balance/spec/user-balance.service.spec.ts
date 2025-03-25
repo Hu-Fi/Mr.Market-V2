@@ -58,12 +58,8 @@ describe('UserBalanceService', () => {
       balance: 0,
     } as UserBalance;
 
-    jest
-      .spyOn(repository, 'findByUserIdAssetId')
-      .mockResolvedValue(null);
-    jest
-      .spyOn(repository, 'saveUserBalance')
-      .mockResolvedValue(userBalance);
+    jest.spyOn(repository, 'findByUserIdAssetId').mockResolvedValue(null);
+    jest.spyOn(repository, 'saveUserBalance').mockResolvedValue(userBalance);
 
     const result = await service.findOrCreateUserBalance(
       '1',
