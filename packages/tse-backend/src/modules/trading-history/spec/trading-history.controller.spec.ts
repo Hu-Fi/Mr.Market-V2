@@ -5,7 +5,6 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { TradingHistoryProfile } from '../trading-history.mapper';
 import {
-  GetUserTradingHistoryParamsDto,
   GetUserTradingHistoryQueryDto,
 } from '../model/trading-history.model';
 import {
@@ -45,7 +44,6 @@ describe('TradingHistoryController', () => {
   });
 
   describe('getUserTradingHistory', () => {
-    const paramsDto: GetUserTradingHistoryParamsDto = { userId: 1 };
     const queryDto: GetUserTradingHistoryQueryDto = {
       startDate: '2024-01-01',
       endDate: '2024-01-31',
@@ -63,7 +61,6 @@ describe('TradingHistoryController', () => {
       ]);
 
       const result = await controller.getUserTradingHistory(
-        paramsDto,
         queryDto,
         { user: { id: 1 } },
       );

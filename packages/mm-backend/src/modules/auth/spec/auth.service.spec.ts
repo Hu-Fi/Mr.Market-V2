@@ -22,6 +22,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const mockAuthSessionRepository = {
       findByUserId: jest.fn(),
+      findAuthSessionByClientId: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
     };
