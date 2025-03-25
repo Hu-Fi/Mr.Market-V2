@@ -156,9 +156,9 @@ export class ExchangeTradeService {
     return results.filter((result) => result).length;
   }
 
-  private getExchangeInstance(exchange: string) {
+  private async getExchangeInstance(exchange: string) {
     const exchangeInstance =
-      this.exchangeRegistryService.getExchangeByName(exchange);
+      await this.exchangeRegistryService.getExchangeByName(exchange);
     if (!exchangeInstance) {
       throw new Error(`Exchange ${exchange} not found.`);
     }

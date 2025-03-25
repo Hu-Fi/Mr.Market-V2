@@ -108,7 +108,6 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
             'User already registered for the campaign'
         ) {
           expect(error.response.status).toEqual(500);
-          console.log(error.response.data.message);
         } else {
           throw error;
         }

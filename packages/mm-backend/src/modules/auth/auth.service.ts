@@ -108,7 +108,6 @@ export class AuthService {
     const mixinAuthSession =
       await this.authSessionRepository.findAuthSessionByClientId(clientId);
     if (mixinAuthSession) {
-      console.log(mixinAuthSession);
       await this.authSessionRepository.update(mixinAuthSession.id, {
         ...clientSession,
       });

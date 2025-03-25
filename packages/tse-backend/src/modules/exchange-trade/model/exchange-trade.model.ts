@@ -105,17 +105,17 @@ export type MarketTrade = MarketLimitCommand | MarketTradeCommand;
 
 export class CancelOrderDto {
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: 'bybit' })
   @IsString()
   exchange: string;
 
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: '1' })
   @IsString()
   orderId: string;
 
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: 'BTC/USDT' })
   @IsString()
   symbol: string;
 }
