@@ -25,6 +25,11 @@ import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
 import { Volume } from '../../common/entities/volume.entity';
 import { GetAdditionalAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
 import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
+import { AlpacaStrategyProfile } from './strategies/alpaca/alpaca.mapper';
+import { AlpacaStrategyRepository } from './strategies/alpaca/alpaca.repository';
+import { AlpacaService } from './strategies/alpaca/alpaca.service';
+import { AlpacaStrategy } from './strategies/alpaca/alpaca.strategy';
+import { AlpacaController } from './strategies/alpaca/alpaca.controller';
 
 @Module({
   imports: [
@@ -38,16 +43,20 @@ import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager
     ArbitrageStrategy,
     MarketMakingStrategy,
     VolumeStrategy,
+    AlpacaStrategy,
     ArbitrageService,
     MarketMakingService,
     VolumeService,
+    AlpacaService,
     ArbitrageStrategyRepository,
     MarketMakingRepository,
     VolumeStrategyRepository,
+    AlpacaStrategyRepository,
     ExchangeTradeService,
     MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
     VolumeStrategyProfile,
+    AlpacaStrategyProfile,
     GetDefaultAccountStrategy,
     GetAdditionalAccountStrategy,
   ],
@@ -58,7 +67,14 @@ import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager
     MarketMakingService,
     VolumeStrategy,
     VolumeService,
+    AlpacaStrategy,
+    AlpacaService,
   ],
-  controllers: [ArbitrageController, MarketMakingController, VolumeController],
+  controllers: [
+    ArbitrageController,
+    MarketMakingController,
+    VolumeController,
+    AlpacaController,
+  ],
 })
 export class TradingStrategyModule {}
