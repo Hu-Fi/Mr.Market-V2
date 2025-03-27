@@ -30,17 +30,14 @@ export class Alpaca {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amountToTrade: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2 })
-  incrementPercentage: number;
+  @Column({ type: 'decimal', precision: 3, scale: 2 })
+  minProfitability: number;
 
-  @Column({ type: 'int' })
-  tradeIntervalSeconds: number;
+  @Column()
+  checkIntervalSeconds: number;
 
-  @Column({ type: 'int' })
-  numTotalTrades: number;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2 })
-  pricePushRate: number;
+  @Column({ nullable: true })
+  maxOpenOrders?: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -56,10 +53,4 @@ export class Alpaca {
 
   @Column({ nullable: true })
   pausedReason: string;
-
-  @Column({ type: 'int', default: 0 })
-  tradesExecuted: number;
-
-  @Column({ type: 'decimal', precision: 12, scale: 6, nullable: true })
-  currentMakerPrice: number;
 }

@@ -11,6 +11,7 @@ import { Web3IdentityRpc } from '../entities/web3-identity-rpc.entity';
 import { Contribution } from '../entities/contribution.entity';
 import { ExchangeApiKeyReadOnly } from '../entities/exchange-api-key-read-only.entity';
 import { Volume } from '../entities/volume.entity';
+import { Alpaca } from '../entities/alpaca.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -50,6 +51,7 @@ export class TypeormConfig {
         Contribution,
         ExchangeApiKeyReadOnly,
         Volume,
+        Alpaca,
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: logging,

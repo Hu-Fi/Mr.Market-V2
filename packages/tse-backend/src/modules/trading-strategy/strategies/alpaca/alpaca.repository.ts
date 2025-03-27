@@ -51,11 +51,4 @@ export class AlpacaStrategyRepository {
       where: { id: id, ...options },
     });
   }
-
-  async updateStrategyAfterTrade(
-    id: number,
-    data: { tradesExecuted: number; currentMakerPrice: any },
-  ) {
-    return await this.repository.update({ id }, data);
-  }
 }

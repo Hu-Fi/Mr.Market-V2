@@ -68,18 +68,4 @@ export class AlpacaService {
       throw error;
     }
   }
-
-  async updateStrategyAfterTrade(
-    id: number,
-    data: { tradesExecuted: number; currentMakerPrice: any },
-  ) {
-    try {
-      await this.repository.updateStrategyAfterTrade(id, data);
-    } catch (error) {
-      this.logger.error(
-        `Error updating strategy after trade: ${error.message}`,
-      );
-      throw error;
-    }
-  }
 }

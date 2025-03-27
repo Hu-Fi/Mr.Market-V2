@@ -73,8 +73,16 @@ export class AlpacaStrategy implements Strategy {
     this.logger.log(`Strategy [${command.id}] stopped successfully.`);
   }
 
+  async delete(command: AlpacaStrategyActionCommand): Promise<void> {
+    await this.alpacaService.updateStrategyStatusById(
+      command.id,
+      StrategyInstanceStatus.DELETED,
+    );
+    this.logger.log(`Strategy [${command.id}] deleted successfully.`);
+  }
+
   private async executeAlpacaStrategy(strategy: AlpacaStrategyData) {
-    const { exchangeName, sideA, sideB, amountToTrade, minProfitability } = strategy;
+    const { exchangeName, sideA, sideB, amountToTrade, minProfitability, userId, clientId } = strategy;
 
     const alpacaExchange = await this.exchangeRegistryService.getExchangeByName(
       'alpaca',
@@ -108,6 +116,8 @@ export class AlpacaStrategy implements Strategy {
       const sellPrice = derivativePrice > spotPrice ? derivativePrice : spotPrice;
 
       await this.executeArbitrageTrades(
+        userId,
+        clientId,
         strategy,
         buyExchange.name,
         sellExchange.name,
@@ -122,6 +132,8 @@ export class AlpacaStrategy implements Strategy {
   }
 
   private async executeArbitrageTrades(
+    userId: string,
+    clientId: string,
     strategy: AlpacaStrategyData,
     buyExchange: string,
     sellExchange: string,
@@ -137,8 +149,8 @@ export class AlpacaStrategy implements Strategy {
     try {
       await Promise.all([
         this.tradeService.executeLimitTrade({
-          userId: null,
-          clientId: null,
+          userId,
+          clientId,
           exchange: buyExchange,
           symbol,
           side: TradeSideType.BUY,
@@ -146,8 +158,8 @@ export class AlpacaStrategy implements Strategy {
           price: buyPrice,
         }),
         this.tradeService.executeLimitTrade({
-          userId: null,
-          clientId: null,
+          userId,
+          clientId,
           exchange: sellExchange,
           symbol,
           side: TradeSideType.SELL,
@@ -159,11 +171,6 @@ export class AlpacaStrategy implements Strategy {
       this.logger.log(
         `Arbitrage Trades executed successfully for strategy [${strategy.id}]: BUY - ${buyExchange} at ${buyPrice}, SELL - ${sellExchange} at ${sellPrice}`,
       );
-
-      await this.alpacaService.updateStrategyAfterTrade(strategy.id, {
-        tradesExecuted: 1,
-        currentMakerPrice: sellPrice,
-      });
     } catch (error) {
       this.logger.error(
         `Trade execution error for strategy [${strategy.id}]: ${error.message}`,
