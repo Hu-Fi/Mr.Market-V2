@@ -6,13 +6,6 @@ import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-typ
 export class AlpacaStrategyDto {
   @AutoMap()
   @ApiProperty({
-    example: 'binance',
-    description: 'Name of the exchange.',
-  })
-  exchangeName: string;
-
-  @AutoMap()
-  @ApiProperty({
     example: 'ETH/USDT',
     description: 'The trading pair to monitor for arbitrage opportunities.',
   })
@@ -28,71 +21,53 @@ export class AlpacaStrategyDto {
 
   @AutoMap()
   @ApiProperty({
-    example: '5',
+    example: 0.01,
     description:
-      'Percentage increment for offsetting from midPrice (initial offset)',
+      'Minimum profitability threshold as a decimal (e.g., 0.01 for 1%).',
   })
-  incrementPercentage: number;
+  minProfitability: number;
 
   @AutoMap()
-  @ApiProperty({
-    example: 10,
-    description: 'Time interval (in seconds) between each trade execution',
-  })
-  tradeIntervalSeconds: number;
+  @ApiProperty({ example: 'mexc', description: 'Name of the second exchange.' })
+  exchangeName: string;
 
   @AutoMap()
-  @ApiProperty({
-    example: 1,
-    description: 'Number of total trades to execute',
-  })
-  numTotalTrades: number;
+  @ApiProperty({ example: 10, description: 'interval to run arbitrage scan' })
+  checkIntervalSeconds: number;
 
   @AutoMap()
-  @ApiProperty({
-    example: 1,
-    description:
-      'Rate at which to push the price upward after each successful trade, in percent',
-  })
-  pricePushRate: number;
+  @ApiProperty({ example: 1, description: 'Max number of orders' })
+  maxOpenOrders?: number;
 }
 
 export class AlpacaStrategyCommand {
   userId: string;
   clientId: string;
-
-  @AutoMap()
-  exchangeName: string;
-
   sideA: string;
   sideB: string;
-
   @AutoMap()
   amountToTrade: number;
   @AutoMap()
-  incrementPercentage: number;
+  minProfitability: number;
   @AutoMap()
-  tradeIntervalSeconds: number;
+  exchangeName: string;
   @AutoMap()
-  numTotalTrades: number;
+  checkIntervalSeconds: number;
   @AutoMap()
-  pricePushRate: number;
+  maxOpenOrders?: number;
 }
 
 export class AlpacaStrategyData {
   id: number;
   userId: string;
   clientId: string;
-  exchangeName: string;
   sideA: string;
   sideB: string;
   amountToTrade: number;
-  incrementPercentage: number;
-  tradeIntervalSeconds: number;
-  numTotalTrades: number;
-  pricePushRate: number;
-  tradesExecuted: number;
-  currentMakerPrice: number;
+  minProfitability: number;
+  exchangeName: string;
+  checkIntervalSeconds: number;
+  maxOpenOrders?: number;
   status: StrategyInstanceStatus;
   lastTradingAttemptAt: Date;
 }
