@@ -21,7 +21,7 @@ describe('ArbitrageController', () => {
 
   const mockRequest = {
     user: {
-      id: 'user-123',
+      userId: 'user-123',
       clientId: 'client-456',
     },
   };
@@ -56,7 +56,7 @@ describe('ArbitrageController', () => {
       const dto: ArbitrageStrategyDto = ArbitrageDtoFixture;
       const expectedCommand: ArbitrageStrategyCommand = {
         ...ArbitrageCommandFixture,
-        userId: mockRequest.user.id,
+        userId: mockRequest.user.userId,
         clientId: mockRequest.user.clientId,
       };
 
@@ -73,7 +73,7 @@ describe('ArbitrageController', () => {
       const dto: ArbitrageStrategyActionDto = { id: 1 };
       const expectedCommand: ArbitrageStrategyActionCommand = {
         id: 1,
-        userId: mockRequest.user.id,
+        userId: mockRequest.user.userId,
         clientId: mockRequest.user.clientId,
       };
 
@@ -90,7 +90,7 @@ describe('ArbitrageController', () => {
       const dto: ArbitrageStrategyActionDto = { id: 2 };
       const expectedCommand: ArbitrageStrategyActionCommand = {
         id: 2,
-        userId: mockRequest.user.id,
+        userId: mockRequest.user.userId,
         clientId: mockRequest.user.clientId,
       };
 
@@ -107,7 +107,7 @@ describe('ArbitrageController', () => {
       const dto: ArbitrageStrategyActionDto = { id: 3 };
       const expectedCommand: ArbitrageStrategyActionCommand = {
         id: 3,
-        userId: mockRequest.user.id,
+        userId: mockRequest.user.userId,
         clientId: mockRequest.user.clientId,
       };
 

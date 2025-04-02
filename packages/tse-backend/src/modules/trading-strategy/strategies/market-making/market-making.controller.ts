@@ -42,7 +42,7 @@ export class MarketMakingController {
       MarketMakingStrategyDto,
       MarketMakingStrategyCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return await this.service.create(command);
   }
@@ -57,7 +57,7 @@ export class MarketMakingController {
       MarketMakingStrategyActionDto,
       MarketMakingStrategyActionCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return await this.service.pause(command);
   }
@@ -72,7 +72,7 @@ export class MarketMakingController {
       MarketMakingStrategyActionDto,
       MarketMakingStrategyActionCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return await this.service.stop(command);
   }
@@ -87,7 +87,7 @@ export class MarketMakingController {
       MarketMakingStrategyActionDto,
       MarketMakingStrategyActionCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return await this.service.delete(command);
   }

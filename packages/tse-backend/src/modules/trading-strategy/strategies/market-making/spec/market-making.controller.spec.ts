@@ -19,7 +19,7 @@ describe('MarketMakingController', () => {
   let controller: MarketMakingController;
   let service: MarketMakingStrategy;
 
-  const reqMock = { user: { id: 'user-123', clientId: 'client-456' } };
+  const reqMock = { user: { userId: 'user-123', clientId: 'client-456' } };
 
   beforeEach(async () => {
     const mockService = {
@@ -60,7 +60,7 @@ describe('MarketMakingController', () => {
       };
 
       const expectedCommand: MarketMakingStrategyCommand = {
-        userId: reqMock.user.id,
+        userId: reqMock.user.userId,
         clientId: reqMock.user.clientId,
         sideA: 'BTC',
         sideB: 'USDT',
@@ -90,7 +90,7 @@ describe('MarketMakingController', () => {
 
       const expectedCommand: MarketMakingStrategyActionCommand = {
         id: 1,
-        userId: reqMock.user.id,
+        userId: reqMock.user.userId,
         clientId: reqMock.user.clientId,
       };
 
@@ -107,7 +107,7 @@ describe('MarketMakingController', () => {
 
       const expectedCommand: MarketMakingStrategyActionCommand = {
         id: 2,
-        userId: reqMock.user.id,
+        userId: reqMock.user.userId,
         clientId: reqMock.user.clientId,
       };
 
@@ -124,7 +124,7 @@ describe('MarketMakingController', () => {
 
       const expectedCommand: MarketMakingStrategyActionCommand = {
         id: 3,
-        userId: reqMock.user.id,
+        userId: reqMock.user.userId,
         clientId: reqMock.user.clientId,
       };
 

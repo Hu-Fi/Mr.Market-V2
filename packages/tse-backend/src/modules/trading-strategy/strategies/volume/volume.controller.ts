@@ -36,7 +36,7 @@ export class VolumeController {
       VolumeStrategyDto,
       VolumeStrategyCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return this.service.create(command);
   }
@@ -48,7 +48,7 @@ export class VolumeController {
       VolumeStrategyActionDto,
       VolumeStrategyActionCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return this.service.pause(command);
   }
@@ -60,7 +60,7 @@ export class VolumeController {
       VolumeStrategyActionDto,
       VolumeStrategyActionCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return this.service.stop(command);
   }
@@ -72,7 +72,7 @@ export class VolumeController {
       VolumeStrategyActionDto,
       VolumeStrategyActionCommand,
     );
-    command.userId = req.user.id;
+    command.userId = req.user.userId;
     command.clientId = req.user.clientId;
     return this.service.delete(command);
   }
