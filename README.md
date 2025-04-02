@@ -26,6 +26,7 @@ You can find the V2 high-level architecture overview [here](./MrMarket%20-%20V2%
 Below are links to the documentation files located in the `architecture/docs` folder:
 
 - [PROJECT_STRUCTURE.md](architecture/docs/PROJECT_STRUCTURE.md)
+- [CREATE_MIXIN_APP.md](architecture/docs/CREATE_MIXIN_APP.md)
 - [HOW_TO_DEPLOY.md](architecture/docs/HOW_TO_DEPLOY.md)
 - [HOW_TO_RUN_APP.md](architecture/docs/HOW_TO_RUN_APP.md)
 - [HOW_TO_RUN_TESTS.md](architecture/docs/HOW_TO_RUN_TESTS.md)
