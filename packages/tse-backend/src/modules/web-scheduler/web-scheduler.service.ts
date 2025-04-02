@@ -18,7 +18,7 @@ export class WebSchedulerService {
   }
 
   async triggerCampaignCronJob() {
-    await this.campaignService.tryJoinCampaigns();
+    return await this.campaignService.tryJoinCampaigns();
   }
 
   async clearOldOrdersAndOperations() {

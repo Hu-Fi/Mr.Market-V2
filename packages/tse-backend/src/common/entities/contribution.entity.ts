@@ -2,10 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn, Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
+@Unique(['campaignAddress'])
 @Entity()
 export class Contribution {
   @PrimaryGeneratedColumn()

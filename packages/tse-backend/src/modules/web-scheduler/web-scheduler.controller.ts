@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { WebSchedulerService } from './web-scheduler.service';
+import { JoinCampaignResultDto } from '../campaign/campaign.model';
 
 @ApiTags('web-scheduler')
 @Controller('cron')
@@ -15,8 +16,9 @@ export class WebSchedulerController {
 
   @Get('campaign/execute')
   @ApiOperation({ summary: 'Trigger campaign cron job' })
+  @ApiResponse({ status: 200, description: 'Campaign execution result', type: JoinCampaignResultDto })
   async triggerCampaignCronJob() {
-    await this.service.triggerCampaignCronJob();
+    return await this.service.triggerCampaignCronJob();
   }
 
   @Get('order-clear/execute')

@@ -11,6 +11,8 @@ import { CustomLogger } from '../logger/logger.service';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
 import { Web3IdentityService } from './web3-identity-manager/web3-identity.service';
 import { CampaignRepository } from './campaign.repository';
+import { JoinCampaignResultDto } from './campaign.model';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class CampaignService {
@@ -46,63 +48,85 @@ export class CampaignService {
     );
   }
 
-  async tryJoinCampaigns() {
+  async tryJoinCampaigns(): Promise<JoinCampaignResultDto> {
     const campaigns = await this.fetchRunningCampaigns();
 
-    const results = {
-      successful: [] as string[],
-      alreadyRegistered: [] as string[],
-      errors: [] as { campaignAddress: string; error: string }[],
+    const results: JoinCampaignResultDto = {
+      successful: [],
+      alreadyRegistered: [],
+      errors: [],
     };
 
     for (const campaign of campaigns) {
+      const signer = this.web3IdentityService.getSigner(campaign.chainId);
+
+      if (!signer) {
+        const errorMsg = `No signer available for chainId ${campaign.chainId}`;
+        results.errors.push({
+          campaignAddress: campaign.address,
+          error: errorMsg
+        });
+        this.logger.error(errorMsg);
+        continue;
+      }
+
       try {
-        const walletAddress = await this.web3IdentityService
-          .getSigner(campaign.chainId)
-          .getAddress();
-        const exchange = await this.exchangeRegistryService.getExchangeByName(
-          campaign.exchangeName,
-        );
-        if (!exchange) {
-          this.logger.debug(
-            `Could not find exchange ${campaign.exchangeName} for ${campaign.chainId} in exchange registry`,
-          );
-          return;
+        const walletAddress = await signer.getAddress();
+
+        if (!walletAddress) {
+          const walletError = `Wallet address not found for chainId ${campaign.chainId}`;
+          results.errors.push({
+            campaignAddress: campaign.address,
+            error: walletError,
+          });
+          this.logger.error(walletError);
+          continue;
         }
+
+        const exchange = await this.exchangeRegistryService.getExchangeByName(campaign.exchangeName);
+        if (!exchange) {
+          const exchangeError = `Could not find exchange ${campaign.exchangeName} for ${campaign.chainId} in registry`;
+          results.errors.push({
+            campaignAddress: campaign.address,
+            error: exchangeError,
+          });
+          this.logger.debug(exchangeError);
+          continue;
+        }
+
         await this.registerToCampaign(campaign, exchange, walletAddress);
-        results.successful.push(campaign.address);
+
         await this.campaignRepository.save({
           chainId: campaign.chainId,
           exchangeName: campaign.exchangeName,
           campaignAddress: campaign.address,
         });
+
+        results.successful.push(campaign.address);
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message.includes('already registered')
-        ) {
+        if (error instanceof QueryFailedError && error.driverError?.code === '23505') {
           results.alreadyRegistered.push(campaign.address);
         } else {
           results.errors.push({
             campaignAddress: campaign.address,
             error: error instanceof Error ? error.message : 'Unknown error',
           });
+          this.logger.error(`Error registering campaign ${campaign.address}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
     }
 
-    this.logger.debug(
-      `Campaign registration summary:\n` +
-        `- Successfully registered: ${results.successful.join(', ') || 'None'}\n` +
-        `- Already registered: ${results.alreadyRegistered.join(', ') || 'None'}\n` +
-        `- Errors: ${
-          results.errors.length > 0
-            ? results.errors
-                .map((e) => `${e.campaignAddress}: ${e.error}`)
-                .join(', ')
-            : 'None'
-        }`,
-    );
+    this.logger.debug( `Campaign registration summary:\n` +
+      `- Successfully registered: ${results.successful.join(', ') || 'None'}\n` +
+      `- Already registered: ${results.alreadyRegistered.join(', ') || 'None'}\n` +
+      `- Errors: ${
+        results.errors.length > 0
+          ? results.errors
+            .map((e) => `${e.campaignAddress}: ${e.error}`)
+            .join(', ')
+          : 'None'
+      }`);
+    return results;
   }
 
   async fetchRunningCampaigns() {
