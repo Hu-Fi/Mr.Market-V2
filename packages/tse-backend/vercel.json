@@ -6,27 +6,15 @@
       "use": "@vercel/node"
     }
   ],
+  "functions": {
+    "/api/v1/cron/strategy/execute": {
+      "maxDuration": 35
+    },
+    "/api/v1/cron/campaign/execute": {
+      "maxDuration": 35
+    }
+  },
   "routes": [
-    {
-      "src": "/api/v1/cron/strategy/execute",
-      "dest": "src/main.ts",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "*",
-        "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
-      },
-      "maxDuration": 35
-    },
-    {
-      "src": "/api/v1/cron/campaign/execute",
-      "dest": "src/main.ts",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "*",
-        "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
-      },
-      "maxDuration": 35
-    },
     {
       "src": "/(.*)",
       "dest": "src/main.ts",
