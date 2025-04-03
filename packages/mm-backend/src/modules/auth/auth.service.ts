@@ -123,7 +123,7 @@ export class AuthService {
     clientSession: ClientSession,
   ) {
     await this.authSessionRepository.create({
-      userId: { id: userId } as any,
+      userId: { userId: userId },
       clientId,
       ...clientSession,
     } as MixinAuthSession);
