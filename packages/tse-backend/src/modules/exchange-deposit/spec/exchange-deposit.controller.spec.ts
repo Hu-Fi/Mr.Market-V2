@@ -18,6 +18,7 @@ describe('ExchangeDepositController', () => {
   };
 
   const createDepositDtoFixture: CreateDepositDto = {
+    userId: '',
     exchangeName: 'binance',
     symbol: 'ETH',
     network: 'eth',
@@ -53,6 +54,7 @@ describe('ExchangeDepositController', () => {
   describe('createDepositAddress', () => {
     it('should call handleDeposit with correct command', async () => {
       const command: CreateDepositCommand = {
+        userId: createDepositDtoFixture.userId,
         exchangeName: createDepositDtoFixture.exchangeName,
         symbol: createDepositDtoFixture.symbol,
         network: createDepositDtoFixture.network,

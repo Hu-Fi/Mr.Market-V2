@@ -80,12 +80,11 @@ describe('ExchangeRegistryService', () => {
   describe('getExchangeByName', () => {
     it('should initialize exchanges if none exist', async () => {
       const exchangeName = 'binance';
-      const strategy = new GetDefaultAccountStrategy();
 
-      const result = await service.getExchangeByName(exchangeName, strategy);
+      const result = await service.getExchangeByName({ exchangeName });
 
       expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
-        exchangeName,
+        {"exchangeName": "binance", "userId": null},
       );
 
       expect(mockEncryptionService.decrypt).toHaveBeenCalledWith('encrypted');
@@ -115,7 +114,6 @@ describe('ExchangeRegistryService', () => {
 
     it('should return an existing exchange if already initialized', async () => {
       const exchangeName = 'binance';
-      const strategy = new GetDefaultAccountStrategy();
 
       const existingExchange = {
         id: 'binance-true',
@@ -131,14 +129,12 @@ describe('ExchangeRegistryService', () => {
         .mockResolvedValue(existingExchange);
 
       const firstResult = await service.getExchangeByName(
-        exchangeName,
-        strategy,
+        { exchangeName },
       );
       expect(firstResult).toEqual(existingExchange);
 
       const secondResult = await service.getExchangeByName(
-        exchangeName,
-        strategy,
+        { exchangeName },
       );
       expect(secondResult).toEqual(existingExchange);
     });
@@ -151,7 +147,7 @@ describe('ExchangeRegistryService', () => {
       const result = await service['initializeExchanges'](exchangeName);
 
       expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
-        exchangeName,
+        {"exchangeName": "binance", "userId": undefined},
       );
       expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
         mockApiKeys.length,
@@ -168,7 +164,7 @@ describe('ExchangeRegistryService', () => {
       const result = await service.getApiKeys(exchangeName);
 
       expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
-        exchangeName,
+        {"exchangeName": "binance", "userId": undefined},
       );
       const expectedDecryptedApiKeys = [
         {

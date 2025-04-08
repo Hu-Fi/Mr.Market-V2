@@ -39,10 +39,13 @@ export class ExchangeWithdrawalController {
   async getWithdrawal(
     @Query('exchangeName') exchangeName: string,
     @Query('transactionHash') transactionHash: string,
+    @Query('userId') userId: string,
   ) {
     return await this.exchangeWithdrawalService.fetchWithdrawal(
       exchangeName,
       transactionHash,
+      userId,
     );
   }
 }
+//TODO: handle jwt user

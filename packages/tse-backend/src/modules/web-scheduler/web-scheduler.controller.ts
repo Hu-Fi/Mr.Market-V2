@@ -16,7 +16,11 @@ export class WebSchedulerController {
 
   @Get('campaign/execute')
   @ApiOperation({ summary: 'Trigger campaign cron job' })
-  @ApiResponse({ status: 200, description: 'Campaign execution result', type: JoinCampaignResultDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign execution result',
+    type: JoinCampaignResultDto,
+  })
   async triggerCampaignCronJob() {
     return await this.service.triggerCampaignCronJob();
   }

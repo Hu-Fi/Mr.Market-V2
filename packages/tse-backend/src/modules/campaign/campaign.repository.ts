@@ -14,6 +14,12 @@ export class CampaignRepository {
     return await this.repository.save(data);
   }
 
+  async findOneBy(options?: any) {
+    return await this.repository.findOne({
+      where: options,
+    });
+  }
+
   async find() {
     return await this.repository.find();
   }

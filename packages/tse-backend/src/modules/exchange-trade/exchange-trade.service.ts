@@ -28,7 +28,11 @@ export class ExchangeTradeService {
   ) {}
 
   async executeMarketTrade(command: MarketTradeCommand) {
-    const exchangeInstance = await this.getExchangeInstance(command.exchange);
+    const { exchange } = command;
+    const exchangeInstance =
+      await this.exchangeRegistryService.getExchangeByName({
+        exchangeName: exchange,
+      });
     const savedData = await this.saveOrder(
       command,
       MarketOrderType.MARKET_ORDER,
@@ -54,7 +58,7 @@ export class ExchangeTradeService {
     exchangeInstance: any,
     command: MarketTradeCommand,
   ) {
-    if (command.exchange === 'bigone') {
+    if (command.exchange === 'bigone' || command.exchange === 'mexc') {
       const ticker = await exchangeInstance.fetchTicker(command.symbol);
       const price = ticker.ask;
       const amount = command.amount * price;
@@ -77,7 +81,11 @@ export class ExchangeTradeService {
   }
 
   async executeLimitTrade(command: MarketLimitCommand) {
-    const exchangeInstance = await this.getExchangeInstance(command.exchange);
+    const { exchange } = command;
+    const exchangeInstance =
+      await this.exchangeRegistryService.getExchangeByName({
+        exchangeName: exchange,
+      });
     const savedData = await this.saveOrder(
       command,
       MarketOrderType.LIMIT_ORDER,
@@ -106,6 +114,7 @@ export class ExchangeTradeService {
   }
 
   async cancelOrder(command: CancelOrderCommand) {
+    const { userId, exchange } = command;
     const order = await this.getOperationByOrderExtId(command.orderId, {
       userId: command.userId,
       clientId: command.clientId,
@@ -113,8 +122,11 @@ export class ExchangeTradeService {
     if (!order) {
       throw new NotFoundException(`Order ${command.orderId} not found.`);
     }
-    const exchangeInstance = await this.getExchangeInstance(command.exchange);
-
+    const exchangeInstance =
+      await this.exchangeRegistryService.getExchangeByName({
+        exchangeName: exchange,
+        userId,
+      });
     try {
       const result = await exchangeInstance.cancelOrder(
         command.orderId,
@@ -131,8 +143,16 @@ export class ExchangeTradeService {
     }
   }
 
-  async cancelUnfilledOrders(exchangeName: string, pair: string) {
-    const exchangeInstance = await this.getExchangeInstance(exchangeName);
+  async cancelUnfilledOrders(
+    exchangeName: string,
+    pair: string,
+    userId: string,
+  ) {
+    const exchangeInstance =
+      await this.exchangeRegistryService.getExchangeByName({
+        exchangeName,
+        userId,
+      });
     let openOrders: { id: string }[];
 
     try {
@@ -154,15 +174,6 @@ export class ExchangeTradeService {
 
     const results = await Promise.all(cancelPromises);
     return results.filter((result) => result).length;
-  }
-
-  private async getExchangeInstance(exchange: string) {
-    const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName(exchange);
-    if (!exchangeInstance) {
-      throw new Error(`Exchange ${exchange} not found.`);
-    }
-    return exchangeInstance;
   }
 
   private async saveOrder(command: MarketTrade, orderType: MarketOrderType) {

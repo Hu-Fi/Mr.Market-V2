@@ -15,22 +15,10 @@ export class ExchangeApiKeyRepository {
     return this.exchangeApiKeyRepository.save(data);
   }
 
-  async findByName(
-    exchangeName: string,
-  ): Promise<ExchangeApiKey[] | undefined> {
+  async find(options: any) {
     return await this.exchangeApiKeyRepository.find({
       where: {
-        exchangeName,
-        removed: false,
-      },
-    });
-  }
-
-  async find(user: { userId: string; clientId: string }) {
-    return await this.exchangeApiKeyRepository.find({
-      where: {
-        userId: user.userId,
-        clientId: user.clientId,
+        ...options,
         removed: false,
       },
     });

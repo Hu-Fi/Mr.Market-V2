@@ -4,6 +4,10 @@ import { IsNumber, IsString } from 'class-validator';
 export class CreateWithdrawalDto {
   @AutoMap()
   @IsString()
+  userId: string;
+
+  @AutoMap()
+  @IsString()
   exchangeName: string;
 
   @AutoMap()
@@ -28,6 +32,9 @@ export class CreateWithdrawalDto {
 }
 
 export class CreateWithdrawalCommand {
+  @AutoMap()
+  @IsString()
+  userId: string;
   @AutoMap()
   exchangeName: string;
   @AutoMap()

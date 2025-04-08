@@ -39,10 +39,13 @@ export class ExchangeDepositController {
   async getDeposits(
     @Query('exchangeName') exchangeName: string,
     @Query('symbol') symbol: string,
+    @Query('userId') userId: string,
   ) {
     return await this.exchangeDepositService.fetchDeposits(
       exchangeName,
       symbol,
+      userId,
     );
   }
 }
+// TODO: handle jwt user

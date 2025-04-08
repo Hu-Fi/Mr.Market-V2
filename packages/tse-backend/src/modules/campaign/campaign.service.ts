@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
@@ -12,7 +12,7 @@ import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.
 import { Web3IdentityService } from './web3-identity-manager/web3-identity.service';
 import { CampaignRepository } from './campaign.repository';
 import { JoinCampaignResultDto } from './campaign.model';
-import { QueryFailedError } from 'typeorm';
+import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-manager/strategies/get-all-default-accounts.strategy';
 
 @Injectable()
 export class CampaignService {
@@ -33,6 +33,7 @@ export class CampaignService {
     private readonly exchangeRegistryService: ExchangeRegistryService,
     private readonly web3IdentityService: Web3IdentityService,
     private readonly campaignRepository: CampaignRepository,
+    private readonly allDefaultAccountsStrategy: GetAllDefaultAccountsStrategy,
   ) {
     this.CAMPAIGN_LAUNCHER_API_URL = this.configService.get<string>(
       'CAMPAIGN_LAUNCHER_API_URL',
@@ -50,7 +51,6 @@ export class CampaignService {
 
   async tryJoinCampaigns(): Promise<JoinCampaignResultDto> {
     const campaigns = await this.fetchRunningCampaigns();
-
     const results: JoinCampaignResultDto = {
       successful: [],
       alreadyRegistered: [],
@@ -58,75 +58,163 @@ export class CampaignService {
     };
 
     for (const campaign of campaigns) {
-      const signer = this.web3IdentityService.getSigner(campaign.chainId);
-
-      if (!signer) {
-        const errorMsg = `No signer available for chainId ${campaign.chainId}`;
-        results.errors.push({
-          campaignAddress: campaign.address,
-          error: errorMsg
-        });
-        this.logger.error(errorMsg);
-        continue;
-      }
-
-      try {
-        const walletAddress = await signer.getAddress();
-
-        if (!walletAddress) {
-          const walletError = `Wallet address not found for chainId ${campaign.chainId}`;
-          results.errors.push({
-            campaignAddress: campaign.address,
-            error: walletError,
-          });
-          this.logger.error(walletError);
-          continue;
-        }
-
-        const exchange = await this.exchangeRegistryService.getExchangeByName(campaign.exchangeName);
-        if (!exchange) {
-          const exchangeError = `Could not find exchange ${campaign.exchangeName} for ${campaign.chainId} in registry`;
-          results.errors.push({
-            campaignAddress: campaign.address,
-            error: exchangeError,
-          });
-          this.logger.debug(exchangeError);
-          continue;
-        }
-
-        await this.registerToCampaign(campaign, exchange, walletAddress);
-
-        await this.campaignRepository.save({
-          chainId: campaign.chainId,
-          exchangeName: campaign.exchangeName,
-          campaignAddress: campaign.address,
-        });
-
-        results.successful.push(campaign.address);
-      } catch (error) {
-        if (error instanceof QueryFailedError && error.driverError?.code === '23505') {
-          results.alreadyRegistered.push(campaign.address);
-        } else {
-          results.errors.push({
-            campaignAddress: campaign.address,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          });
-          this.logger.error(`Error registering campaign ${campaign.address}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-      }
+      await this.handleCampaign(campaign, results);
     }
 
-    this.logger.debug( `Campaign registration summary:\n` +
-      `- Successfully registered: ${results.successful.join(', ') || 'None'}\n` +
-      `- Already registered: ${results.alreadyRegistered.join(', ') || 'None'}\n` +
-      `- Errors: ${
-        results.errors.length > 0
-          ? results.errors
-            .map((e) => `${e.campaignAddress}: ${e.error}`)
-            .join(', ')
-          : 'None'
-      }`);
     return results;
+  }
+
+  private async handleCampaign(
+    campaign: Campaign,
+    results: JoinCampaignResultDto,
+  ): Promise<void> {
+    const signer = this.web3IdentityService.getSigner(campaign.chainId);
+    if (!signer)
+      throw new NotFoundException(
+        `Wallet address not found, add your wallet and rpc urls.`,
+      );
+
+    const walletAddress = await this.getWalletAddress(
+      signer,
+      campaign,
+      results,
+    );
+
+    const exchanges = await this.getExchanges(
+      campaign.exchangeName,
+      campaign,
+      results,
+    );
+
+    await this.registerExchanges(exchanges, campaign, walletAddress, results);
+  }
+
+  private async getWalletAddress(
+    signer: any,
+    campaign: Campaign,
+    results: JoinCampaignResultDto,
+  ): Promise<string | null> {
+    try {
+      return await signer.getAddress();
+    } catch (err) {
+      this.logError(
+        results,
+        campaign.address,
+        `Failed to retrieve wallet address for chainId ${campaign.chainId}: ${err.message}`,
+      );
+      return null;
+    }
+  }
+
+  private async getExchanges(
+    exchangeName: string,
+    campaign: Campaign,
+    results: JoinCampaignResultDto,
+  ): Promise<any[]> {
+    const exchanges: any = await this.exchangeRegistryService.getExchangeByName(
+      {
+        exchangeName,
+        strategy: this.allDefaultAccountsStrategy,
+      },
+    );
+    if (!exchanges.length) {
+      this.logError(
+        results,
+        campaign.address,
+        `No exchanges found for ${exchangeName}`,
+      );
+    }
+
+    return exchanges;
+  }
+
+  private async registerExchanges(
+    exchanges: any[],
+    campaign: Campaign,
+    walletAddress: string,
+    results: JoinCampaignResultDto,
+  ): Promise<void> {
+    for (const e of exchanges) {
+      const isRegistered = await this.persistCampaign(campaign);
+
+      if (isRegistered) {
+        results.alreadyRegistered.push(campaign.address);
+      } else {
+        await this.registerToRecordingOracle(
+          campaign,
+          e.exchange,
+          walletAddress,
+        );
+        results.successful.push(campaign.address);
+      }
+    }
+  }
+
+  private logError(
+    results: JoinCampaignResultDto,
+    campaignAddress: string,
+    message: string,
+  ): void {
+    results.errors.push({
+      campaignAddress,
+      error: message,
+    });
+    this.logger.error(message);
+  }
+
+  private async persistCampaign(campaign: Campaign) {
+    try {
+      const existingCampaign = await this.campaignRepository.findOneBy({
+        campaignAddress: campaign.address,
+      });
+
+      if (existingCampaign) {
+        return true;
+      }
+
+      await this.campaignRepository.save({
+        chainId: campaign.chainId,
+        exchangeName: campaign.exchangeName,
+        campaignAddress: campaign.address,
+      });
+
+      return false;
+    } catch (error) {
+      console.error(`Unexpected error while persisting campaign:`, error);
+      throw error;
+    }
+  }
+
+  private async registerToRecordingOracle(
+    campaign: Campaign,
+    exchange: ExchangeCredentials,
+    walletAddress: string,
+  ): Promise<boolean> {
+    const url = `${this.RECORDING_ORACLE_API_URL}${this.REGISTER_TO_CAMPAIGN_ENDPOINT}`;
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': this.RECORDING_ORACLE_API_KEY,
+    };
+    const payload = {
+      wallet_address: walletAddress,
+      chain_id: campaign.chainId,
+      address: campaign.address,
+      exchange_name: campaign.exchangeName,
+      api_key: exchange.apiKey,
+      secret: exchange.secret,
+    };
+
+    try {
+      const registrationResponse = await lastValueFrom(
+        this.httpService.post(url, payload, { headers }),
+      );
+
+      return registrationResponse.status === 200;
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        return false;
+      }
+    }
   }
 
   async fetchRunningCampaigns() {
@@ -156,40 +244,6 @@ export class CampaignService {
     const isNotComplete = campaign.status !== Status.COMPLETE;
     const isBeforeEndBlock = endBlockDate >= new Date();
     return isNotComplete && isBeforeEndBlock;
-  }
-
-  async registerToCampaign(
-    campaign: Campaign,
-    exchangeInstance: ExchangeCredentials,
-    walletAddress: string,
-  ) {
-    try {
-      const response = await lastValueFrom(
-        this.httpService.post(
-          `${this.RECORDING_ORACLE_API_URL}${this.REGISTER_TO_CAMPAIGN_ENDPOINT}`,
-          {
-            wallet_address: walletAddress,
-            chain_id: campaign.chainId,
-            address: campaign.address,
-            exchange_name: campaign.exchangeName,
-            api_key: exchangeInstance.apiKey,
-            secret: exchangeInstance.secret,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': this.RECORDING_ORACLE_API_KEY,
-            },
-          },
-        ),
-      );
-      return response.data;
-    } catch (error) {
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-      throw new Error('Unexpected error during campaign registration');
-    }
   }
 
   async getCampaignContribution() {

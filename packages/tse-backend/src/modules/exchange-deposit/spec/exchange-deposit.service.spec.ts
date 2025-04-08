@@ -21,6 +21,7 @@ describe('ExchangeDepositService', () => {
   };
 
   const createDepositCommand: CreateDepositCommand = {
+    userId: '1',
     exchangeName: 'binance',
     symbol: 'ETH',
     network: 'eth',

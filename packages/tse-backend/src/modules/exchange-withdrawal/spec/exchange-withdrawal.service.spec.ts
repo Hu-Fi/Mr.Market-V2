@@ -43,6 +43,7 @@ describe('ExchangeWithdrawalService', () => {
 
   it('should throw ExchangeNotFoundException if exchange does not exist', async () => {
     const command: CreateWithdrawalCommand = {
+      userId: '',
       exchangeName: 'binance',
       symbol: 'ETH',
       network: 'eth',
@@ -57,12 +58,13 @@ describe('ExchangeWithdrawalService', () => {
       ExchangeNotFoundException,
     );
     expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-      'binance',
+      {"exchangeName": "binance"}
     );
   });
 
   it('should throw WithdrawalNotSupportedException if exchange does not support withdrawal', async () => {
     const command: CreateWithdrawalCommand = {
+      userId: '',
       exchangeName: 'binance',
       symbol: 'ETH',
       network: 'eth',
@@ -82,12 +84,13 @@ describe('ExchangeWithdrawalService', () => {
       WithdrawalNotSupportedException,
     );
     expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-      'binance',
+      {"exchangeName": "binance"}
     );
   });
 
   it('should call withdraw method if withdrawal is supported', async () => {
     const command: CreateWithdrawalCommand = {
+      userId: '',
       exchangeName: 'binance',
       symbol: 'ETH',
       network: 'eth',
@@ -118,6 +121,7 @@ describe('ExchangeWithdrawalService', () => {
 
   it('should log and throw interpreted error on withdraw failure', async () => {
     const command: CreateWithdrawalCommand = {
+      userId: '',
       exchangeName: 'binance',
       symbol: 'ETH',
       network: 'eth',
@@ -140,7 +144,7 @@ describe('ExchangeWithdrawalService', () => {
     await expect(service.handleWithdrawal(command)).rejects.toThrow(Error);
     expect(mockCcxtGateway.interpretError).toHaveBeenCalled();
     expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-      'binance',
+      {"exchangeName": "binance"}
     );
   });
 });

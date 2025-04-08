@@ -19,13 +19,16 @@ export class ExchangeApiKeyService {
   ) {}
 
   async addExchangeApiKey(command: ExchangeApiKeyCommand) {
-    const { exchangeName } = command;
+    const { exchangeName, userId, isDefaultAccount } = command;
 
     if (!this.ccxtGateway.getExchangeClass(exchangeName)) {
       throw new BadRequestException(`Invalid exchange name: ${exchangeName}`);
     }
 
-    const existingExchangeApiKeys = await this.getExchangeApiKeys(exchangeName);
+    const existingExchangeApiKeys = await this.getExchangeApiKeys({
+      userId,
+      exchangeName,
+    });
 
     if (
       existingExchangeApiKeys.some((apiKey) => apiKey.apiKey === command.apiKey)
@@ -36,12 +39,24 @@ export class ExchangeApiKeyService {
     }
 
     if (
-      command.isDefaultAccount &&
+      isDefaultAccount &&
       existingExchangeApiKeys.some((apiKey) => apiKey.isDefaultAccount)
     ) {
       throw new BadRequestException(
         `There is already a default exchange API key for ${exchangeName}. Please remove it before adding a new default key.`,
       );
+    }
+
+    if (!isDefaultAccount) {
+      const hasDefaultKey = existingExchangeApiKeys.some(
+        (apiKey) => apiKey.isDefaultAccount,
+      );
+
+      if (!hasDefaultKey) {
+        throw new BadRequestException(
+          `You must first add a default API key for exchange ${exchangeName} before adding additional keys.`,
+        );
+      }
     }
 
     const data = this.mapper.map(
@@ -55,12 +70,11 @@ export class ExchangeApiKeyService {
     return await this.exchangeApiKeyRepository.save(data);
   }
 
-  async getExchangeApiKeys(exchangeName: string) {
-    const existingApiKeys =
-      await this.exchangeApiKeyRepository.findByName(exchangeName);
+  async getExchangeApiKeys(options: { exchangeName: string; userId?: string }) {
+    const existingApiKeys = await this.exchangeApiKeyRepository.find(options);
     if (!existingApiKeys) {
       throw new BadRequestException(
-        `No exchange API keys found for exchange: ${exchangeName}`,
+        `No exchange API keys found for exchange: ${options.exchangeName}`,
       );
     }
 

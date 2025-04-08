@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CustomLogger } from '../logger/logger.service';
 import { CcxtIntegrationService } from '../../integrations/ccxt.integration.service';
 import { ExchangeApiKeyService } from './exchange-manager/exchange-api-key.service';
 import { ExchangeManagerService } from './exchange-manager/exchange-manager.service';
-import { ExchangeSelectionStrategy } from './exchange-manager/exchange-selection-strategy.interface';
 import { GetDefaultAccountStrategy } from './exchange-manager/strategies/get-default-account.strategy';
 import { EncryptionService } from '../../common/utils/encryption.service';
 
 @Injectable()
 export class ExchangeRegistryService {
-  private readonly logger = new CustomLogger(ExchangeRegistryService.name);
-
   constructor(
     private readonly ccxtGateway: CcxtIntegrationService,
     private readonly exchangeApiKeyService: ExchangeApiKeyService,
@@ -18,21 +14,30 @@ export class ExchangeRegistryService {
     private readonly defaultStrategy: GetDefaultAccountStrategy,
   ) {}
 
-  async getExchangeByName(
-    exchangeName: string,
-    strategy: ExchangeSelectionStrategy = this.defaultStrategy,
-  ) {
-    const freshInitializedExchanges =
-      await this.initializeExchanges(exchangeName);
+  async getExchangeByName({
+    exchangeName,
+    strategy = this.defaultStrategy,
+    userId = null,
+  }: {
+    exchangeName: string;
+    strategy?: any;
+    userId?: string;
+  }): Promise<any> {
+    const freshInitializedExchanges = await this.initializeExchanges(
+      exchangeName,
+      userId,
+    );
+
     const manager = new ExchangeManagerService(
       freshInitializedExchanges,
       strategy,
     );
-    return manager.getExchange();
+
+    return await manager.getExchange();
   }
 
-  private async initializeExchanges(exchangeName: string) {
-    const apiKeys = await this.getApiKeys(exchangeName);
+  private async initializeExchanges(exchangeName: string, userId?: string) {
+    const apiKeys = await this.getApiKeys(exchangeName, userId);
     const initializedExchanges = [];
 
     const primaryApiKey = apiKeys.find((apiKey) => apiKey.isDefaultAccount);
@@ -50,6 +55,7 @@ export class ExchangeRegistryService {
         exchangeIdentifier,
         exchange,
       });
+
       await this.ccxtGateway.addExchange(exchangeIdentifier, 'loadMarkets');
     }
 
@@ -74,9 +80,11 @@ export class ExchangeRegistryService {
     return initializedExchanges;
   }
 
-  async getApiKeys(exchangeName: string) {
-    const data =
-      await this.exchangeApiKeyService.getExchangeApiKeys(exchangeName);
+  async getApiKeys(exchangeName: string, userId?: string) {
+    const data = await this.exchangeApiKeyService.getExchangeApiKeys({
+      exchangeName,
+      userId,
+    });
 
     return Promise.all(
       data.map(async (apiKey) => ({
