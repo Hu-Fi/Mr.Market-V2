@@ -57,9 +57,9 @@ describe('ExchangeWithdrawalService', () => {
     await expect(service.handleWithdrawal(command)).rejects.toThrow(
       ExchangeNotFoundException,
     );
-    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-      {"exchangeName": "binance"}
-    );
+    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith({
+      exchangeName: 'binance',
+    });
   });
 
   it('should throw WithdrawalNotSupportedException if exchange does not support withdrawal', async () => {
@@ -83,9 +83,9 @@ describe('ExchangeWithdrawalService', () => {
     await expect(service.handleWithdrawal(command)).rejects.toThrow(
       WithdrawalNotSupportedException,
     );
-    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-      {"exchangeName": "binance"}
-    );
+    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith({
+      exchangeName: 'binance',
+    });
   });
 
   it('should call withdraw method if withdrawal is supported', async () => {
@@ -143,8 +143,8 @@ describe('ExchangeWithdrawalService', () => {
 
     await expect(service.handleWithdrawal(command)).rejects.toThrow(Error);
     expect(mockCcxtGateway.interpretError).toHaveBeenCalled();
-    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-      {"exchangeName": "binance"}
-    );
+    expect(mockExchangeRegistryService.getExchangeByName).toHaveBeenCalledWith({
+      exchangeName: 'binance',
+    });
   });
 });

@@ -249,9 +249,13 @@ describe('ArbitrageStrategy', () => {
 
       jest
         .spyOn(exchangeRegistryService, 'getExchangeByName')
-        .mockImplementation((name: { exchangeName: string; strategy?: any; userId?: string; }) => {
-          return name.exchangeName === 'ExchangeA' ? (exchangeA as any) : (exchangeB as any);
-        });
+        .mockImplementation(
+          (name: { exchangeName: string; strategy?: any; userId?: string }) => {
+            return name.exchangeName === 'ExchangeA'
+              ? (exchangeA as any)
+              : (exchangeB as any);
+          },
+        );
 
       (calculateVWAPForAmount as jest.Mock).mockReturnValueOnce(2000);
       (isArbitrageOpportunityBuyOnA as jest.Mock).mockReturnValueOnce(true);
@@ -274,9 +278,13 @@ describe('ArbitrageStrategy', () => {
 
       jest
         .spyOn(exchangeRegistryService, 'getExchangeByName')
-        .mockImplementation((name: { exchangeName: string; strategy?: any; userId?: string; }) => {
-          return name.exchangeName === 'binance' ? (exchangeA as any) : (exchangeB as any);
-        });
+        .mockImplementation(
+          (name: { exchangeName: string; strategy?: any; userId?: string }) => {
+            return name.exchangeName === 'binance'
+              ? (exchangeA as any)
+              : (exchangeB as any);
+          },
+        );
 
       (calculateVWAPForAmount as jest.Mock).mockReturnValueOnce(2000);
       (isArbitrageOpportunityBuyOnA as jest.Mock).mockReturnValueOnce(false);

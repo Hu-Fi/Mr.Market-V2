@@ -81,7 +81,7 @@ describe('ExchangeTradeService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith({"exchangeName": "binance"});
+      ).toHaveBeenCalledWith({ exchangeName: 'binance' });
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -123,7 +123,7 @@ describe('ExchangeTradeService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith({"exchangeName": "binance"});
+      ).toHaveBeenCalledWith({ exchangeName: 'binance' });
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -167,7 +167,7 @@ describe('ExchangeTradeService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith({"exchangeName": "binance"});
+      ).toHaveBeenCalledWith({ exchangeName: 'binance' });
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -210,7 +210,7 @@ describe('ExchangeTradeService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith({"exchangeName": "binance"});
+      ).toHaveBeenCalledWith({ exchangeName: 'binance' });
       expect(mockExchangeOperationService.saveOrderData).toHaveBeenCalledWith({
         userId: 'user123',
         clientId: 'client456',
@@ -296,7 +296,7 @@ describe('ExchangeTradeService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith({"exchangeName": "binance"});
+      ).toHaveBeenCalledWith({ exchangeName: 'binance' });
       expect(exchangeInstanceMock.cancelOrder).toHaveBeenCalledWith(
         'order123',
         'BTC/USDT',
