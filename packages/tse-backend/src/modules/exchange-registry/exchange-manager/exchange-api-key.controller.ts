@@ -24,11 +24,16 @@ import {
 } from './model/exchange-api-key-readonly.model';
 import { ExchangeApiKeyReadonlyService } from './exchange-api-key-readonly.service';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
+import { Roles } from '../../../common/utils/auth/roles.decorator';
+import { Role } from '../../../common/enums/role.enums';
+import { RolesGuard } from '../../../common/utils/auth/guards/roles.guard';
 
-@ApiTags('exchange api key')
+@ApiTags('exchange api key (admin only)')
 @UsePipes(new ValidationPipe())
 @Controller('exchange-api-key')
+@UseGuards(RolesGuard)
 @UseGuards(JwtAuthGuard)
+@Roles(Role.ADMIN)
 @ApiBearerAuth()
 export class ExchangeApiKeyController {
   constructor(
