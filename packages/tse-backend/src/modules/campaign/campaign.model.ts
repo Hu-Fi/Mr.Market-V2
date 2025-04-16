@@ -9,10 +9,16 @@ class CampaignError {
 }
 
 export class JoinCampaignResultDto {
-  @ApiProperty({ description: 'Successfully joined campaign addresses', example: ['0x123...', '0x456...'] })
+  @ApiProperty({
+    description: 'Successfully joined campaign addresses',
+    example: ['0x123...', '0x456...'],
+  })
   successful: string[];
 
-  @ApiProperty({ description: 'Campaign addresses already registered', example: ['0x789...'] })
+  @ApiProperty({
+    description: 'Campaign addresses already registered',
+    example: ['0x789...'],
+  })
   alreadyRegistered: string[];
 
   @ApiProperty({ description: 'List of errors', type: [CampaignError] })

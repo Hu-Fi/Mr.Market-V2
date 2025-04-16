@@ -18,9 +18,11 @@ export class ExchangeDepositService {
   ) {}
 
   async handleDeposit(command: CreateDepositCommand) {
-    const { exchangeName, symbol, network } = command;
-    const exchange =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName);
+    const { userId, exchangeName, symbol, network } = command;
+    const exchange = await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+      userId,
+    });
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
@@ -83,9 +85,11 @@ export class ExchangeDepositService {
     }
   }
 
-  async fetchDeposits(exchangeName: string, symbol: string) {
-    const exchange =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName);
+  async fetchDeposits(exchangeName: string, symbol: string, userId: string) {
+    const exchange = await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+      userId,
+    });
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }

@@ -90,9 +90,10 @@ describe('MarketMakingStrategy', () => {
 
       await strategy.create(command);
 
-      expect(exchangeRegistryService.getExchangeByName).toHaveBeenCalledWith(
-        command.exchangeName,
-      );
+      expect(exchangeRegistryService.getExchangeByName).toHaveBeenCalledWith({
+        exchangeName: 'exchangea',
+        userId: 'user1',
+      });
       expect(exchangeMock.fetchTicker).toHaveBeenCalledWith(
         `${command.sideA}/${command.sideB}`,
       );

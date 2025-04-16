@@ -18,8 +18,9 @@ export class ExchangeWithdrawalService {
 
   async handleWithdrawal(command: CreateWithdrawalCommand) {
     const { exchangeName, symbol, network, address, tag, amount } = command;
-    const exchange =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName);
+    const exchange = await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+    });
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }
@@ -40,9 +41,15 @@ export class ExchangeWithdrawalService {
     }
   }
 
-  async fetchWithdrawal(exchangeName: string, transactionHash: string) {
-    const exchange =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName);
+  async fetchWithdrawal(
+    exchangeName: string,
+    transactionHash: string,
+    userId: string,
+  ) {
+    const exchange = await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+      userId,
+    });
     if (!exchange) {
       throw new ExchangeNotFoundException(exchangeName);
     }

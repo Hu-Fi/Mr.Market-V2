@@ -91,7 +91,7 @@ describe('ExchangeDataService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('mockExchange');
+      ).toHaveBeenCalledWith({ exchangeName: 'mockExchange' });
       expect(mockExchangeInstance.fetchTickers).toHaveBeenCalledWith([
         'ETH/USDT',
       ]);
@@ -137,7 +137,7 @@ describe('ExchangeDataService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('mockExchange');
+      ).toHaveBeenCalledWith({ exchangeName: 'mockExchange' });
       expect(mockExchangeInstance.fetchOHLCV).toHaveBeenCalledWith(
         'ETH/USDT',
         '1d',
@@ -198,7 +198,7 @@ describe('ExchangeDataService', () => {
       expect(result).toEqual(['ETH/USDT', 'BTC/USDT']);
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('exchange1');
+      ).toHaveBeenCalledWith({ exchangeName: 'mockExchange' });
     });
   });
 
@@ -217,7 +217,7 @@ describe('ExchangeDataService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('mockExchange');
+      ).toHaveBeenCalledWith({ exchangeName: 'mockExchange' });
       expect(mockExchangeInstance.fetchTicker).toHaveBeenCalledWith('ETH/USDT');
       expect(result).toEqual({ pair: 'ETH/USDT', price: 100 });
     });
@@ -288,7 +288,7 @@ describe('ExchangeDataService', () => {
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
-      ).toHaveBeenCalledWith('mockExchange');
+      ).toHaveBeenCalledWith({ exchangeName: 'mockExchange' });
       expect(mockExchangeInstance.loadMarkets).toHaveBeenCalled();
       expect(result).toEqual(['ETH/USDT', 'BTC/USDT']);
     });

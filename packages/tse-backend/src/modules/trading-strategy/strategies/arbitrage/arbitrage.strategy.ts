@@ -152,11 +152,11 @@ export class ArbitrageStrategy implements Strategy {
   private async validateExchangesAndPairs(
     command: ArbitrageStrategyCommand,
   ): Promise<void> {
-    const { exchangeAName, exchangeBName, sideA, sideB } = command;
+    const { userId, exchangeAName, exchangeBName, sideA, sideB } = command;
 
     await Promise.all([
-      this.validateExchange(exchangeAName),
-      this.validateExchange(exchangeBName),
+      this.validateExchange(exchangeAName, userId),
+      this.validateExchange(exchangeBName, userId),
     ]);
 
     const pair = `${sideA}/${sideB}:${sideB}`;
@@ -166,8 +166,14 @@ export class ArbitrageStrategy implements Strategy {
     ]);
   }
 
-  private async validateExchange(exchangeName: string): Promise<void> {
-    await this.exchangeRegistryService.getExchangeByName(exchangeName);
+  private async validateExchange(
+    exchangeName: string,
+    userId: string,
+  ): Promise<void> {
+    await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+      userId,
+    });
     const supportedExchanges =
       await this.exchangeRegistryService.getSupportedExchanges();
     if (!isExchangeSupported(exchangeName, supportedExchanges)) {
@@ -244,10 +250,12 @@ export class ArbitrageStrategy implements Strategy {
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeAName,
       pair,
+      strategyEntity.userId,
     );
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeBName,
       pair,
+      strategyEntity.userId,
     );
   }
 
@@ -263,10 +271,14 @@ export class ArbitrageStrategy implements Strategy {
       exchangeBName,
     } = command;
 
-    const exchangeA =
-      await this.exchangeRegistryService.getExchangeByName(exchangeAName);
-    const exchangeB =
-      await this.exchangeRegistryService.getExchangeByName(exchangeBName);
+    const exchangeA = await this.exchangeRegistryService.getExchangeByName({
+      exchangeName: exchangeAName,
+      userId,
+    });
+    const exchangeB = await this.exchangeRegistryService.getExchangeByName({
+      exchangeName: exchangeBName,
+      userId,
+    });
 
     const pair = `${sideA}/${sideB}`;
 

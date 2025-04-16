@@ -47,9 +47,10 @@ export class MarketMakingStrategy implements Strategy {
     await this.validateExchangesAndPairs(command);
 
     const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName(
-        command.exchangeName,
-      );
+      await this.exchangeRegistryService.getExchangeByName({
+        exchangeName: command.exchangeName,
+        userId: command.userId,
+      });
 
     const ticker = await exchangeInstance.fetchTicker(
       `${command.sideA}/${command.sideB}`,
@@ -148,6 +149,7 @@ export class MarketMakingStrategy implements Strategy {
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeName,
       pair,
+      command.userId,
     );
 
     this.logger.debug(
@@ -169,6 +171,7 @@ export class MarketMakingStrategy implements Strategy {
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeName,
       pair,
+      command.userId,
     );
 
     this.logger.debug('Soft deleted market making strategy');
@@ -177,8 +180,11 @@ export class MarketMakingStrategy implements Strategy {
   private async validateExchangesAndPairs(
     command: MarketMakingStrategyCommand,
   ): Promise<void> {
-    const { exchangeName, sideA, sideB } = command;
-    await this.exchangeRegistryService.getExchangeByName(exchangeName);
+    const { userId, exchangeName, sideA, sideB } = command;
+    await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+      userId,
+    });
     const supportedExchanges =
       await this.exchangeRegistryService.getSupportedExchanges();
 
@@ -229,7 +235,7 @@ export class MarketMakingStrategy implements Strategy {
     const pair = `${sideA}/${sideB}`;
 
     this.tradeService
-      .cancelUnfilledOrders(exchangeName, pair)
+      .cancelUnfilledOrders(exchangeName, pair, userId)
       .then((canceledCount) => {
         this.logger.debug(
           `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeName}`,
@@ -237,15 +243,16 @@ export class MarketMakingStrategy implements Strategy {
       });
 
     const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName(exchangeName);
+      await this.exchangeRegistryService.getExchangeByName({
+        exchangeName,
+      });
 
     let source: any;
 
     if (oracleExchangeName) {
-      source =
-        await this.exchangeRegistryService.getExchangeByName(
-          oracleExchangeName,
-        );
+      source = await this.exchangeRegistryService.getExchangeByName({
+        exchangeName: oracleExchangeName,
+      });
       this.logger.debug(
         `Oracle exchange provided, price is calculated from ${source.name}`,
       );

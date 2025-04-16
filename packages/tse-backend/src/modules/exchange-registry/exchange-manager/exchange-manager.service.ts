@@ -4,7 +4,7 @@ export class ExchangeManagerService {
   private strategy: ExchangeSelectionStrategy;
 
   constructor(
-    private exchangeInstances: any[],
+    private exchangeInstances: any,
     strategy: ExchangeSelectionStrategy,
   ) {
     this.strategy = strategy;

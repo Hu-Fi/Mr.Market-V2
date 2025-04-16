@@ -80,13 +80,13 @@ describe('ExchangeRegistryService', () => {
   describe('getExchangeByName', () => {
     it('should initialize exchanges if none exist', async () => {
       const exchangeName = 'binance';
-      const strategy = new GetDefaultAccountStrategy();
 
-      const result = await service.getExchangeByName(exchangeName, strategy);
+      const result = await service.getExchangeByName({ exchangeName });
 
-      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
-        exchangeName,
-      );
+      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith({
+        exchangeName: 'binance',
+        userId: null,
+      });
 
       expect(mockEncryptionService.decrypt).toHaveBeenCalledWith('encrypted');
 
@@ -115,7 +115,6 @@ describe('ExchangeRegistryService', () => {
 
     it('should return an existing exchange if already initialized', async () => {
       const exchangeName = 'binance';
-      const strategy = new GetDefaultAccountStrategy();
 
       const existingExchange = {
         id: 'binance-true',
@@ -130,16 +129,10 @@ describe('ExchangeRegistryService', () => {
         .spyOn(ccxtGateway, 'initializeExchange')
         .mockResolvedValue(existingExchange);
 
-      const firstResult = await service.getExchangeByName(
-        exchangeName,
-        strategy,
-      );
+      const firstResult = await service.getExchangeByName({ exchangeName });
       expect(firstResult).toEqual(existingExchange);
 
-      const secondResult = await service.getExchangeByName(
-        exchangeName,
-        strategy,
-      );
+      const secondResult = await service.getExchangeByName({ exchangeName });
       expect(secondResult).toEqual(existingExchange);
     });
   });
@@ -150,9 +143,10 @@ describe('ExchangeRegistryService', () => {
 
       const result = await service['initializeExchanges'](exchangeName);
 
-      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
-        exchangeName,
-      );
+      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith({
+        exchangeName: 'binance',
+        userId: undefined,
+      });
       expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
         mockApiKeys.length,
       );
@@ -167,9 +161,10 @@ describe('ExchangeRegistryService', () => {
 
       const result = await service.getApiKeys(exchangeName);
 
-      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith(
-        exchangeName,
-      );
+      expect(exchangeApiKeyService.getExchangeApiKeys).toHaveBeenCalledWith({
+        exchangeName: 'binance',
+        userId: undefined,
+      });
       const expectedDecryptedApiKeys = [
         {
           apiKey: 'mockApiKey1',

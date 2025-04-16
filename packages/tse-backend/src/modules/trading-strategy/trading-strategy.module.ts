@@ -25,6 +25,7 @@ import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
 import { Volume } from '../../common/entities/volume.entity';
 import { GetAdditionalAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
 import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
+import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-manager/strategies/get-all-default-accounts.strategy';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager
     VolumeStrategyProfile,
     GetDefaultAccountStrategy,
     GetAdditionalAccountStrategy,
+    GetAllDefaultAccountsStrategy,
   ],
   exports: [
     ArbitrageStrategy,

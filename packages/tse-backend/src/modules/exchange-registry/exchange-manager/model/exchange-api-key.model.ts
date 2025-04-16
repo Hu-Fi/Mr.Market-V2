@@ -15,7 +15,7 @@ export class ExchangeApiKeyDto {
   exchangeName: string;
 
   @AutoMap()
-  @ApiProperty({ example: 'false' })
+  @ApiProperty({ example: 'true' })
   @IsBoolean()
   isDefaultAccount: boolean;
 

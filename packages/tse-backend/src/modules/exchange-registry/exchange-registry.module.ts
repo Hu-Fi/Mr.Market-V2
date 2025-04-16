@@ -13,6 +13,7 @@ import { ExchangeApiKeyReadonlyRepository } from './exchange-manager/exchange-ap
 import { ExchangeApiKeyReadOnly } from '../../common/entities/exchange-api-key-read-only.entity';
 import { ExchangeApiKeyReadonlyService } from './exchange-manager/exchange-api-key-readonly.service';
 import { GetDefaultAccountStrategy } from './exchange-manager/strategies/get-default-account.strategy';
+import { GetAllDefaultAccountsStrategy } from './exchange-manager/strategies/get-all-default-accounts.strategy';
 
 @Module({
   imports: [
@@ -29,12 +30,15 @@ import { GetDefaultAccountStrategy } from './exchange-manager/strategies/get-def
     ExchangeApiKeyReadonlyService,
     ExchangeApiKeyReadonlyRepository,
     GetDefaultAccountStrategy,
+    GetAllDefaultAccountsStrategy,
   ],
   controllers: [ExchangeApiKeyController],
   exports: [
     ExchangeRegistryService,
     ExchangeApiKeyService,
     ExchangeApiKeyReadonlyService,
+    GetDefaultAccountStrategy,
+    GetAllDefaultAccountsStrategy,
   ],
 })
 export class ExchangeRegistryModule {}

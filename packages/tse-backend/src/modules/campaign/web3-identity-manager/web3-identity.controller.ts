@@ -20,11 +20,16 @@ import {
   IdentityRpcDto,
 } from './model/web3-identity.model';
 import { JwtAuthGuard } from '../../../common/utils/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/utils/auth/guards/roles.guard';
+import { Roles } from '../../../common/utils/auth/roles.decorator';
+import { Role } from '../../../common/enums/role.enums';
 
-@ApiTags('web3 identity')
+@ApiTags('web3 identity (admin only)')
 @UsePipes(new ValidationPipe())
 @Controller('identity')
+@UseGuards(RolesGuard)
 @UseGuards(JwtAuthGuard)
+@Roles(Role.ADMIN)
 @ApiBearerAuth()
 export class Web3IdentityController {
   constructor(

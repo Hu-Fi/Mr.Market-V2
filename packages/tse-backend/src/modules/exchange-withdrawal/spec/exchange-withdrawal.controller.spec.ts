@@ -18,6 +18,7 @@ describe('ExchangeWithdrawalController', () => {
   };
 
   const createWithdrawalDtoFixture: CreateWithdrawalDto = {
+    userId: '',
     exchangeName: 'binance',
     symbol: 'ETH',
     network: 'eth',
@@ -56,6 +57,7 @@ describe('ExchangeWithdrawalController', () => {
   describe('createWithdrawal', () => {
     it('should call handleWithdrawal with correct command', async () => {
       const command: CreateWithdrawalCommand = {
+        userId: createWithdrawalDtoFixture.userId,
         exchangeName: createWithdrawalDtoFixture.exchangeName,
         symbol: createWithdrawalDtoFixture.symbol,
         network: createWithdrawalDtoFixture.network,

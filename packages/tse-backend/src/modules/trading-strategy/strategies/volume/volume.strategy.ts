@@ -154,16 +154,22 @@ export class VolumeStrategy implements Strategy {
   private async validateExchangesAndPairs(
     command: VolumeStrategyCommand,
   ): Promise<void> {
-    const { exchangeName, sideA, sideB } = command;
+    const { userId, exchangeName, sideA, sideB } = command;
     const pair = `${sideA}/${sideB}:${sideB}`;
     await Promise.all([
       this.validatePair(pair, exchangeName),
-      this.validateExchange(exchangeName),
+      this.validateExchange(exchangeName, userId),
     ]);
   }
 
-  private async validateExchange(exchangeName: string): Promise<void> {
-    await this.exchangeRegistryService.getExchangeByName(exchangeName);
+  private async validateExchange(
+    exchangeName: string,
+    userId: string,
+  ): Promise<void> {
+    await this.exchangeRegistryService.getExchangeByName({
+      exchangeName,
+      userId,
+    });
     const supportedExchanges =
       await this.exchangeRegistryService.getSupportedExchanges();
     if (!isExchangeSupported(exchangeName, supportedExchanges)) {
@@ -237,12 +243,14 @@ export class VolumeStrategy implements Strategy {
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeName,
       pair,
+      strategyEntity.userId,
     );
   }
 
   async executeVolumeStrategy(data: VolumeStrategyData): Promise<void> {
     const now = new Date();
     const {
+      userId,
       id,
       exchangeName,
       sideA,
@@ -269,15 +277,18 @@ export class VolumeStrategy implements Strategy {
     }
 
     const defaultAccount = await this.exchangeRegistryService.getExchangeByName(
-      exchangeName,
-      this.defaultStrategy,
+      {
+        exchangeName,
+        strategy: this.defaultStrategy,
+        userId,
+      },
     );
     const additionalAccount =
-      await this.exchangeRegistryService.getExchangeByName(
+      await this.exchangeRegistryService.getExchangeByName({
         exchangeName,
-        this.additionalAccountStrategy,
-      );
-
+        strategy: this.additionalAccountStrategy,
+        userId,
+      });
     const pair = `${sideA}/${sideB}`;
 
     if (tradesExecuted >= numTotalTrades) {
