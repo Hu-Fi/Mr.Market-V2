@@ -82,6 +82,7 @@ describe('AuthService', () => {
 
       expect(jwtService.sign).toHaveBeenCalledWith({
         roles: ['Admin'],
+        clientId: 'admin',
         sub: 'admin',
       });
       expect(result).toStrictEqual(response);
