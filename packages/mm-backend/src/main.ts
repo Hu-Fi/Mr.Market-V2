@@ -24,7 +24,7 @@ async function bootstrap() {
   const corsConfig = configService.get<string>('CORS_ORIGIN', '*');
   app.enableCors({
     origin: corsConfig,
-    methods: ['GET', 'OPTIONS', 'POST', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST'],
   });
 
   app.setGlobalPrefix('api');
