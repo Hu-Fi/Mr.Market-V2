@@ -7,6 +7,7 @@ import {
 } from '../../common/enums/transaction.enum';
 import { MixinTransactionUtils } from './utils/mixin-transaction.utils';
 import { ExchangeTransactionUtils } from './utils/exchange-transaction.utils';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class TransactionService {
@@ -60,27 +61,12 @@ export class TransactionService {
         await this.mixinTransactionUtils.updateUserBalance({
           userId: withdrawal.userId,
           assetId: withdrawal.assetId,
-          amount: -withdrawal.amount,
+          amount: new Decimal(-withdrawal.amount),
         });
         this.logger.debug(
           `Withdrawal ${withdrawal.id} confirmed and updated to spent`,
         );
       }
-    }
-  }
-
-  async handleCron() {
-    if (this.isJobRunning) {
-      this.logger.warn('Job still running, skipping');
-      return;
-    }
-    this.isJobRunning = true;
-    try {
-      await this.processData();
-    } catch (error) {
-      this.logger.error('Error processing data', error.stack);
-    } finally {
-      this.isJobRunning = false;
     }
   }
 
@@ -136,7 +122,7 @@ export class TransactionService {
         await this.mixinTransactionUtils.updateUserBalance({
           userId,
           assetId,
-          amount: -amount,
+          amount: new Decimal(-amount),
         });
         break;
       }

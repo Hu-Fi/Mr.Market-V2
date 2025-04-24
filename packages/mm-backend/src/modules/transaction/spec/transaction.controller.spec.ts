@@ -19,6 +19,7 @@ import { CreateDepositDto } from '../exchange-deposit/model/exchange-deposit.mod
 import { ExchangeDepositService } from '../exchange-deposit/exchange-deposit.service';
 import { ExchangeWithdrawalService } from '../exchange-withdraw/exchange-withdrawal.service';
 import { ExchangeNetwork } from '../../../common/enums/exchange.enum';
+import { Decimal } from 'decimal.js';
 
 describe('TransactionController', () => {
   let controller: TransactionController;
@@ -75,16 +76,20 @@ describe('TransactionController', () => {
   describe('deposit', () => {
     it('should execute a deposit transaction', async () => {
       const depositDto: DepositDto = {
-        amount: 0.001,
+        amount: '0.001',
         assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
         chainId: '43d61dcd-e413-450d-80b8-101d5e903357',
       };
 
       const userId = 'user-id-123';
-      const command: DepositCommand = { userId, ...depositDto };
+      const command: DepositCommand = {
+        ...depositDto,
+        userId,
+        amount: new Decimal(depositDto.amount),
+      };
       const depositResponse: MixinDepositResponse = {
         assetId: depositDto.assetId,
-        amount: depositDto.amount,
+        amount: new Decimal(depositDto.amount),
         destination: 'some-destination',
       };
 
@@ -107,7 +112,11 @@ describe('TransactionController', () => {
       };
 
       const userId = 'user-id-123';
-      const command: WithdrawCommand = { userId, ...withdrawDto };
+      const command: WithdrawCommand = {
+        userId,
+        ...withdrawDto,
+        amount: new Decimal(withdrawDto.amount),
+      };
 
       const withdrawResponse = {
         transactionHash: 'mockTransactionHash',
@@ -131,7 +140,7 @@ describe('TransactionController', () => {
         exchangeName: 'Binance',
         symbol: 'BTC',
         network: ExchangeNetwork.ERC20,
-        amount: 0.001,
+        amount: '0.001',
       };
 
       const depositResponse = {
@@ -149,7 +158,13 @@ describe('TransactionController', () => {
       const result = await controller.exchangeDeposit(createDepositDto, req);
 
       expect(mockExchangeDepositService.deposit).toHaveBeenCalledWith(
-        expect.objectContaining(createDepositDto),
+        expect.objectContaining({
+          amount: new Decimal(0.001),
+          exchangeName: 'Binance',
+          network: 'ERC20',
+          symbol: 'BTC',
+          userId: 'user-id-123',
+        }),
       );
       expect(result).toEqual(depositResponse);
     });
@@ -163,7 +178,7 @@ describe('TransactionController', () => {
         network: 'BTC',
         address: 'some-address',
         tag: 'some-tag',
-        amount: 0.01,
+        amount: '0.001',
       };
 
       const withdrawResponse = {
@@ -182,7 +197,11 @@ describe('TransactionController', () => {
       );
 
       expect(mockExchangeWithdrawService.withdraw).toHaveBeenCalledWith(
-        expect.objectContaining(createWithdrawalDto),
+        expect.objectContaining({
+          ...createWithdrawalDto,
+          amount: new Decimal(0.001),
+          userId: 'user-id-123',
+        }),
       );
       expect(result).toEqual(withdrawResponse);
     });

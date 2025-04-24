@@ -41,7 +41,7 @@ describe('UserBalanceRepository', () => {
       userId: '1',
       assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
       balance: 100,
-    } as UserBalance;
+    } as unknown as UserBalance;
     jest.spyOn(repository, 'findOne').mockResolvedValue(userBalance);
 
     const result = await userBalanceRepository.findByUserIdAssetId(
@@ -59,7 +59,7 @@ describe('UserBalanceRepository', () => {
       userId: '1',
       assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
       balance: 100,
-    } as UserBalance;
+    } as unknown as UserBalance;
     jest.spyOn(repository, 'save').mockResolvedValue(userBalance);
 
     const result = await userBalanceRepository.saveUserBalance(userBalance);

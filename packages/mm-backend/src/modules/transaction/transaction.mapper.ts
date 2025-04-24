@@ -1,6 +1,6 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { createMap, Mapper } from '@automapper/core';
+import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
   DepositCommand,
   DepositDto,
@@ -17,6 +17,7 @@ import {
   CreateWithdrawalCommand,
   CreateWithdrawalDto,
 } from './exchange-withdraw/model/exchange-withdrawal.model';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class TransactionProfile extends AutomapperProfile {
@@ -26,10 +27,42 @@ export class TransactionProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, DepositDto, DepositCommand);
-      createMap(mapper, WithdrawDto, WithdrawCommand);
-      createMap(mapper, CreateDepositDto, CreateDepositCommand);
-      createMap(mapper, CreateWithdrawalDto, CreateWithdrawalCommand);
+      createMap(
+        mapper,
+        DepositDto,
+        DepositCommand,
+        forMember(
+          (dest) => dest.amount,
+          mapFrom((src) => new Decimal(src.amount)),
+        ),
+      );
+      createMap(
+        mapper,
+        WithdrawDto,
+        WithdrawCommand,
+        forMember(
+          (dest) => dest.amount,
+          mapFrom((src) => new Decimal(src.amount)),
+        ),
+      );
+      createMap(
+        mapper,
+        CreateDepositDto,
+        CreateDepositCommand,
+        forMember(
+          (dest) => dest.amount,
+          mapFrom((src) => new Decimal(src.amount)),
+        ),
+      );
+      createMap(
+        mapper,
+        CreateWithdrawalDto,
+        CreateWithdrawalCommand,
+        forMember(
+          (dest) => dest.amount,
+          mapFrom((src) => new Decimal(src.amount)),
+        ),
+      );
     };
   }
 }

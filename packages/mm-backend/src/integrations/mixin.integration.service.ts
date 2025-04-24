@@ -22,9 +22,9 @@ import {
 } from '../common/interfaces/auth.interfaces';
 import { DepositCommand } from '../modules/transaction/mixin-deposit/model/mixin-deposit.model';
 import { v4 } from 'uuid';
-import BigNumber from 'bignumber.js';
 import { Fee } from '../common/interfaces/mixin.interfaces';
 import { WithdrawCommand } from '../modules/transaction/mixin-withdraw/model/mixin-withdrawal.model';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class MixinIntegrationService {
@@ -155,7 +155,7 @@ export class MixinIntegrationService {
     return assetFee ?? chainFee;
   }
 
-  private hasPositiveChange(change: BigNumber): boolean {
+  private hasPositiveChange(change: Decimal): boolean {
     return !change.isZero() && !change.isNegative();
   }
 
@@ -171,7 +171,8 @@ export class MixinIntegrationService {
     ];
 
     const { change } = getUnspentOutputsForRecipients(outputs, recipients);
-    if (this.hasPositiveChange(change)) {
+    const decimalChange = new Decimal(change.toString());
+    if (this.hasPositiveChange(decimalChange)) {
       recipients.push(
         <SafeWithdrawalRecipient>(
           buildSafeTransactionRecipient(
@@ -256,7 +257,7 @@ export class MixinIntegrationService {
 
     const feeCommand: WithdrawCommand = {
       ...command,
-      amount: fee.amount,
+      amount: new Decimal(fee.amount),
       destination: MixinCashier,
     };
 
@@ -332,7 +333,7 @@ export class MixinIntegrationService {
           if (!grouped[utxo.asset_id]) {
             grouped[utxo.asset_id] = {
               asset_id: utxo.asset_id,
-              amount: new BigNumber(0),
+              amount: new Decimal(0),
             };
           }
           grouped[utxo.asset_id].amount = grouped[utxo.asset_id].amount.plus(
@@ -340,17 +341,17 @@ export class MixinIntegrationService {
           );
           return grouped;
         },
-        {} as Record<string, { asset_id: string; amount: BigNumber }>,
+        {} as Record<string, { asset_id: string; amount: Decimal }>,
       ),
     );
   }
 
   private async calculateBalances(
     client: any,
-    groupedUTXOs: { asset_id: string; amount: BigNumber }[],
+    groupedUTXOs: { asset_id: string; amount: Decimal }[],
   ) {
-    let totalUSDBalance = new BigNumber(0);
-    let totalBTCBalance = new BigNumber(0);
+    let totalUSDBalance = new Decimal(0);
+    let totalBTCBalance = new Decimal(0);
 
     const balanceDetails = await Promise.all(
       groupedUTXOs.map(async ({ asset_id, amount }) => {
@@ -386,15 +387,15 @@ export class MixinIntegrationService {
   }
 
   private calculateValueInCurrency(
-    amount: BigNumber,
+    amount: Decimal,
     price: string | number,
-  ): BigNumber {
-    return amount.multipliedBy(new BigNumber(price));
+  ): Decimal {
+    return amount.mul(new Decimal(price));
   }
 
-  private roundToPrecision(value: BigNumber, precision: number): string {
+  private roundToPrecision(value: Decimal, precision: number): string {
     return value
-      .decimalPlaces(precision, BigNumber.ROUND_HALF_UP)
+      .toDecimalPlaces(precision, Decimal.ROUND_HALF_UP)
       .toFixed(precision);
   }
 }

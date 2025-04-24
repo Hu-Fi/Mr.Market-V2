@@ -25,6 +25,7 @@ import {
   newCampaignPayload,
   userStrategyPayload,
 } from './fixtures';
+import { Decimal } from 'decimal.js';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -217,8 +218,9 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
     '7. should the user deposit funds into the bot wallet to increase the liquidity of the campaign',
     async () => {
       const command = {
-        userId: '123',
         ...depositPayload,
+        userId: '123',
+        amount: new Decimal(depositPayload.amount),
       };
       const depositDetails = await depositService.deposit(command);
       expect(depositDetails).toHaveProperty('assetId');

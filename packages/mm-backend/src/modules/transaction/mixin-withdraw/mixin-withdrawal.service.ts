@@ -17,7 +17,7 @@ export class MixinWithdrawalService {
   async withdraw(command: WithdrawCommand) {
     const withdrawal = await this.repository.save({
       ...command,
-      amount: Number(command.amount),
+      amount: command.amount,
       status: MixinWithdrawalStatus.SIGNED,
     });
 

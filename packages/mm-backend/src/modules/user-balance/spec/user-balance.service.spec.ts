@@ -4,6 +4,7 @@ import { UserBalanceRepository } from '../user-balance.repository';
 import { AuthService } from '../../auth/auth.service';
 import { UserBalance } from '../../../common/entities/user-balance.entity';
 import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
+import { Decimal } from 'decimal.js';
 
 const mockUserBalanceRepository = {
   findByUserIdAssetId: jest.fn(),
@@ -55,7 +56,7 @@ describe('UserBalanceService', () => {
     const userBalance = {
       userId: '1',
       assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
-      balance: 0,
+      balance: new Decimal(0),
     } as UserBalance;
 
     jest.spyOn(repository, 'findByUserIdAssetId').mockResolvedValue(null);
@@ -79,7 +80,7 @@ describe('UserBalanceService', () => {
     const userBalance = {
       userId: '1',
       assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
-      balance: 100,
+      balance: new Decimal(100),
     } as UserBalance;
 
     jest
@@ -87,17 +88,17 @@ describe('UserBalanceService', () => {
       .mockResolvedValue(userBalance);
     jest
       .spyOn(repository, 'saveUserBalance')
-      .mockResolvedValue({ ...userBalance, balance: 200 });
+      .mockResolvedValue({ ...userBalance, balance: new Decimal(200) });
 
     const result = await service.updateUserBalance({
       userId: '1',
       assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
-      amount: 100,
+      amount: new Decimal(100),
     });
-    expect(result.balance).toEqual(200);
+    expect(result.balance).toEqual(new Decimal(200));
     expect(repository.saveUserBalance).toHaveBeenCalledWith({
       ...userBalance,
-      balance: 200,
+      balance: new Decimal(200),
     });
   });
 
@@ -105,7 +106,7 @@ describe('UserBalanceService', () => {
     const userBalance = {
       userId: '1',
       assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
-      balance: 50,
+      balance: new Decimal(50),
     } as UserBalance;
 
     jest
@@ -116,7 +117,7 @@ describe('UserBalanceService', () => {
       service.updateUserBalance({
         userId: '1',
         assetId: '43d61dcd-e413-450d-80b8-101d5e903357',
-        amount: -100,
+        amount: new Decimal(-100),
       }),
     ).rejects.toThrow('Insufficient balance');
   });

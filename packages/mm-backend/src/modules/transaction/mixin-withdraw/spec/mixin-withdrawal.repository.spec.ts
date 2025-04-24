@@ -4,6 +4,7 @@ import { MixinWithdrawal } from '../../../../common/entities/mixin-withdrawal.en
 import { MixinWithdrawalRepository } from '../mixin-withdrawal.repository';
 import { MixinWithdrawalData } from '../../../../common/interfaces/transaction.interfaces';
 import { MixinWithdrawalStatus } from '../../../../common/enums/transaction.enum';
+import { Decimal } from 'decimal.js';
 
 const mockRepository = {
   save: jest.fn(),
@@ -38,7 +39,7 @@ describe('WithdrawRepository', () => {
     const data: MixinWithdrawalData = {
       userId: 'user1',
       assetId: 'asset1',
-      amount: 100,
+      amount: new Decimal(100),
       destination: 'address1',
       status: MixinWithdrawalStatus.SIGNED,
     };
