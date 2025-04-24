@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { MixinIntegrationService } from '../../integrations/mixin.integration.service';
-import { createHash } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AdminLoginCommand, MixinOAuthCommand } from './model/auth.model';
@@ -21,6 +20,7 @@ import { CustomLogger } from '../logger/logger.service';
 import { AuthSessionRepository } from './auth-session.repository';
 import { MixinAuthSession } from '../../common/entities/mixin-auth-session.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { CryptoUtil } from '../../common/utils/auth/crypto.utils';
 
 @Injectable()
 export class AuthService {
@@ -42,18 +42,16 @@ export class AuthService {
       throw new BadRequestException('Password is required');
     }
 
-    const hashedAdminPassword = createHash('sha3-256')
-      .update(this.adminPassword)
-      .digest('hex');
+    const hashedAdminPassword = CryptoUtil.sha3Hash(this.adminPassword);
 
-    if (hashedAdminPassword !== password) {
+    if (!CryptoUtil.safeCompare(hashedAdminPassword, password)) {
       throw new UnauthorizedException('Invalid password');
     }
 
     const payload = {
       sub: 'admin',
       clientId: 'admin',
-      roles: ['Admin']
+      roles: ['Admin'],
     };
     return { accessToken: this.jwtService.sign(payload) };
   }
