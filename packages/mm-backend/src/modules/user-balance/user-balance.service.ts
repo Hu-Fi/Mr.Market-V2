@@ -26,7 +26,7 @@ export class UserBalanceService {
       userBalance = new UserBalance();
       userBalance.userId = userId;
       userBalance.assetId = assetId;
-      userBalance.balance = 0;
+      userBalance.balance = new Decimal(0);
 
       await this.userBalanceRepository.saveUserBalance(userBalance);
     }
@@ -47,7 +47,7 @@ export class UserBalanceService {
       throw new Error('Insufficient balance');
     }
 
-    userBalance.balance = currentBalance.plus(transactionAmount).toNumber();
+    userBalance.balance = currentBalance.plus(transactionAmount);
 
     return this.userBalanceRepository.saveUserBalance(userBalance);
   }

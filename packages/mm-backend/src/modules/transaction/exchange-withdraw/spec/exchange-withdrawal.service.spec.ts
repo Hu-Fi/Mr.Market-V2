@@ -7,6 +7,7 @@ import { AxiosResponse } from 'axios';
 import { ExchangeWithdrawalService } from '../exchange-withdrawal.service';
 import { CreateWithdrawalCommand } from '../model/exchange-withdrawal.model';
 import { ExchangeWithdrawalRepository } from '../exchange-withdrawal.repository';
+import { Decimal } from 'decimal.js';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -62,7 +63,7 @@ describe('ExchangeWithdrawService', () => {
       userId: 'user123',
       symbol: 'ETH',
       address: 'sample-address',
-      amount: 0.01,
+      amount: new Decimal(0.01),
       exchangeName: 'binance',
       network: 'ETH',
       tag: '',
@@ -99,7 +100,7 @@ describe('ExchangeWithdrawService', () => {
       userId: 'user123',
       symbol: 'ETH',
       address: 'sample-address',
-      amount: 0.01,
+      amount: new Decimal(0.01),
       exchangeName: 'binance',
       network: 'ETH',
       tag: '',
@@ -125,7 +126,7 @@ describe('ExchangeWithdrawService', () => {
       userId: 'user123',
       symbol: 'ETH',
       address: 'sample-address',
-      amount: 0.01,
+      amount: new Decimal(0.01),
       exchangeName: 'binance',
       network: 'ETH',
       tag: '',

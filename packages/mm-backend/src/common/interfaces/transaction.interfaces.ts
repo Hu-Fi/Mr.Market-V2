@@ -4,10 +4,11 @@ import {
   MixinDepositStatus,
   MixinWithdrawalStatus,
 } from '../enums/transaction.enum';
+import { Decimal } from 'decimal.js';
 
 export interface TransactionBalance {
   userId: string;
-  amount: number;
+  amount: Decimal;
   assetId: string;
 }
 
@@ -15,7 +16,7 @@ export interface MixinDepositData {
   userId: string;
   assetId: string;
   chainId: string;
-  amount: number;
+  amount: Decimal;
   destination: string;
   status: MixinDepositStatus;
   transactionHash?: string;
@@ -24,14 +25,14 @@ export interface MixinDepositData {
 export interface MixinWithdrawalData {
   userId: string;
   assetId: string;
-  amount: number;
+  amount: Decimal;
   destination: string;
   status: MixinWithdrawalStatus;
 }
 
 export interface MixinDepositResponse {
   assetId: string;
-  amount: number;
+  amount: Decimal;
   destination: string;
 }
 
@@ -45,7 +46,7 @@ export interface ExchangeDepositData {
   exchangeName: string;
   assetId: string;
   chainId: string;
-  amount: number;
+  amount: Decimal;
   destination: string;
   status: ExchangeDepositStatus;
   transactionHash?: string;
@@ -55,7 +56,7 @@ export interface ExchangeWithdrawalData {
   userId: string;
   exchangeName: string;
   assetId: string;
-  amount: number;
+  amount: Decimal;
   destination: string;
   status: ExchangeWithdrawalStatus;
 }

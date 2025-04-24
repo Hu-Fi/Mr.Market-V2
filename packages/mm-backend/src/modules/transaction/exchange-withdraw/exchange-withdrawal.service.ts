@@ -31,7 +31,7 @@ export class ExchangeWithdrawalService {
       exchangeName: command.exchangeName,
       assetId: command.symbol,
       destination: command.address,
-      amount: Number(command.amount),
+      amount: command.amount,
       status: ExchangeWithdrawalStatus.PENDING,
     });
 

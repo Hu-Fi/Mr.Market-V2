@@ -6,6 +6,7 @@ import { DepositCommand } from '../model/mixin-deposit.model';
 import { MixinDepositResponse } from '../../../../common/interfaces/transaction.interfaces';
 import { MixinDeposit } from '../../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
+import { Decimal } from 'decimal.js';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -65,7 +66,7 @@ describe('DepositService', () => {
     it('should execute a deposit transaction', async () => {
       const command: DepositCommand = {
         userId: 'user-id-123',
-        amount: 100,
+        amount: new Decimal(100),
         assetId: 'asset-id-456',
         chainId: 'chain-id-789',
       };
@@ -98,7 +99,7 @@ describe('DepositService', () => {
         {
           id: 1,
           userId: 'user-id-123',
-          amount: 100,
+          amount: new Decimal(100),
           assetId: 'asset-id-456',
           chainId: 'chain-id-789',
           status: MixinDepositStatus.PENDING,

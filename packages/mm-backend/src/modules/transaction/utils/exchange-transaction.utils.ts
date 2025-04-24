@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserBalanceService } from '../../user-balance/user-balance.service';
 import { ExchangeDepositService } from '../exchange-deposit/exchange-deposit.service';
 import { ExchangeWithdrawalService } from '../exchange-withdraw/exchange-withdrawal.service';
@@ -11,8 +11,6 @@ import { UserBalance } from '../../../common/entities/user-balance.entity';
 
 @Injectable()
 export class ExchangeTransactionUtils {
-  private logger = new Logger(ExchangeTransactionUtils.name);
-
   constructor(
     private readonly depositService: ExchangeDepositService,
     private readonly withdrawService: ExchangeWithdrawalService,

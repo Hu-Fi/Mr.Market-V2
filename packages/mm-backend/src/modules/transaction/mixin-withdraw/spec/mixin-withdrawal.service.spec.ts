@@ -5,6 +5,7 @@ import { MixinWithdrawalService } from '../mixin-withdrawal.service';
 import { WithdrawCommand } from '../model/mixin-withdrawal.model';
 import { MixinWithdrawalStatus } from '../../../../common/enums/transaction.enum';
 import { MixinWithdrawResponse } from '../../../../common/interfaces/transaction.interfaces';
+import { Decimal } from 'decimal.js';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -59,7 +60,7 @@ describe('WithdrawService', () => {
       const command: WithdrawCommand = {
         userId: 'user1',
         assetId: 'asset1',
-        amount: '100',
+        amount: new Decimal(100),
         destination: 'address1',
       };
 
@@ -67,7 +68,7 @@ describe('WithdrawService', () => {
 
       expect(mockWithdrawRepository.save).toHaveBeenCalledWith({
         ...command,
-        amount: Number(command.amount),
+        amount: command.amount,
         status: MixinWithdrawalStatus.SIGNED,
       });
 
@@ -83,7 +84,7 @@ describe('WithdrawService', () => {
       const command: WithdrawCommand = {
         userId: 'user1',
         assetId: 'asset1',
-        amount: '100',
+        amount: new Decimal(100),
         destination: 'address1',
       };
 

@@ -1,10 +1,11 @@
 import { IsString } from 'class-validator';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty } from '@nestjs/swagger';
+import { Decimal } from 'decimal.js';
 
 export class WithdrawDto {
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: '1000.0000000092341234' })
   @IsString()
   amount: string;
 
@@ -22,7 +23,7 @@ export class WithdrawDto {
 export class WithdrawCommand {
   userId: string;
   @AutoMap()
-  amount: string;
+  amount: Decimal;
   @AutoMap()
   assetId: string;
   @AutoMap()

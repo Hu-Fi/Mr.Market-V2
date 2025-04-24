@@ -53,7 +53,7 @@ export class AuthService {
     const payload = {
       sub: 'admin',
       clientId: 'admin',
-      roles: ['Admin']
+      roles: ['Admin'],
     };
     return { accessToken: this.jwtService.sign(payload) };
   }

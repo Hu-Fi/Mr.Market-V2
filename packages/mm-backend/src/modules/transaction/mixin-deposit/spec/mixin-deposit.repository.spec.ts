@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { MixinDepositRepository } from '../mixin-deposit.repository';
 import { MixinDeposit } from '../../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
+import { Decimal } from 'decimal.js';
 
 const mockRepository = {
   save: jest.fn(),
@@ -37,7 +38,7 @@ describe('DepositRepository', () => {
     it('should save a deposit and return it', async () => {
       const transactionData = {
         userId: 'user-123',
-        amount: 100,
+        amount: new Decimal(100),
         assetId: 'asset-456',
         status: MixinDepositStatus.PENDING,
         chainId: 'chainId-123',
