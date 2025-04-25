@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { MixinDepositService } from './mixin-deposit/mixin-deposit.service';
 import {
   DepositCommand,
@@ -49,6 +49,10 @@ export class TransactionController {
     @Body() dto: DepositDto,
     @Request() req,
   ): Promise<MixinDepositResponse> {
+    if (req.user.clientId === Role.ADMIN) {
+      throw new ForbiddenException('This endpoint is intended for Mixin App users only');
+    }
+
     const command = this.mapper.map(dto, DepositDto, DepositCommand);
     command.userId = req.user.userId;
     return this.mixinDepositService.deposit(command);
@@ -57,7 +61,11 @@ export class TransactionController {
   @Roles(Role.USER)
   @Post('mixin-withdraw')
   @ApiOperation({ summary: 'Execute a withdraw transaction' })
-  async mixinWithdraw(@Body() dto: WithdrawDto, @Request() req): Promise<any> {
+  async mixinWithdraw(@Body() dto: WithdrawDto, @Request() req) {
+    if (req.user.clientId === Role.ADMIN) {
+      throw new ForbiddenException('This endpoint is intended for Mixin App users only');
+    }
+
     const command = this.mapper.map(dto, WithdrawDto, WithdrawCommand);
     command.userId = req.user.userId;
     return this.mixinWithdrawService.withdraw(command);
