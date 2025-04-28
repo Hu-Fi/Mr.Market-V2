@@ -185,13 +185,9 @@ export class MixinIntegrationService {
     }
 
     const ghosts = await this._client.utxo.ghostKey(
-      recipients
-        .filter((r) => 'members' in r)
-        .map((r, i) => ({
-          hint: v4(),
-          receivers: r.members as string[],
-          index: i + 1,
-        })),
+      recipients.filter((r) => 'members' in r),
+      v4(),
+      this.spendPrivateKey
     );
 
     return { recipients, ghosts };
@@ -209,7 +205,7 @@ export class MixinIntegrationService {
       utxos,
       recipients,
       [undefined, ...ghosts],
-      memo,
+      Buffer.from(memo, 'utf-8'),
       feeRef ? [feeRef] : undefined,
     );
     const raw = encodeSafeTransaction(tx);

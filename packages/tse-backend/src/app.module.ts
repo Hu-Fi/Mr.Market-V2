@@ -6,6 +6,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { ExchangeRegistryModule } from './modules/exchange-registry/exchange-registry.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
+import * as Joi from 'joi';
 import { ExchangeOperationModule } from './modules/exchange-operation/exchange-operation.module';
 import { ExchangeTradeModule } from './modules/exchange-trade/exchange-trade.module';
 import { HealthModule } from './modules/health/health.module';
@@ -27,6 +28,14 @@ import { PassportModule } from '@nestjs/passport';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: Joi.object({
+        POSTGRES_HOST: Joi.string().required(),
+        POSTGRES_USER: Joi.string().required(),
+        POSTGRES_PASSWORD: Joi.string().required(),
+        POSTGRES_DATABASE: Joi.string().required(),
+        DATABASE_PORT: Joi.string().required(),
+        REDIS_URL: Joi.string().required(),
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
