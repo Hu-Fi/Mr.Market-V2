@@ -1,10 +1,25 @@
 ## Running the Application
 
+> **Note:** The instructions below describe how to run the application in a local development environment and are not intended for production deployment.
+
 ### Running the Entire Application Using the Main `docker-compose.yml`
 
 1. Navigate to the root directory of the project.
-2. Copy the `.env.example` files to `.env` and adjust the environment variables.
-3. Run Docker Compose.
+2. Copy the `.env.example` files to `.env` and adjust the environment variables:
+
+    ```sh
+    cp .env.example .env
+    ```
+
+3. Important environment variables to configure:
+   - **Database settings**: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DATABASE`, `DATABASE_PORT`
+   - **Mixin API credentials**: `MIXIN_APP_ID`, `MIXIN_SESSION_ID`, `MIXIN_SERVER_PUBLIC_KEY`, `MIXIN_SESSION_PRIVATE_KEY`, `MIXIN_SPEND_PRIVATE_KEY`
+   - **Authentication**: `ADMIN_PASSWORD`
+   - **Mixin OAuth**: `MIXIN_OAUTH_SECRET`, `MIXIN_OAUTH_SCOPE`
+   - **Database options**: `DATABASE_LOGGING_LEVEL`, `DATABASE_SYNCHRONIZE`, `DATABASE_AUTO_RUN_MIGRATIONS`, `DATABASE_SSL`
+   - **Trading Strategy Execution**: `SANDBOX` (for tse-backend)
+
+4. Run Docker Compose:
 
     ```sh
     docker-compose up --build
@@ -26,10 +41,10 @@
     cd packages/mm-backend
     ```
 
-3. Run Docker Compose.
+3. Run the application.
 
     ```sh
-    docker-compose up --build
+    pnpm run start
     ```
 
 #### Running `tse-backend`
@@ -46,10 +61,10 @@
     cd packages/tse-backend
     ```
 
-3. Run Docker Compose.
+3. Run the application.
 
     ```sh
-    docker-compose up --build
+    pnpm run start
     ```
 
 ---

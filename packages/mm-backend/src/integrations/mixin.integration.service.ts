@@ -237,7 +237,7 @@ export class MixinIntegrationService {
       utxos,
       recipients,
       [undefined, ...ghosts],
-      memo,
+      Buffer.from(memo, 'utf-8'),
       feeRef ? [feeRef] : undefined,
     );
     const raw = encodeSafeTransaction(tx);
