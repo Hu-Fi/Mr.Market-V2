@@ -165,32 +165,60 @@ export class MixinIntegrationService {
     additionalRecipient?,
   ) {
     const { amount, destination } = command;
+
+    const sortedOutputs = [...outputs].sort((a, b) => 
+      new Decimal(b.amount).minus(new Decimal(a.amount)).toNumber());
+    
     const recipients: SafeWithdrawalRecipient[] = [
       { amount: amount, destination },
       ...(additionalRecipient ? [additionalRecipient] : []),
     ];
 
-    const { change } = getUnspentOutputsForRecipients(outputs, recipients);
-    const decimalChange = new Decimal(change.toString());
-    if (this.hasPositiveChange(decimalChange)) {
-      recipients.push(
-        <SafeWithdrawalRecipient>(
-          buildSafeTransactionRecipient(
-            outputs[0].receivers,
-            outputs[0].receivers_threshold,
-            change.toString(),
-          )
-        ),
+    try {
+      const { change } = getUnspentOutputsForRecipients(sortedOutputs, recipients);
+      
+      const decimalChange = new Decimal(change.toString());
+      if (this.hasPositiveChange(decimalChange)) {
+        recipients.push(
+          <SafeWithdrawalRecipient>(
+            buildSafeTransactionRecipient(
+              sortedOutputs[0].receivers,
+              sortedOutputs[0].receivers_threshold,
+              change.toString(),
+            )
+          ),
+        );
+      }
+
+      const ghosts = await this._client.utxo.ghostKey(
+        recipients.filter((r) => 'members' in r),
+        v4(),
+        this.spendPrivateKey
       );
+
+      return { recipients, ghosts };
+      
+    } catch (error) {
+      if (error.message.includes('insufficient total input outputs')) {
+        throw new Error(
+          `Insufficient balance for withdrawal. Available: ${this.calculateTotalAmount(outputs)}, ` +
+          `Required: ${this.calculateTotalRequired(recipients)}`
+        );
+      }
+      throw error;
     }
+  }
 
-    const ghosts = await this._client.utxo.ghostKey(
-      recipients.filter((r) => 'members' in r),
-      v4(),
-      this.spendPrivateKey
-    );
+  private calculateTotalAmount(outputs: SafeUtxoOutput[]): string {
+    return outputs
+      .reduce((sum, output) => sum.plus(new Decimal(output.amount)), new Decimal(0))
+      .toString();
+  }
 
-    return { recipients, ghosts };
+  private calculateTotalRequired(recipients: SafeWithdrawalRecipient[]): string {
+    return recipients
+      .reduce((sum, r) => sum.plus(new Decimal(r.amount.toString())), new Decimal(0))
+      .toString();
   }
 
   private async createAndSendTransaction(
@@ -234,6 +262,14 @@ export class MixinIntegrationService {
       asset: assetId,
       state: 'unspent',
     });
+
+    const totalAvailable = outputs.reduce((sum, output) =>
+      sum.plus(new Decimal(output.amount)), new Decimal(0));
+
+    if (totalAvailable.lessThan(command.amount.plus(new Decimal(fee.amount)))) {
+      throw new Error('Insufficient balance for withdrawal including fees');
+    }
+
     const feeOutputs = await this._client.utxo.safeOutputs({
       asset: fee.asset_id,
       state: 'unspent',
@@ -283,6 +319,12 @@ export class MixinIntegrationService {
       asset: assetId,
       state: 'unspent',
     });
+
+    const adjustedAmount = command.amount.minus(new Decimal(fee.amount));
+
+    if (adjustedAmount.isNegative()) {
+      throw new Error('Withdrawal amount too small to cover fees');
+    }
 
     const feeOutput = buildSafeTransactionRecipient(
       [MixinCashier],
