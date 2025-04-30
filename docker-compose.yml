@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+  # Backend services
   mm-backend:
     build:
       context: ./packages/mm-backend
@@ -9,7 +12,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      TRADING_STRATEGY_EXECUTION_URL: ${TRADING_STRATEGY_EXECUTION_URL}
+      # Connect to services using container names
+      POSTGRES_HOST: mm-postgres
+      REDIS_URL: redis://mm-redis:6379
+      TRADING_STRATEGY_EXECUTION_URL: http://tse-backend:3001
+      # Other environment variables from .env
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       MIXIN_APP_ID: ${MIXIN_APP_ID}
       MIXIN_SESSION_ID: ${MIXIN_SESSION_ID}
@@ -18,7 +25,6 @@ services:
       MIXIN_SPEND_PRIVATE_KEY: ${MIXIN_SPEND_PRIVATE_KEY}
       MIXIN_OAUTH_SECRET: ${MIXIN_OAUTH_SECRET}
       MIXIN_OAUTH_SCOPE: ${MIXIN_OAUTH_SCOPE}
-      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DATABASE: ${POSTGRES_DATABASE}
@@ -27,7 +33,11 @@ services:
       DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
       DATABASE_AUTO_RUN_MIGRATIONS: ${DATABASE_AUTO_RUN_MIGRATIONS}
       DATABASE_SSL: ${DATABASE_SSL}
-      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      - mm-postgres
+      - mm-redis
+      - tse-backend
+    restart: unless-stopped
 
   tse-backend:
     build:
@@ -39,8 +49,8 @@ services:
     ports:
       - "3001:3001"
     environment:
-      SANDBOX: ${SANDBOX}
-      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_HOST: mm-postgres
+      REDIS_URL: redis://mm-redis:6379
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DATABASE: ${POSTGRES_DATABASE}
@@ -49,21 +59,45 @@ services:
       DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
       DATABASE_AUTO_RUN_MIGRATIONS: ${DATABASE_AUTO_RUN_MIGRATIONS}
       DATABASE_SSL: ${DATABASE_SSL}
-      REDIS_URL: ${REDIS_URL}
     depends_on:
-      - db
-      - redis
-  db:
-    image: postgres
+      - mm-postgres
+      - mm-redis
+    restart: unless-stopped
+
+  # Database services
+  mm-postgres:
+    image: postgres:14-alpine
+    container_name: mm-postgres
     ports:
-      - '${DATABASE_PORT}:5432'
+      - "${DATABASE_PORT:-5432}:5432"
     environment:
-      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  redis:
-    image: redis:latest
-    ports:
-      - '6379:6379'
+      POSTGRES_DB: ${POSTGRES_DATABASE:-mr_market_v2}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
-      - ./redis_data:/data
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mm-redis:
+    image: redis:7-alpine
+    container_name: mm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

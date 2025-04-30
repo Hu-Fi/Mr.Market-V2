@@ -17,28 +17,14 @@ export class TypeormConfig {
   constructor(private configService: ConfigService) {}
 
   getTypeOrmConfig(): DataSourceOptions {
-    const logging: LoggerOptions = this.configService.get<string>(
-      'DATABASE_LOGGING_LEVEL',
-    )
-      ? (this.configService
-          .get<string>('DATABASE_LOGGING_LEVEL')
-          .split(',') as LoggerOptions)
-      : false;
-
     return {
       type: 'postgres',
-      schema: this.configService.get<string>('DATABASE_SCHEMA', 'public'),
-      host: this.configService.get<string>('POSTGRES_HOST', 'localhost'),
-      port: parseInt(
-        this.configService.get<string>('DATABASE_PORT', '5432'),
-        10,
-      ),
-      username: this.configService.get<string>('POSTGRES_USER', 'postgres'),
-      password: this.configService.get<string>('POSTGRES_PASSWORD', 'postgres'),
-      database: this.configService.get<string>(
-        'POSTGRES_DATABASE',
-        'mr_market_v2',
-      ),
+      schema: 'public',
+      host: this.configService.get<string>('POSTGRES_HOST'),
+      port: parseInt(this.configService.get('DATABASE_PORT', '5432')),
+      username: this.configService.get<string>('POSTGRES_USER'),
+      password: this.configService.get<string>('POSTGRES_PASSWORD'),
+      database: this.configService.get<string>('POSTGRES_DATABASE'),
       entities: [
         Order,
         Operation,
@@ -52,16 +38,10 @@ export class TypeormConfig {
         Volume,
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
-      logging: logging,
-      synchronize:
-        this.configService.get<string>('DATABASE_SYNCHRONIZE', 'true') ===
-        'true',
-      migrationsRun:
-        this.configService.get<string>(
-          'DATABASE_AUTO_RUN_MIGRATIONS',
-          'true',
-        ) === 'true',
-      ssl: this.configService.get<string>('DATABASE_SSL', 'true') === 'true',
+      logging: this.configService.get<string>('DATABASE_LOGGING_LEVEL', 'query,error,migration').split(',') as LoggerOptions,
+      synchronize: this.configService.get('DATABASE_SYNCHRONIZE', 'false')?.toLowerCase() === 'true',
+      migrationsRun: this.configService.get('DATABASE_AUTO_RUN_MIGRATIONS', 'true')?.toLowerCase() === 'true',
+      ssl: this.configService.get('DATABASE_SSL', 'true')?.toLowerCase() === 'true',
     };
   }
 }

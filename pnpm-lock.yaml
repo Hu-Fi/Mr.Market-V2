@@ -27,8 +27,8 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5(@types/node@22.5.4)(terser@5.31.3)
       '@mixin.dev/mixin-node-sdk':
-        specifier: ^7.1.0
-        version: 7.1.0
+        specifier: ^7.4.1
+        version: 7.4.1
       '@nestjs/axios':
         specifier: ^3.0.3
         version: 3.0.3(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(axios@1.7.7)(rxjs@7.8.1)
@@ -309,6 +309,9 @@ importers:
       express:
         specifier: ^4.21.1
         version: 4.21.1
+      joi:
+        specifier: ^17.13.3
+        version: 17.13.3
       passport:
         specifier: ^0.7.0
         version: 0.7.0
@@ -963,8 +966,8 @@ packages:
   '@microsoft/tsdoc@0.15.0':
     resolution: {integrity: sha512-HZpPoABogPvjeJOdzCOSJsXeL/SMCBgBZMVC3X3d7YYp2gf31MfxhUoYUNwf1ERPJOnQc0wkFn9trqI6ZEdZuA==}
 
-  '@mixin.dev/mixin-node-sdk@7.1.0':
-    resolution: {integrity: sha512-1F2eFRs3R9SmaPsCfHXuemoKtasZKVNZUWAf2PvST5EMi1j3EQOn0InC4Uxj/zKP+Z9y88a1/ia5AtBbDzfqzg==}
+  '@mixin.dev/mixin-node-sdk@7.4.1':
+    resolution: {integrity: sha512-93YopQGNsCvJAXcTQYlqAVnzM9NHQC41Js3AoHZCCxBScPJ3hpvZum/da2PdoCKWROob++Ya73DcZYmWKGMRsw==}
     engines: {node: '>=10'}
 
   '@nestjs/axios@3.0.3':
@@ -1183,6 +1186,10 @@ packages:
     peerDependenciesMeta:
       '@nestjs/platform-socket.io':
         optional: true
+
+  '@noble/ciphers@1.3.0':
+    resolution: {integrity: sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@noble/curves@1.2.0':
     resolution: {integrity: sha512-oYclrNgRaM9SsBUBVbb8M6DTV7ZHRTKugureoYEncY5c65HOmRzvSiTE3y5CYaPYJA/GVkrhXEoF0M3Ya9PMnw==}
@@ -1804,6 +1811,9 @@ packages:
   axios@1.7.7:
     resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
 
+  axios@1.8.2:
+    resolution: {integrity: sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==}
+
   b4a@1.6.6:
     resolution: {integrity: sha512-5Tk1HLk6b6ctmjIkAcU/Ujv/1WqiDl0F0JdRCR80VsOcUlHcu7pWeWRlOqQLHfDEsVx9YH/aif5AG4ehoCtTmg==}
 
@@ -2015,6 +2025,9 @@ packages:
 
   chardet@0.7.0:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
+
+  charenc@0.0.2:
+    resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==}
 
   check-disk-space@3.4.0:
     resolution: {integrity: sha512-drVkSqfwA+TvuEhFipiR1OC9boEGZL5RrWvVsOthdcvQNXyCCuKkEiTOTXZ7qxSf/GLwq4GvzfrQD/Wz325hgw==}
@@ -2230,6 +2243,9 @@ packages:
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
+
+  crypt@0.0.2:
+    resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==}
 
   dayjs@1.11.12:
     resolution: {integrity: sha512-Rt2g+nTbLlDWZTwwrIXjy9MeiZmSDI375FvZs72ngxx8PDC6YXOeR3q5LAuPzjZQxhiWdRKac7RKV+YyQYfYIg==}
@@ -2917,6 +2933,9 @@ packages:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
     engines: {node: '>=8'}
 
+  is-buffer@1.1.6:
+    resolution: {integrity: sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==}
+
   is-callable@1.2.7:
     resolution: {integrity: sha512-1BC0BVFhS/p0qtw6enp8e+8OD0UrK0oFLztSjNzhcKA3WDuJxxAPXzPuPtKkjEY9UUoEWlX/8fgKeu2S8i9JTA==}
     engines: {node: '>= 0.4'}
@@ -3327,6 +3346,9 @@ packages:
   makeerror@1.0.12:
     resolution: {integrity: sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg==}
 
+  md5@2.3.0:
+    resolution: {integrity: sha512-T1GITYmFaKuO91vxyoQMFETst+O71VUPEU3ze5GNzDm0OWdP8v1ziTaAEPUr/3kLsY3Sftgz242A1SetQiDL7g==}
+
   media-typer@0.3.0:
     resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
     engines: {node: '>= 0.6'}
@@ -3492,10 +3514,6 @@ packages:
     peerDependenciesMeta:
       encoding:
         optional: true
-
-  node-forge@1.3.1:
-    resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
-    engines: {node: '>= 6.13.0'}
 
   node-gyp-build@4.8.2:
     resolution: {integrity: sha512-IRUxE4BVsHWXkV/SFOut4qTlagw2aM8T5/vnTsmrHJvVoKueJHRc/JaFND7QDDc61kLYUJ6qlZM3sqTSyx2dTw==}
@@ -5462,22 +5480,21 @@ snapshots:
 
   '@microsoft/tsdoc@0.15.0': {}
 
-  '@mixin.dev/mixin-node-sdk@7.1.0':
+  '@mixin.dev/mixin-node-sdk@7.4.1':
     dependencies:
+      '@noble/ciphers': 1.3.0
       '@noble/curves': 1.6.0
       '@noble/hashes': 1.5.0
-      '@types/qs': 6.9.15
-      axios: 1.7.7
+      axios: 1.8.2
       axios-retry: 3.4.0
       bignumber.js: 9.1.2
       bs58: 5.0.0
       int64-buffer: 1.0.1
       is-retry-allowed: 2.2.0
       lodash.merge: 4.6.2
+      md5: 2.3.0
       nano-seconds: 1.2.2
-      node-forge: 1.3.1
       pako: 2.1.0
-      qs: 6.12.3
       serialize-javascript: 6.0.2
       uuid: 9.0.1
       ws: 8.18.0
@@ -5695,6 +5712,8 @@ snapshots:
       tslib: 2.6.3
     optionalDependencies:
       '@nestjs/platform-socket.io': 10.4.6(@nestjs/common@10.4.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/websockets@10.4.1)(rxjs@7.8.1)
+
+  '@noble/ciphers@1.3.0': {}
 
   '@noble/curves@1.2.0':
     dependencies:
@@ -6387,6 +6406,14 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  axios@1.8.2:
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   b4a@1.6.6: {}
 
   babel-jest@29.7.0(@babel/core@7.24.9):
@@ -6666,6 +6693,8 @@ snapshots:
 
   chardet@0.7.0: {}
 
+  charenc@0.0.2: {}
+
   check-disk-space@3.4.0: {}
 
   check-error@1.0.3:
@@ -6894,6 +6923,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  crypt@0.0.2: {}
 
   dayjs@1.11.12: {}
 
@@ -7721,6 +7752,8 @@ snapshots:
     dependencies:
       binary-extensions: 2.3.0
 
+  is-buffer@1.1.6: {}
+
   is-callable@1.2.7: {}
 
   is-core-module@2.15.0:
@@ -8300,6 +8333,12 @@ snapshots:
     dependencies:
       tmpl: 1.0.5
 
+  md5@2.3.0:
+    dependencies:
+      charenc: 0.0.2
+      crypt: 0.0.2
+      is-buffer: 1.1.6
+
   media-typer@0.3.0: {}
 
   memfs@3.5.3:
@@ -8439,8 +8478,6 @@ snapshots:
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
-
-  node-forge@1.3.1: {}
 
   node-gyp-build@4.8.2: {}
 

@@ -30,6 +30,12 @@ import { SecretGeneratorUtils } from './common/utils/auth/secret-generator.utils
       envFilePath: '.env',
       validationSchema: Joi.object({
         ADMIN_PASSWORD: Joi.string().required(),
+        POSTGRES_HOST: Joi.string().required(),
+        POSTGRES_USER: Joi.string().required(),
+        POSTGRES_PASSWORD: Joi.string().required(),
+        POSTGRES_DATABASE: Joi.string().required(),
+        DATABASE_PORT: Joi.string().required(),
+        REDIS_URL: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
