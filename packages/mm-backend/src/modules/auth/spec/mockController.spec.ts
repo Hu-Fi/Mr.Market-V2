@@ -26,12 +26,13 @@ describe('RolesGuard', () => {
 
   const mockAuthSessionRepository = {
     findByUserId: jest.fn(),
+    findAuthSessionByClientId: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
   };
 
   const mockUserService = {
-    createUser: jest.fn(),
+    createUser: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeAll(async () => {
@@ -95,8 +96,10 @@ describe('RolesGuard', () => {
 
     const authService = module.get<AuthService>(AuthService);
 
-    jest.spyOn(authService, 'saveUserToDatabase').mockResolvedValue(undefined);
-    jest.spyOn(authService, 'findAndUpdateAuthId').mockResolvedValue(undefined);
+    jest
+      .spyOn(authService, 'saveUserToDatabase')
+      .mockResolvedValue('mock-user-id');
+    jest.spyOn(authService, 'findAndUpdateAuthId').mockResolvedValue(null);
 
     adminLoginResponse = await authService.validateUser(
       adminLoginCommandFixture,

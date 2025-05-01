@@ -32,10 +32,20 @@ export class TypeormConfig {
         MixinAuthSession,
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
-      logging: this.configService.get<string>('DATABASE_LOGGING_LEVEL', 'query,error,migration').split(',') as LoggerOptions,
-      synchronize: this.configService.get('DATABASE_SYNCHRONIZE', 'false')?.toLowerCase() === 'true',
-      migrationsRun: this.configService.get('DATABASE_AUTO_RUN_MIGRATIONS', 'true')?.toLowerCase() === 'true',
-      ssl: this.configService.get('DATABASE_SSL', 'true')?.toLowerCase() === 'true',
+      logging: this.configService
+        .get<string>('DATABASE_LOGGING_LEVEL', 'query,error,migration')
+        .split(',') as LoggerOptions,
+      synchronize:
+        this.configService
+          .get('DATABASE_SYNCHRONIZE', 'false')
+          ?.toLowerCase() === 'true',
+      migrationsRun:
+        this.configService
+          .get('DATABASE_AUTO_RUN_MIGRATIONS', 'true')
+          ?.toLowerCase() === 'true',
+      ssl:
+        this.configService.get('DATABASE_SSL', 'true')?.toLowerCase() ===
+        'true',
     };
   }
 }
