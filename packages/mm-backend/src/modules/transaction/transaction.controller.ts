@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  ForbiddenException,
+} from '@nestjs/common';
 import { MixinDepositService } from './mixin-deposit/mixin-deposit.service';
 import {
   DepositCommand,
@@ -50,7 +57,9 @@ export class TransactionController {
     @Request() req,
   ): Promise<MixinDepositResponse> {
     if (req.user.clientId === Role.ADMIN) {
-      throw new ForbiddenException('This endpoint is intended for Mixin App users only');
+      throw new ForbiddenException(
+        'This endpoint is intended for Mixin App users only',
+      );
     }
 
     const command = this.mapper.map(dto, DepositDto, DepositCommand);
@@ -63,7 +72,9 @@ export class TransactionController {
   @ApiOperation({ summary: 'Execute a withdraw transaction' })
   async mixinWithdraw(@Body() dto: WithdrawDto, @Request() req) {
     if (req.user.clientId === Role.ADMIN) {
-      throw new ForbiddenException('This endpoint is intended for Mixin App users only');
+      throw new ForbiddenException(
+        'This endpoint is intended for Mixin App users only',
+      );
     }
 
     const command = this.mapper.map(dto, WithdrawDto, WithdrawCommand);

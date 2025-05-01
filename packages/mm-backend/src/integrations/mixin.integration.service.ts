@@ -62,7 +62,8 @@ export class MixinIntegrationService implements OnModuleInit {
     try {
       await this._client.user.profile();
     } catch (error) {
-      throw new Error('Invalid Mixin credentials. code: ' + error.originalError.code
+      throw new Error(
+        'Invalid Mixin credentials. code: ' + error.originalError.code,
       );
     }
   }
@@ -175,17 +176,21 @@ export class MixinIntegrationService implements OnModuleInit {
   ) {
     const { amount, destination } = command;
 
-    const sortedOutputs = [...outputs].sort((a, b) => 
-      new Decimal(b.amount).minus(new Decimal(a.amount)).toNumber());
-    
+    const sortedOutputs = [...outputs].sort((a, b) =>
+      new Decimal(b.amount).minus(new Decimal(a.amount)).toNumber(),
+    );
+
     const recipients: SafeWithdrawalRecipient[] = [
       { amount: amount, destination },
       ...(additionalRecipient ? [additionalRecipient] : []),
     ];
 
     try {
-      const { change } = getUnspentOutputsForRecipients(sortedOutputs, recipients);
-      
+      const { change } = getUnspentOutputsForRecipients(
+        sortedOutputs,
+        recipients,
+      );
+
       const decimalChange = new Decimal(change.toString());
       if (this.hasPositiveChange(decimalChange)) {
         recipients.push(
@@ -202,16 +207,15 @@ export class MixinIntegrationService implements OnModuleInit {
       const ghosts = await this._client.utxo.ghostKey(
         recipients.filter((r) => 'members' in r),
         v4(),
-        this.spendPrivateKey
+        this.spendPrivateKey,
       );
 
       return { recipients, ghosts };
-      
     } catch (error) {
       if (error.message.includes('insufficient total input outputs')) {
         throw new Error(
           `Insufficient balance for withdrawal. Available: ${this.calculateTotalAmount(outputs)}, ` +
-          `Required: ${this.calculateTotalRequired(recipients)}`
+            `Required: ${this.calculateTotalRequired(recipients)}`,
         );
       }
       throw error;
@@ -220,13 +224,21 @@ export class MixinIntegrationService implements OnModuleInit {
 
   private calculateTotalAmount(outputs: SafeUtxoOutput[]): string {
     return outputs
-      .reduce((sum, output) => sum.plus(new Decimal(output.amount)), new Decimal(0))
+      .reduce(
+        (sum, output) => sum.plus(new Decimal(output.amount)),
+        new Decimal(0),
+      )
       .toString();
   }
 
-  private calculateTotalRequired(recipients: SafeWithdrawalRecipient[]): string {
+  private calculateTotalRequired(
+    recipients: SafeWithdrawalRecipient[],
+  ): string {
     return recipients
-      .reduce((sum, r) => sum.plus(new Decimal(r.amount.toString())), new Decimal(0))
+      .reduce(
+        (sum, r) => sum.plus(new Decimal(r.amount.toString())),
+        new Decimal(0),
+      )
       .toString();
   }
 
@@ -272,8 +284,10 @@ export class MixinIntegrationService implements OnModuleInit {
       state: 'unspent',
     });
 
-    const totalAvailable = outputs.reduce((sum, output) =>
-      sum.plus(new Decimal(output.amount)), new Decimal(0));
+    const totalAvailable = outputs.reduce(
+      (sum, output) => sum.plus(new Decimal(output.amount)),
+      new Decimal(0),
+    );
 
     if (totalAvailable.lessThan(command.amount.plus(new Decimal(fee.amount)))) {
       throw new Error('Insufficient balance for withdrawal including fees');
