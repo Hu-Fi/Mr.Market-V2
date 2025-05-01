@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import {
   base64RawURLEncode,
   buildSafeTransaction,
@@ -27,7 +27,7 @@ import { WithdrawCommand } from '../modules/transaction/mixin-withdraw/model/mix
 import { Decimal } from 'decimal.js';
 
 @Injectable()
-export class MixinIntegrationService {
+export class MixinIntegrationService implements OnModuleInit {
   private readonly keystore: Keystore;
   private readonly _clientSecret: string;
   private _client: KeystoreClientReturnType;
@@ -56,6 +56,15 @@ export class MixinIntegrationService {
       'MIXIN_OAUTH_SCOPE',
       'PROFILE:READ ASSETS:READ SNAPSHOTS:READ',
     );
+  }
+
+  async onModuleInit() {
+    try {
+      await this._client.user.profile();
+    } catch (error) {
+      throw new Error('Invalid Mixin credentials. code: ' + error.originalError.code
+      );
+    }
   }
 
   async oauthHandler(code: string): Promise<OAuthResponse> {
