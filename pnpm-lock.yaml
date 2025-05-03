@@ -303,6 +303,9 @@ importers:
       cron:
         specifier: 3.1.7
         version: 3.1.7
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.4.3
       ethers:
         specifier: 6.13.3
         version: 6.13.3

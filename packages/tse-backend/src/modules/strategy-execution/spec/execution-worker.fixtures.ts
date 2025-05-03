@@ -6,6 +6,7 @@ import {
 import { Arbitrage } from '../../../common/entities/arbitrage.entity';
 import { MarketMaking } from '../../../common/entities/market-making.entity';
 import { Volume } from '../../../common/entities/volume.entity';
+import { Decimal } from 'decimal.js';
 
 export const arbitrageStrategiesDataFixture: Arbitrage[] = [
   {
@@ -104,7 +105,7 @@ export const volumeStrategiesDataFixture: Volume[] = [
     exchangeName: 'Binance',
     sideA: 'ETH',
     sideB: 'USDT',
-    amountToTrade: 1500.0,
+    amountToTrade: new Decimal(1500.0),
     incrementPercentage: 3.5,
     tradeIntervalSeconds: 45,
     numTotalTrades: 10,
@@ -124,7 +125,7 @@ export const volumeStrategiesDataFixture: Volume[] = [
     exchangeName: 'Coinbase',
     sideA: 'BTC',
     sideB: 'USD',
-    amountToTrade: 25000.0,
+    amountToTrade: new Decimal(25000.0),
     incrementPercentage: 1.2,
     tradeIntervalSeconds: 60,
     numTotalTrades: 15,
@@ -144,7 +145,7 @@ export const volumeStrategiesDataFixture: Volume[] = [
     exchangeName: 'Kraken',
     sideA: 'ADA',
     sideB: 'EUR',
-    amountToTrade: 5000.0,
+    amountToTrade: new Decimal(5000.0),
     incrementPercentage: 2.0,
     tradeIntervalSeconds: 30,
     numTotalTrades: 20,
