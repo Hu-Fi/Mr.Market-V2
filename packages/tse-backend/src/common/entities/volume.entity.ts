@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { StrategyInstanceStatus } from '../enums/strategy-type.enums';
+import { DecimalTransformer } from '../utils/transformer/decimal.utils';
+import { Decimal } from 'decimal.js';
 
 @Entity()
 export class Volume {
@@ -27,8 +29,13 @@ export class Volume {
   @Column()
   sideB: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  amountToTrade: number;
+  @Column('decimal', {
+    precision: 32,
+    scale: 16,
+    default: 0,
+    transformer: new DecimalTransformer(),
+  })
+  amountToTrade: Decimal;
 
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   incrementPercentage: number;

@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 import { IsString, Matches } from 'class-validator';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
+import { Decimal } from 'decimal.js';
 
 export class VolumeStrategyDto {
   @AutoMap()
@@ -21,10 +22,11 @@ export class VolumeStrategyDto {
 
   @AutoMap()
   @ApiProperty({
-    example: 1.0,
+    example: '0.001',
     description: 'The amount of the asset to trade.',
   })
-  amountToTrade: number;
+  @IsString()
+  amountToTrade: string;
 
   @AutoMap()
   @ApiProperty({
@@ -68,7 +70,7 @@ export class VolumeStrategyCommand {
   sideB: string;
 
   @AutoMap()
-  amountToTrade: number;
+  amountToTrade: Decimal;
   @AutoMap()
   incrementPercentage: number;
   @AutoMap()
@@ -86,7 +88,7 @@ export class VolumeStrategyData {
   exchangeName: string;
   sideA: string;
   sideB: string;
-  amountToTrade: number;
+  amountToTrade: Decimal;
   incrementPercentage: number;
   tradeIntervalSeconds: number;
   numTotalTrades: number;

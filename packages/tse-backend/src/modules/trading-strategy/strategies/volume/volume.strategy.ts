@@ -18,7 +18,6 @@ import { GetDefaultAccountStrategy } from '../../../exchange-registry/exchange-m
 import { GetAdditionalAccountStrategy } from '../../../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
 import {
   MarketOrderType,
-  OrderStatus,
   TradeSideType,
 } from '../../../../common/enums/exchange-operation.enums';
 
@@ -321,7 +320,7 @@ export class VolumeStrategy implements Strategy {
         : defaultAccount;
 
       const randomFactor = 1 + (Math.random() * 0.1 - 0.05);
-      const tradeAmount = amountToTrade * randomFactor;
+      const tradeAmount = amountToTrade.mul(randomFactor);
 
       let newMakerPrice: number;
       if (currentMakerPrice == null) {
@@ -346,6 +345,8 @@ export class VolumeStrategy implements Strategy {
         { postOnly: true },
       );
 
+      this.logger.log(`Maker order executed: ${makerOrder.id}`);
+
       this.logger.log(
         `Taker placing limit SELL: ${tradeAmount.toFixed(6)} ${pair} @ ${newMakerPrice.toFixed(6)} on ${takerExchange.id}`,
       );
@@ -357,34 +358,7 @@ export class VolumeStrategy implements Strategy {
         newMakerPrice,
       );
 
-      const makerResult = await makerExchange.fetchOrder(makerOrder.id, pair);
-      const takerResult = await takerExchange.fetchOrder(takerOrder.id, pair);
-
-      if (
-        makerResult.status === OrderStatus.CLOSED ||
-        makerResult.status === OrderStatus.FILLED
-      ) {
-        this.logger.log(
-          `Maker order on ${makerExchange.id} filled at ${newMakerPrice}`,
-        );
-      } else {
-        this.logger.warn(
-          `Maker order on ${makerExchange.id} status: ${makerResult.status}`,
-        );
-      }
-
-      if (
-        takerResult.status === OrderStatus.CLOSED ||
-        takerResult.status === OrderStatus.FILLED
-      ) {
-        this.logger.log(
-          `Taker order on ${takerExchange.id} filled at ${newMakerPrice}`,
-        );
-      } else {
-        this.logger.warn(
-          `Taker order on ${takerExchange.id} status: ${takerResult.status}`,
-        );
-      }
+      this.logger.log(`Taker order executed: ${takerOrder.id}`);
 
       const updatedTradesExecuted = tradesExecuted + 1;
 
