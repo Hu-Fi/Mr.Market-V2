@@ -1,13 +1,41 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeWithdrawalController } from '../exchange-withdrawal.controller';
 import { ExchangeWithdrawalService } from '../exchange-withdrawal.service';
-import { AutomapperModule } from '@automapper/nestjs';
+import { AutomapperModule, InjectMapper } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import {
-  CreateWithdrawalDto,
   CreateWithdrawalCommand,
+  CreateWithdrawalDto,
 } from '../model/exchange-withdrawal.model';
-import { ExchangeWithdrawalProfile } from '../exchange-withdrawal.mapper';
+import { Decimal } from 'decimal.js';
+import {
+  createMap,
+  forMember,
+  mapFrom,
+  Mapper,
+  MappingProfile,
+} from '@automapper/core';
+import { AutomapperProfile } from '@automapper/nestjs';
+
+export class WithdrawalMappingTestProfile extends AutomapperProfile {
+  constructor(@InjectMapper() mapper: Mapper) {
+    super(mapper);
+  }
+
+  override get profile(): MappingProfile {
+    return (mapper) => {
+      createMap(
+        mapper,
+        CreateWithdrawalDto,
+        CreateWithdrawalCommand,
+        forMember(
+          (dest) => dest.amount,
+          mapFrom((src) => new Decimal(src.amount)),
+        ),
+      );
+    };
+  }
+}
 
 describe('ExchangeWithdrawalController', () => {
   let controller: ExchangeWithdrawalController;
@@ -24,7 +52,7 @@ describe('ExchangeWithdrawalController', () => {
     network: 'eth',
     address: '0x1234567890abcdef1234567890abcdef12345678',
     tag: 'tag',
-    amount: 1.5,
+    amount: '1.5',
   };
 
   beforeEach(async () => {
@@ -40,7 +68,7 @@ describe('ExchangeWithdrawalController', () => {
           provide: ExchangeWithdrawalService,
           useValue: mockExchangeWithdrawalService,
         },
-        ExchangeWithdrawalProfile,
+        WithdrawalMappingTestProfile,
       ],
     }).compile();
 
@@ -56,18 +84,18 @@ describe('ExchangeWithdrawalController', () => {
 
   describe('createWithdrawal', () => {
     it('should call handleWithdrawal with correct command', async () => {
-      const command: CreateWithdrawalCommand = {
-        userId: createWithdrawalDtoFixture.userId,
-        exchangeName: createWithdrawalDtoFixture.exchangeName,
-        symbol: createWithdrawalDtoFixture.symbol,
-        network: createWithdrawalDtoFixture.network,
-        address: createWithdrawalDtoFixture.address,
-        tag: createWithdrawalDtoFixture.tag,
-        amount: createWithdrawalDtoFixture.amount,
-      };
-
       await controller.createWithdrawal(createWithdrawalDtoFixture);
-      expect(service.handleWithdrawal).toHaveBeenCalledWith(command);
+      expect(service.handleWithdrawal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: createWithdrawalDtoFixture.userId,
+          exchangeName: createWithdrawalDtoFixture.exchangeName,
+          symbol: createWithdrawalDtoFixture.symbol,
+          network: createWithdrawalDtoFixture.network,
+          address: createWithdrawalDtoFixture.address,
+          tag: createWithdrawalDtoFixture.tag,
+          amount: expect.any(Decimal),
+        }),
+      );
     });
   });
 });
