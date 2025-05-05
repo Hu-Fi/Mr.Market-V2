@@ -32,10 +32,15 @@ export class ExchangeWithdrawalService {
     try {
       const currencies = await exchange.fetchCurrencies();
 
-      if (currencies && currencies[symbol] &&
+      if (
+        currencies &&
+        currencies[symbol] &&
         currencies[symbol].networks &&
-        (!network || !currencies[symbol].networks[network])) {
-        throw new Error(`Network '${network}' is not supported for ${symbol} on ${exchangeName}`);
+        (!network || !currencies[symbol].networks[network])
+      ) {
+        throw new Error(
+          `Network '${network}' is not supported for ${symbol} on ${exchangeName}`,
+        );
       }
 
       return await exchange.withdraw(symbol, amount, address, tag, { network });

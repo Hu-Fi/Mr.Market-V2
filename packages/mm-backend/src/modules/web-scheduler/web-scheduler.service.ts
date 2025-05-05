@@ -24,7 +24,9 @@ export class WebSchedulerService {
       await this.transactionService.processData();
     } catch (error: any) {
       if (error?.name === 'LockError') {
-        this.logger.warn('Another instance is already running the cron job. Skipping.');
+        this.logger.warn(
+          'Another instance is already running the cron job. Skipping.',
+        );
       } else {
         this.logger.error('Unexpected error during cron job execution:', error);
       }

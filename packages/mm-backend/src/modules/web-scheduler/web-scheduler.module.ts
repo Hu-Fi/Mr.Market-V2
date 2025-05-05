@@ -14,12 +14,9 @@ import { RedisClientProvider } from '../../common/config/redis.provider';
     {
       provide: 'REDLOCK',
       useFactory: (redisClient: Redis) => {
-        return new Redlock(
-          [redisClient],
-          {
-            retryCount: 0,
-          },
-        );
+        return new Redlock([redisClient], {
+          retryCount: 0,
+        });
       },
       inject: ['REDIS_CLIENT'],
     },

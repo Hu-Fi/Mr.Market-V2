@@ -31,7 +31,6 @@ export class TransactionService {
       this.logger.error(`processData execution failed.`);
       throw e;
     }
-
   }
 
   async processMixinDeposits() {

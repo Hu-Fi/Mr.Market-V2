@@ -28,22 +28,27 @@ export class ExchangeDepositService {
     const url = `${this.tseApiUrl}/api/v1/exchange-deposit`;
     const payload = { ...command };
 
-    let transaction: { address: string; };
+    let transaction: { address: string };
 
     try {
       transaction = await lastValueFrom(
         this.httpService.post(url, payload).pipe(
           map((res) => res.data),
           catchError((error: AxiosError) => {
-            this.logger.error(`Error response from TSE API: ${JSON.stringify(error.response?.data)}`, error.stack);
+            this.logger.error(
+              `Error response from TSE API: ${JSON.stringify(error.response?.data)}`,
+              error.stack,
+            );
 
             const responseData = error.response?.data as any;
             const errors = responseData?.errors;
-            const errorMessage = Array.isArray(errors) && errors.length > 0
-              ? errors.map(err => err.message).join(', ')
-              : error.message;
+            const errorMessage =
+              Array.isArray(errors) && errors.length > 0
+                ? errors.map((err) => err.message).join(', ')
+                : error.message;
 
-            const status = error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
+            const status =
+              error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
 
             throw new HttpException(errorMessage, status);
           }),
@@ -53,7 +58,10 @@ export class ExchangeDepositService {
       if (e instanceof HttpException) {
         throw e;
       } else {
-        throw new HttpException('An unexpected error occurred while processing the withdrawal.', HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(
+          'An unexpected error occurred while processing the withdrawal.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
     }
 
