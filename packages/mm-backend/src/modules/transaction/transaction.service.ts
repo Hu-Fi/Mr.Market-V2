@@ -12,7 +12,6 @@ import { Decimal } from 'decimal.js';
 @Injectable()
 export class TransactionService {
   private logger = new Logger(TransactionService.name);
-  private isJobRunning: boolean = false;
 
   constructor(
     private readonly mixinGateway: MixinIntegrationService,
@@ -21,12 +20,17 @@ export class TransactionService {
   ) {}
 
   async processData() {
-    this.logger.debug('Worker checking transactions in progress started');
-    await this.processMixinDeposits();
-    await this.processMixinWithdrawals();
-
-    await this.processExchangeDeposits();
-    await this.processExchangeWithdrawals();
+    try {
+      this.logger.log(`Starting processData execution.`);
+      await this.processMixinDeposits();
+      await this.processMixinWithdrawals();
+      await this.processExchangeDeposits();
+      await this.processExchangeWithdrawals();
+      this.logger.log(`processData execution completed.`);
+    } catch (e) {
+      this.logger.error(`processData execution failed.`);
+      throw e;
+    }
   }
 
   async processMixinDeposits() {
@@ -119,7 +123,7 @@ export class TransactionService {
           pendingWithdrawal.id,
           ExchangeWithdrawalStatus.OK,
         );
-        await this.mixinTransactionUtils.updateUserBalance({
+        await this.exchangeTransactionUtils.updateUserBalance({
           userId,
           assetId,
           amount: new Decimal(-amount),
