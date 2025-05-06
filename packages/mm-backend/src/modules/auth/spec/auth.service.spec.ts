@@ -13,6 +13,8 @@ import {
 import { UserService } from '../../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { AuthSessionRepository } from '../auth-session.repository';
+import { EncryptionService } from '../../../common/utils/auth/encryption.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -27,9 +29,20 @@ describe('AuthService', () => {
       update: jest.fn(),
     };
 
+    const mockCacheManager = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        EncryptionService,
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
+        },
+
         {
           provide: AuthSessionRepository,
           useValue: mockAuthSessionRepository,

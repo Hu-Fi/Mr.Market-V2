@@ -23,6 +23,7 @@ import { MixinAuthSession } from '../../common/entities/mixin-auth-session.entit
 import { v4 as uuidv4 } from 'uuid';
 import { CryptoUtil } from '../../common/utils/auth/crypto.utils';
 import { handleAndThrowMixinApiError } from '../../common/exceptions/mixin-api.exceptions';
+import { EncryptionService } from '../../common/utils/auth/encryption.service';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,7 @@ export class AuthService {
     private jwtService: JwtService,
     private readonly userService: UserService,
     private readonly authSessionRepository: AuthSessionRepository,
+    private readonly encryptionService: EncryptionService,
   ) {
     this.adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
   }
@@ -195,10 +197,22 @@ export class AuthService {
     clientId: string,
     clientSession: ClientSession,
   ) {
+    const encryptedAuthorizationId = await this.encryptionService.encrypt(
+      clientSession.authorizationId,
+    );
+    const encryptedPrivateKey = await this.encryptionService.encrypt(
+      clientSession.privateKey,
+    );
+    const encryptedPublicKey = await this.encryptionService.encrypt(
+      clientSession.publicKey,
+    );
+
     await this.authSessionRepository.create({
       userId: { userId: userId },
       clientId,
-      ...clientSession,
+      authorizationId: encryptedAuthorizationId,
+      privateKey: encryptedPrivateKey,
+      publicKey: encryptedPublicKey,
     } as MixinAuthSession);
   }
 
@@ -209,7 +223,16 @@ export class AuthService {
       throw new NotFoundException('User auth session not found');
     }
 
-    const { authorizationId, privateKey, publicKey } = mixinAuthSession;
+    const authorizationId = await this.encryptionService.decrypt(
+      mixinAuthSession.authorizationId,
+    );
+    const privateKey = await this.encryptionService.decrypt(
+      mixinAuthSession.privateKey,
+    );
+    const publicKey = await this.encryptionService.decrypt(
+      mixinAuthSession.publicKey,
+    );
+
     return { authorizationId, privateKey, publicKey } as ClientSession;
   }
 
