@@ -18,6 +18,7 @@ import {
   ArbitrageStrategyDto,
 } from './model/arbitrage.dto';
 import { JwtAuthGuard } from '../../../../common/utils/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from '../../../../common/interfaces/http-request.interfaces';
 
 @ApiTags('trading-strategy')
 @Controller('trading-strategy')
@@ -30,7 +31,10 @@ export class ArbitrageController {
   ) {}
 
   @Post('/create-arbitrage')
-  async createArbitrage(@Request() req, @Body() dto: ArbitrageStrategyDto) {
+  async createArbitrage(
+    @Request() req: RequestWithUser,
+    @Body() dto: ArbitrageStrategyDto,
+  ) {
     const command = this.mapper.map(
       dto,
       ArbitrageStrategyDto,
@@ -43,7 +47,7 @@ export class ArbitrageController {
 
   @Put('/pause-arbitrage')
   async pauseArbitrage(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Query() dto: ArbitrageStrategyActionDto,
   ) {
     const command = this.mapper.map(
@@ -58,7 +62,7 @@ export class ArbitrageController {
 
   @Put('/stop-arbitrage')
   async stopArbitrage(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Query() dto: ArbitrageStrategyActionDto,
   ) {
     const command = this.mapper.map(
@@ -73,7 +77,7 @@ export class ArbitrageController {
 
   @Put('/delete-arbitrage')
   async deleteArbitrage(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Query() dto: ArbitrageStrategyActionDto,
   ) {
     const command = this.mapper.map(

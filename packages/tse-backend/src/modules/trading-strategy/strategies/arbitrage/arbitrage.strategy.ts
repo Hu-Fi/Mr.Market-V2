@@ -21,6 +21,7 @@ import { ArbitrageTradeParams } from '../../../../common/interfaces/trading-stra
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 import { ArbitrageService } from './arbitrage.service';
 import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class ArbitrageStrategy implements Strategy {
@@ -285,17 +286,16 @@ export class ArbitrageStrategy implements Strategy {
     const orderBookA = await exchangeA.fetchOrderBook(pair);
     const orderBookB = await exchangeB.fetchOrderBook(pair);
 
-    const vwapA = calculateVWAPForAmount(
+    const vwapA: Decimal = calculateVWAPForAmount(
       orderBookA,
       amountToTrade,
       TradeSideType.BUY,
     );
-    const vwapB = calculateVWAPForAmount(
+    const vwapB: Decimal = calculateVWAPForAmount(
       orderBookB,
       amountToTrade,
       TradeSideType.SELL,
     );
-
     const tradeParams: ArbitrageTradeParams = {
       buyExchange: exchangeA,
       sellExchange: exchangeB,
@@ -303,8 +303,8 @@ export class ArbitrageStrategy implements Strategy {
       amount: amountToTrade,
       userId,
       clientId,
-      buyPrice: vwapA,
-      sellPrice: vwapB,
+      buyPrice: Number(vwapA),
+      sellPrice: Number(vwapB),
     };
 
     if (isArbitrageOpportunityBuyOnA(vwapA, vwapB, minProfitability)) {
@@ -323,8 +323,8 @@ export class ArbitrageStrategy implements Strategy {
         amount: amountToTrade,
         userId,
         clientId,
-        buyPrice: vwapB,
-        sellPrice: vwapA,
+        buyPrice: Number(vwapB),
+        sellPrice: Number(vwapA),
       });
     } else {
       this.logger.debug('No arbitrage opportunity found');

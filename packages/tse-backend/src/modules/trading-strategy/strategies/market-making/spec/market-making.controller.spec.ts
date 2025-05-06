@@ -14,12 +14,16 @@ import {
   AmountChangeType,
   PriceSourceType,
 } from '../../../../../common/enums/strategy-type.enums';
+import { Decimal } from 'decimal.js';
+import { RequestWithUser } from '../../../../../common/interfaces/http-request.interfaces';
 
 describe('MarketMakingController', () => {
   let controller: MarketMakingController;
   let service: MarketMakingStrategy;
 
-  const reqMock = { user: { userId: 'user-123', clientId: 'client-456' } };
+  const reqMock = {
+    user: { userId: 'user-123', clientId: 'client-456' },
+  } as RequestWithUser;
 
   beforeEach(async () => {
     const mockService = {
@@ -49,7 +53,7 @@ describe('MarketMakingController', () => {
         exchangeName: 'binance',
         bidSpread: 0.01,
         askSpread: 0.01,
-        orderAmount: 1,
+        orderAmount: String(1),
         checkIntervalSeconds: 10,
         numberOfLayers: 1,
         priceSourceType: PriceSourceType.MID_PRICE,
@@ -67,7 +71,7 @@ describe('MarketMakingController', () => {
         exchangeName: 'binance',
         bidSpread: 0.01,
         askSpread: 0.01,
-        orderAmount: 1,
+        orderAmount: new Decimal(1),
         checkIntervalSeconds: 10,
         numberOfLayers: 1,
         priceSourceType: PriceSourceType.MID_PRICE,

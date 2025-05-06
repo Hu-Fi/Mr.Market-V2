@@ -13,6 +13,7 @@ import {
   OrderStatus,
   TradeSideType,
 } from '../../../common/enums/exchange-operation.enums';
+import { Decimal } from 'decimal.js';
 
 describe('ExchangeOperationService', () => {
   let service: ExchangeOperationService;
@@ -51,7 +52,7 @@ describe('ExchangeOperationService', () => {
         exchangeName: 'exchange-name',
         symbol: 'BTC/USD',
         side: TradeSideType.BUY,
-        amount: 1,
+        amount: new Decimal(1),
         price: 10000,
       };
 
@@ -83,7 +84,7 @@ describe('ExchangeOperationService', () => {
         exchangeName: 'exchange-name',
         symbol: 'BTC/USD',
         side: TradeSideType.BUY,
-        amount: 1,
+        amount: new Decimal(1),
         price: 10000,
       };
 

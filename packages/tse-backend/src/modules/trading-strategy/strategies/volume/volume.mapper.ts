@@ -7,6 +7,7 @@ import {
   VolumeStrategyCommand,
   VolumeStrategyDto,
 } from './model/volume.model';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class VolumeStrategyProfile extends AutomapperProfile {
@@ -27,6 +28,10 @@ export class VolumeStrategyProfile extends AutomapperProfile {
         forMember(
           (destination) => destination.sideB,
           mapFrom((source) => source.pair.split('/')[1].toUpperCase()),
+        ),
+        forMember(
+          (destination) => destination.amountToTrade,
+          mapFrom((source) => new Decimal(source.amountToTrade)),
         ),
       );
       createMap(mapper, VolumeStrategyActionDto, VolumeStrategyActionCommand);

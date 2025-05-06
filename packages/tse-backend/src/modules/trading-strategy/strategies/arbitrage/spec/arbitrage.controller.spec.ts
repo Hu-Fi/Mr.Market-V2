@@ -14,6 +14,8 @@ import {
   ArbitrageCommandFixture,
   ArbitrageDtoFixture,
 } from './arbitrage.fixtures';
+import { Decimal } from 'decimal.js';
+import { RequestWithUser } from '../../../../../common/interfaces/http-request.interfaces';
 
 describe('ArbitrageController', () => {
   let controller: ArbitrageController;
@@ -24,7 +26,7 @@ describe('ArbitrageController', () => {
       userId: 'user-123',
       clientId: 'client-456',
     },
-  };
+  } as RequestWithUser;
 
   beforeEach(async () => {
     const mockService = {
@@ -56,6 +58,7 @@ describe('ArbitrageController', () => {
       const dto: ArbitrageStrategyDto = ArbitrageDtoFixture;
       const expectedCommand: ArbitrageStrategyCommand = {
         ...ArbitrageCommandFixture,
+        amountToTrade: new Decimal(dto.amountToTrade),
         userId: mockRequest.user.userId,
         clientId: mockRequest.user.clientId,
       };

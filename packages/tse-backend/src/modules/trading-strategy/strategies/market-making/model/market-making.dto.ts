@@ -5,8 +5,9 @@ import {
   PriceSourceType,
   StrategyInstanceStatus,
 } from '../../../../../common/enums/strategy-type.enums';
-import { IsNumber, Matches, Max, Min } from 'class-validator';
+import { IsNumber, IsString, Matches, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { Decimal } from 'decimal.js';
 
 export class MarketMakingStrategyDto {
   @AutoMap()
@@ -50,8 +51,12 @@ export class MarketMakingStrategyDto {
   askSpread: number;
 
   @AutoMap()
-  @ApiProperty({ description: 'Order amount', example: 1 })
-  orderAmount: number;
+  @ApiProperty({
+    example: '0.001',
+    description: 'The amount of the asset to trade.',
+  })
+  @IsString()
+  orderAmount: string;
 
   @AutoMap()
   @ApiProperty({
@@ -120,7 +125,7 @@ export class MarketMakingStrategyCommand {
   @AutoMap()
   askSpread: number;
   @AutoMap()
-  orderAmount: number;
+  orderAmount: Decimal;
   @AutoMap()
   checkIntervalSeconds: number;
   @AutoMap()
@@ -147,7 +152,7 @@ export class MarketMakingStrategyData {
   oracleExchangeName?: string;
   bidSpread: number;
   askSpread: number;
-  orderAmount: number;
+  orderAmount: Decimal;
   checkIntervalSeconds: number;
   numberOfLayers: number;
   priceSourceType: PriceSourceType;

@@ -20,6 +20,7 @@ import {
 } from './model/market-making.dto';
 import { MarketMakingStrategy } from './market-making.strategy';
 import { JwtAuthGuard } from '../../../../common/utils/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from '../../../../common/interfaces/http-request.interfaces';
 
 @UsePipes(new ValidationPipe())
 @ApiTags('trading-strategy')
@@ -34,7 +35,7 @@ export class MarketMakingController {
 
   @Post('/create-market-making')
   async createMarketMakingStrategy(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Body() dto: MarketMakingStrategyDto,
   ) {
     const command = this.mapper.map(
@@ -49,7 +50,7 @@ export class MarketMakingController {
 
   @Put('/pause-market-making')
   async pauseMarketMakingStrategy(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Query() dto: MarketMakingStrategyActionDto,
   ) {
     const command = this.mapper.map(
@@ -64,7 +65,7 @@ export class MarketMakingController {
 
   @Put('/stop-market-making')
   async stopMarketMakingStrategy(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Query() dto: MarketMakingStrategyActionDto,
   ) {
     const command = this.mapper.map(
@@ -79,7 +80,7 @@ export class MarketMakingController {
 
   @Put('/delete-market-making')
   async deleteMarketMakingStrategy(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Query() dto: MarketMakingStrategyActionDto,
   ) {
     const command = this.mapper.map(

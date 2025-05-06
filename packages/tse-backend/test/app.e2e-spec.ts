@@ -23,6 +23,7 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
+import { Decimal } from 'decimal.js';
 
 describe('ExchangeOperationService (e2e)', () => {
   let app: INestApplication;
@@ -90,7 +91,7 @@ describe('ExchangeOperationService (e2e)', () => {
         exchangeName: 'exchange-1',
         symbol: 'BTC/USD',
         side: TradeSideType.BUY,
-        amount: 1,
+        amount: new Decimal(1),
         price: 50000,
       };
 
@@ -114,7 +115,7 @@ describe('ExchangeOperationService (e2e)', () => {
         exchangeName: 'exchange-1',
         symbol: 'BTC/USD',
         side: TradeSideType.BUY,
-        amount: 1,
+        amount: new Decimal(1),
         price: 50000,
       };
 
@@ -133,7 +134,7 @@ describe('ExchangeOperationService (e2e)', () => {
         exchangeName: 'exchange-2',
         symbol: 'BTC/USD',
         side: TradeSideType.BUY,
-        amount: 1,
+        amount: new Decimal(1),
         price: 50000,
       } as CreateLimitOrderCommand);
 

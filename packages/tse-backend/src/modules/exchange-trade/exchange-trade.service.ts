@@ -61,7 +61,7 @@ export class ExchangeTradeService {
     if (command.exchange === 'bigone' || command.exchange === 'mexc') {
       const ticker = await exchangeInstance.fetchTicker(command.symbol);
       const price = ticker.ask;
-      const amount = command.amount * price;
+      const amount = command.amount.mul(price);
 
       return exchangeInstance.createOrder(
         command.symbol,

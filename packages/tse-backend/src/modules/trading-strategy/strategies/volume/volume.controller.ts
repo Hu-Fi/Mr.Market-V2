@@ -18,6 +18,7 @@ import {
   VolumeStrategyDto,
 } from './model/volume.model';
 import { JwtAuthGuard } from '../../../../common/utils/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from '../../../../common/interfaces/http-request.interfaces';
 
 @ApiTags('trading-strategy')
 @Controller('trading-strategy')
@@ -30,7 +31,10 @@ export class VolumeController {
   ) {}
 
   @Post('/create-volume')
-  async createVolume(@Request() req, @Body() dto: VolumeStrategyDto) {
+  async createVolume(
+    @Request() req: RequestWithUser,
+    @Body() dto: VolumeStrategyDto,
+  ) {
     const command = this.mapper.map(
       dto,
       VolumeStrategyDto,
@@ -42,7 +46,10 @@ export class VolumeController {
   }
 
   @Put('/pause-volume')
-  async pauseVolume(@Request() req, @Query() dto: VolumeStrategyActionDto) {
+  async pauseVolume(
+    @Request() req: RequestWithUser,
+    @Query() dto: VolumeStrategyActionDto,
+  ) {
     const command = this.mapper.map(
       dto,
       VolumeStrategyActionDto,
@@ -54,7 +61,10 @@ export class VolumeController {
   }
 
   @Put('/stop-volume')
-  async stopVolume(@Request() req, @Query() dto: VolumeStrategyActionDto) {
+  async stopVolume(
+    @Request() req: RequestWithUser,
+    @Query() dto: VolumeStrategyActionDto,
+  ) {
     const command = this.mapper.map(
       dto,
       VolumeStrategyActionDto,
@@ -66,7 +76,10 @@ export class VolumeController {
   }
 
   @Put('/delete-volume')
-  async deleteVolume(@Request() req, @Query() dto: VolumeStrategyActionDto) {
+  async deleteVolume(
+    @Request() req: RequestWithUser,
+    @Query() dto: VolumeStrategyActionDto,
+  ) {
     const command = this.mapper.map(
       dto,
       VolumeStrategyActionDto,

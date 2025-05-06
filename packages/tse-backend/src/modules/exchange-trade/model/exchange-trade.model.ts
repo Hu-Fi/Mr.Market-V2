@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 import { IsString, IsNumber, IsEnum } from 'class-validator';
 import { TradeSideType } from '../../../common/enums/exchange-operation.enums';
+import { Decimal } from 'decimal.js';
 
 export class MarketTradeDto {
   @AutoMap()
@@ -23,9 +24,12 @@ export class MarketTradeDto {
   side: TradeSideType;
 
   @AutoMap()
-  @ApiProperty()
-  @IsNumber()
-  amount: number;
+  @ApiProperty({
+    example: '0.001',
+    description: 'The amount of the asset to trade.',
+  })
+  @IsString()
+  amount: string;
 }
 
 export class MarketLimitDto {
@@ -48,9 +52,12 @@ export class MarketLimitDto {
   side: TradeSideType;
 
   @AutoMap()
-  @ApiProperty()
-  @IsNumber()
-  amount: number;
+  @ApiProperty({
+    example: '0.001',
+    description: 'The amount of the asset to trade.',
+  })
+  @IsString()
+  amount: string;
 
   @AutoMap()
   @ApiProperty()
@@ -75,7 +82,7 @@ export class MarketTradeCommand {
   side: string;
 
   @AutoMap()
-  amount: number;
+  amount: Decimal;
 }
 
 export class MarketLimitCommand {
@@ -95,7 +102,7 @@ export class MarketLimitCommand {
   side: string;
 
   @AutoMap()
-  amount: number;
+  amount: Decimal;
 
   @AutoMap()
   price: number;

@@ -20,6 +20,7 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from '../../common/interfaces/http-request.interfaces';
 
 @ApiTags('exchange trade service')
 @UsePipes(new ValidationPipe())
@@ -34,7 +35,10 @@ export class ExchangeTradeController {
 
   @Post('/market')
   @ApiOperation({ summary: 'Execute a market trade' })
-  async handleMarketTrade(@Request() req, @Body() dto: MarketTradeDto) {
+  async handleMarketTrade(
+    @Request() req: RequestWithUser,
+    @Body() dto: MarketTradeDto,
+  ) {
     const command = this.mapper.map(dto, MarketTradeDto, MarketTradeCommand);
     command.userId = req.user.userId;
     command.clientId = req.user.clientId;
@@ -43,7 +47,10 @@ export class ExchangeTradeController {
 
   @Post('/limit')
   @ApiOperation({ summary: 'Execute a limit trade' })
-  async handleLimitTrade(@Request() req, @Body() dto: MarketLimitDto) {
+  async handleLimitTrade(
+    @Request() req: RequestWithUser,
+    @Body() dto: MarketLimitDto,
+  ) {
     const command = this.mapper.map(dto, MarketLimitDto, MarketLimitCommand);
     command.userId = req.user.userId;
     command.clientId = req.user.clientId;
@@ -52,7 +59,10 @@ export class ExchangeTradeController {
 
   @Post('/cancel/:orderId/:symbol')
   @ApiOperation({ summary: 'Cancel an order' })
-  async cancelOrder(@Request() req, @Body() dto: CancelOrderDto) {
+  async cancelOrder(
+    @Request() req: RequestWithUser,
+    @Body() dto: CancelOrderDto,
+  ) {
     const command = this.mapper.map(dto, CancelOrderDto, CancelOrderCommand);
     command.userId = req.user.userId;
     command.clientId = req.user.clientId;

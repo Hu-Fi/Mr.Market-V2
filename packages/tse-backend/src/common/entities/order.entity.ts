@@ -7,6 +7,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Operation } from './operation.entity';
+import { DecimalTransformer } from '../utils/transformer/decimal.utils';
+import { Decimal } from 'decimal.js';
 
 @Entity()
 export class Order {
@@ -31,8 +33,13 @@ export class Order {
   @Column()
   type: string;
 
-  @Column('decimal', { precision: 18, scale: 10 })
-  amount: number;
+  @Column('decimal', {
+    precision: 32,
+    scale: 16,
+    default: 0,
+    transformer: new DecimalTransformer(),
+  })
+  amount: Decimal;
 
   @Column('decimal', { precision: 18, scale: 10, nullable: true })
   price: number | null;

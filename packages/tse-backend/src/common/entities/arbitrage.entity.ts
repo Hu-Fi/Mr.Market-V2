@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { StrategyInstanceStatus } from '../enums/strategy-type.enums';
+import { Decimal } from 'decimal.js';
+import { DecimalTransformer } from '../utils/transformer/decimal.utils';
 
 @Entity()
 export class Arbitrage {
@@ -24,8 +26,13 @@ export class Arbitrage {
   @Column()
   sideB: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  amountToTrade: number;
+  @Column('decimal', {
+    precision: 32,
+    scale: 16,
+    default: 0,
+    transformer: new DecimalTransformer(),
+  })
+  amountToTrade: Decimal;
 
   @Column({ type: 'decimal', precision: 3, scale: 2 })
   minProfitability: number;

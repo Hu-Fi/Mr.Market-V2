@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
-import { IsNumber, Matches } from 'class-validator';
+import { IsNumber, IsString, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { Decimal } from 'decimal.js';
 
 export class ArbitrageStrategyDto {
   @AutoMap()
@@ -15,10 +16,11 @@ export class ArbitrageStrategyDto {
 
   @AutoMap()
   @ApiProperty({
-    example: 1.0,
+    example: '0.001',
     description: 'The amount of the asset to trade.',
   })
-  amountToTrade: number;
+  @IsString()
+  amountToTrade: string;
 
   @AutoMap()
   @ApiProperty({
@@ -54,7 +56,7 @@ export class ArbitrageStrategyCommand {
   sideA: string;
   sideB: string;
   @AutoMap()
-  amountToTrade: number;
+  amountToTrade: Decimal;
   @AutoMap()
   minProfitability: number;
   @AutoMap()
@@ -73,7 +75,7 @@ export class ArbitrageStrategyData {
   clientId: string;
   sideA: string;
   sideB: string;
-  amountToTrade: number;
+  amountToTrade: Decimal;
   minProfitability: number;
   exchangeAName: string;
   exchangeBName: string;

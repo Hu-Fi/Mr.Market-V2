@@ -19,9 +19,10 @@ import {
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
 import { ExchangeDataService } from '../../../../exchange-data/exchange-data.service';
+import { Decimal } from 'decimal.js';
 export const ArbitrageDtoFixture: ArbitrageStrategyDto = {
   pair: 'ETH/USDT',
-  amountToTrade: 1.0,
+  amountToTrade: String(1.0),
   minProfitability: 0.01,
   exchangeAName: 'binance',
   exchangeBName: 'mexc',
@@ -38,7 +39,7 @@ export const ArbitrageDataFixture: Arbitrage = {
   clientId: '456',
   sideA: 'ETH',
   sideB: 'USDT',
-  amountToTrade: 1.0,
+  amountToTrade: new Decimal(1.0),
   minProfitability: 0.01,
   exchangeAName: 'binance',
   exchangeBName: 'mexc',
@@ -118,6 +119,7 @@ describe('ArbitrageStrategy', () => {
       const dto: ArbitrageStrategyDto = ArbitrageDtoFixture;
       const command: ArbitrageStrategyCommand = {
         ...ArbitrageDtoFixture,
+        amountToTrade: new Decimal(dto.amountToTrade),
         userId: '123',
         clientId: '456',
         sideA: 'ETH',
@@ -131,7 +133,7 @@ describe('ArbitrageStrategy', () => {
         clientId: '456',
         sideA: 'ETH',
         sideB: 'USDT',
-        amountToTrade: dto.amountToTrade,
+        amountToTrade: new Decimal(dto.amountToTrade),
         minProfitability: dto.minProfitability,
         exchangeAName: dto.exchangeAName,
         exchangeBName: dto.exchangeBName,
