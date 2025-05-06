@@ -2,7 +2,7 @@ import {
   depositService,
   setupTestApp,
   shutdownServices,
-  signinToRecordingOracleApi,
+  // signinToRecordingOracleApi,
 } from './test-setup';
 import {
   calculateLiquidityScore,
@@ -41,11 +41,13 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
   const TESTCONTAINERS_TIMEOUT = 15 * 60 * 1000;
   const TEST_TIMEOUT = 60 * 1000;
   let TESTED_CAMPAIGN: string = null;
-  let RECORDING_ORACLE_ACCESS_TOKEN: string = null;
+  // let RECORDING_ORACLE_ACCESS_TOKEN: string = null;
+  const RECORDING_ORACLE_ACCESS_TOKEN: string = null;
+
 
   beforeAll(async () => {
     await setupTestApp();
-    RECORDING_ORACLE_ACCESS_TOKEN = await signinToRecordingOracleApi();
+    // RECORDING_ORACLE_ACCESS_TOKEN = await signinToRecordingOracleApi();
   }, TESTCONTAINERS_TIMEOUT);
 
   afterAll(async () => {

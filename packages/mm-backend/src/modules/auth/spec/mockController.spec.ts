@@ -18,6 +18,8 @@ import {
 import { JwtResponse } from '../../../common/interfaces/auth.interfaces';
 import { UserService } from '../../user/user.service';
 import { AuthSessionRepository } from '../auth-session.repository';
+import { EncryptionService } from '../../../common/utils/auth/encryption.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('RolesGuard', () => {
   let app: INestApplication;
@@ -33,6 +35,11 @@ describe('RolesGuard', () => {
 
   const mockUserService = {
     createUser: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockCacheManager = {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeAll(async () => {
@@ -87,6 +94,11 @@ describe('RolesGuard', () => {
         {
           provide: AuthSessionRepository,
           useValue: mockAuthSessionRepository,
+        },
+        EncryptionService,
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
         },
       ],
     }).compile();

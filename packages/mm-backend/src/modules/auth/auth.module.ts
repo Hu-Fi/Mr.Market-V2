@@ -11,6 +11,7 @@ import { AuthSessionRepository } from './auth-session.repository';
 import { SecretGeneratorUtils } from '../../common/utils/auth/secret-generator.utils';
 import { JwtStrategy } from '../../common/utils/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { EncryptionService } from '../../common/utils/auth/encryption.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PassportModule } from '@nestjs/passport';
     AuthProfile,
     AuthSessionRepository,
     SecretGeneratorUtils,
+    EncryptionService,
   ],
   exports: [AuthService, SecretGeneratorUtils],
   controllers: [AuthController],
