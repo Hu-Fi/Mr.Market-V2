@@ -7,6 +7,7 @@ import {
   ArbitrageStrategyCommand,
   ArbitrageStrategyDto,
 } from './model/arbitrage.dto';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class ArbitrageStrategyProfile extends AutomapperProfile {
@@ -35,6 +36,10 @@ export class ArbitrageStrategyProfile extends AutomapperProfile {
         forMember(
           (destination) => destination.sideB,
           mapFrom((source) => source.pair.split('/')[1].toUpperCase()),
+        ),
+        forMember(
+          (destination) => destination.amountToTrade,
+          mapFrom((source) => new Decimal(source.amountToTrade)),
         ),
       );
       createMap(

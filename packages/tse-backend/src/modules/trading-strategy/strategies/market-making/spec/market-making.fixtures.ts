@@ -3,23 +3,7 @@ import {
   PriceSourceType,
   StrategyInstanceStatus,
 } from '../../../../../common/enums/strategy-type.enums';
-
-export const MarketMakingDtoFixture = {
-  userId: 'user1',
-  clientId: 'client1',
-  pair: 'ETH/USDT',
-  exchangeName: 'ExchangeA',
-  bidSpread: 0.1,
-  askSpread: 0.1,
-  orderAmount: 1,
-  checkIntervalSeconds: 10,
-  numberOfLayers: 1,
-  priceSourceType: PriceSourceType.MID_PRICE,
-  amountChangePerLayer: 1,
-  amountChangeType: AmountChangeType.PERCENTAGE,
-  ceilingPrice: 2000,
-  floorPrice: 1500,
-};
+import { Decimal } from 'decimal.js';
 
 export const MarketMakingCommandFixture = {
   userId: 'user1',
@@ -29,7 +13,7 @@ export const MarketMakingCommandFixture = {
   exchangeName: 'exchangea',
   bidSpread: 0.1,
   askSpread: 0.1,
-  orderAmount: 1.0,
+  orderAmount: new Decimal(1.0),
   checkIntervalSeconds: 10,
   numberOfLayers: 1,
   priceSourceType: PriceSourceType.MID_PRICE,
@@ -47,7 +31,7 @@ export const MarketMakingPartialDataFixture = {
   exchangeName: 'Binance',
   bidSpread: 0.1,
   askSpread: 0.1,
-  orderAmount: 1,
+  orderAmount: new Decimal(1),
   checkIntervalSeconds: 10,
   numberOfLayers: 1,
   priceSourceType: PriceSourceType.MID_PRICE,

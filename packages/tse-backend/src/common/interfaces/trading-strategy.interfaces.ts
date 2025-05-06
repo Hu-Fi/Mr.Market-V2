@@ -1,10 +1,11 @@
 import { TradeSideType } from '../enums/exchange-operation.enums';
+import { Decimal } from 'decimal.js';
 
 export interface ArbitrageTradeParams {
   buyExchange: any;
   sellExchange: any;
   symbol: string;
-  amount: number;
+  amount: Decimal;
   userId: string;
   clientId: string;
   buyPrice: number;
@@ -17,13 +18,13 @@ export interface PlaceOrderParams {
   exchangeName: string;
   pair: string;
   side: TradeSideType;
-  amount: number;
+  amount: Decimal;
   price: number;
 }
 
 export interface OrderDetail {
   layer: number;
-  currentOrderAmount: number;
+  currentOrderAmount: Decimal;
   buyPrice: number;
   sellPrice: number;
   shouldBuy: boolean;

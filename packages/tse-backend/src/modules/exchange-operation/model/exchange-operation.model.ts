@@ -3,6 +3,7 @@ import {
   OrderStatus,
   TradeSideType,
 } from '../../../common/enums/exchange-operation.enums';
+import { Decimal } from 'decimal.js';
 
 export class CreateMarketOrderCommand {
   orderType: MarketOrderType;
@@ -11,7 +12,7 @@ export class CreateMarketOrderCommand {
   exchangeName: string;
   symbol: string;
   side: TradeSideType;
-  amount: number;
+  amount: Decimal;
 }
 
 export class CreateLimitOrderCommand extends CreateMarketOrderCommand {

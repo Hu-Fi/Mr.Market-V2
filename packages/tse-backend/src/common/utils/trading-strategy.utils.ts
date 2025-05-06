@@ -3,47 +3,55 @@ import {
   AmountChangeType,
   PriceSourceType,
 } from '../enums/strategy-type.enums';
-
-export const createStrategyKey = (key) => {
-  return `${key.user_id}-${key.client_id}-${key.type}`;
-};
+import { Decimal } from 'decimal.js';
 
 export const isArbitrageOpportunityBuyOnA = (
-  vwapA,
-  vwapB,
-  minProfitability,
+  vwapA: Decimal,
+  vwapB: Decimal,
+  minProfitability: number | Decimal,
 ) => {
-  return (vwapB - vwapA) / vwapA >= minProfitability;
+  return vwapB
+    .minus(vwapA)
+    .dividedBy(vwapA)
+    .greaterThanOrEqualTo(new Decimal(minProfitability));
 };
 
 export const isArbitrageOpportunityBuyOnB = (
-  vwapA,
-  vwapB,
-  minProfitability,
+  vwapA: Decimal,
+  vwapB: Decimal,
+  minProfitability: number | Decimal,
 ) => {
-  return (vwapA - vwapB) / vwapB >= minProfitability;
+  return vwapA
+    .minus(vwapB)
+    .dividedBy(vwapB)
+    .greaterThanOrEqualTo(new Decimal(minProfitability));
 };
 
 export const calculateVWAPForAmount = (
   orderBook: any,
-  amountToTrade: number,
+  amountToTrade: Decimal,
   direction: 'buy' | 'sell',
-) => {
+): Decimal => {
   const orderList = direction === 'buy' ? orderBook.asks : orderBook.bids;
-  let volumeAccumulated = 0;
-  let volumePriceProductSum = 0;
+  let volumeAccumulated: Decimal = new Decimal(0);
+  let volumePriceProductSum: Decimal = new Decimal(0);
 
   for (const [price, volume] of orderList) {
-    const remainingAmount = amountToTrade - volumeAccumulated;
-    const volumeToUse = Math.min(volume, remainingAmount);
+    const remainingAmount = amountToTrade.minus(volumeAccumulated);
+    const volumeToUse = Decimal.min(new Decimal(volume), remainingAmount);
 
-    volumePriceProductSum += volumeToUse * price;
-    volumeAccumulated += volumeToUse;
+    volumePriceProductSum = volumePriceProductSum.plus(
+      volumeToUse.times(new Decimal(price)),
+    );
 
-    if (volumeAccumulated >= amountToTrade) break;
+    volumeAccumulated = volumeAccumulated.plus(volumeToUse);
+
+    if (volumeAccumulated.greaterThanOrEqualTo(amountToTrade)) break;
   }
 
-  return volumeAccumulated > 0 ? volumePriceProductSum / volumeAccumulated : 0;
+  return volumeAccumulated.greaterThan(0)
+    ? volumePriceProductSum.dividedBy(volumeAccumulated)
+    : new Decimal(0);
 };
 
 export const getFee = (order: any) => {
@@ -51,15 +59,21 @@ export const getFee = (order: any) => {
 };
 
 export const calculateProfitLoss = (
-  buyPrice: number,
-  sellPrice: number,
-  amount: number,
-  buyFee: number,
-  sellFee: number,
+  buyPrice: number | Decimal,
+  sellPrice: number | Decimal,
+  amount: number | Decimal,
+  buyFee: number | Decimal,
+  sellFee: number | Decimal,
 ) => {
-  const revenue = sellPrice * amount - sellFee;
-  const cost = buyPrice * amount + buyFee;
-  return revenue - cost;
+  const decimalBuyPrice = new Decimal(buyPrice);
+  const decimalSellPrice = new Decimal(sellPrice);
+  const decimalAmount = new Decimal(amount);
+  const decimalBuyFee = new Decimal(buyFee);
+  const decimalSellFee = new Decimal(sellFee);
+
+  const revenue = decimalSellPrice.times(decimalAmount).minus(decimalSellFee);
+  const cost = decimalBuyPrice.times(decimalAmount).plus(decimalBuyFee);
+  return revenue.minus(cost);
 };
 
 export const isExchangeSupported = (
@@ -91,7 +105,7 @@ const priceSourceFunctions: Record<PriceSourceType, PriceSourceFunction> = {
  *
  * 2. `priceSourceFunctions`: An object that maps `PriceSourceType` (such as MID_PRICE, BEST_ASK, BEST_BID, and LAST_PRICE)
  *    to specific functions. Each function calculates a price based on either the order book or the ticker:
- *      - `MID_PRICE`: Returns the midpoint between the best bid and best ask.
+ *      - `MID_PRICE`: Returns the midpoint between the best bid and the best ask.
  *      - `BEST_ASK`: Returns the lowest ask price.
  *      - `BEST_BID`: Returns the highest bid price.
  *      - `LAST_PRICE`: Returns the last traded price from the ticker.
@@ -122,19 +136,23 @@ export const getPriceSource = async (
 };
 
 export function adjustOrderAmount(
-  initialOrderAmount: number,
+  initialOrderAmount: Decimal,
   layer: number,
   amountChangeType: AmountChangeType,
   amountChangePerLayer: number,
-): number {
+): Decimal {
   if (layer <= 1) return initialOrderAmount;
 
   if (amountChangeType === AmountChangeType.FIXED) {
-    return initialOrderAmount + (layer - 1) * amountChangePerLayer;
+    return new Decimal(initialOrderAmount).plus(
+      new Decimal(layer - 1).times(new Decimal(amountChangePerLayer)),
+    );
   }
 
-  return (
-    initialOrderAmount * Math.pow(1 + amountChangePerLayer / 100, layer - 1)
+  return new Decimal(initialOrderAmount).times(
+    new Decimal(1)
+      .plus(new Decimal(amountChangePerLayer).dividedBy(100))
+      .pow(layer - 1),
   );
 }
 
@@ -160,7 +178,7 @@ export function shouldPlaceOrder(
 }
 
 export function calculateOrderDetails(
-  initialOrderAmount: number,
+  initialOrderAmount: Decimal,
   numberOfLayers: number,
   amountChangeType: AmountChangeType,
   amountChangePerLayer: number,

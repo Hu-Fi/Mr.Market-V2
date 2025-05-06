@@ -5,6 +5,7 @@ import { ArbitrageStrategyRepository } from '../arbitrage.repository';
 import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import { ArbitrageDataFixture } from './arbitrage.fixtures';
+import { Decimal } from 'decimal.js';
 
 describe('ArbitrageService', () => {
   let service: ArbitrageService;
@@ -41,7 +42,7 @@ describe('ArbitrageService', () => {
     it('should create a strategy and return it', async () => {
       const strategy: Partial<Arbitrage> = {
         userId: 'user1',
-        amountToTrade: 10,
+        amountToTrade: new Decimal(10),
       };
       const result: Arbitrage = ArbitrageDataFixture;
 
@@ -53,7 +54,7 @@ describe('ArbitrageService', () => {
     it('should throw an error if creation fails', async () => {
       const strategy: Partial<Arbitrage> = {
         userId: 'user1',
-        amountToTrade: 10,
+        amountToTrade: new Decimal(10),
       };
       const error = new Error('Creation failed');
 

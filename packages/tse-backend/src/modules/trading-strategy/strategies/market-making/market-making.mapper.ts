@@ -7,6 +7,7 @@ import {
   MarketMakingStrategyCommand,
   MarketMakingStrategyDto,
 } from './model/market-making.dto';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class MarketMakingStrategyProfile extends AutomapperProfile {
@@ -31,6 +32,10 @@ export class MarketMakingStrategyProfile extends AutomapperProfile {
         forMember(
           (destination) => destination.sideB,
           mapFrom((source) => source.pair.split('/')[1].toUpperCase()),
+        ),
+        forMember(
+          (destination) => destination.orderAmount,
+          mapFrom((source) => new Decimal(source.orderAmount)),
         ),
       );
       createMap(

@@ -34,7 +34,7 @@ describe('MarketMakingStrategy', () => {
     amountToPrecision: jest.fn().mockReturnValue('1'),
     priceToPrecision: jest
       .fn()
-      .mockImplementation((pair: string, price: number) => price.toFixed(2)),
+      .mockImplementation((price: number) => price.toFixed(2)),
     fetchTicker: jest.fn().mockResolvedValue({ last: 100 }),
   };
 

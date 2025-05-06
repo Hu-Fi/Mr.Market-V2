@@ -4,7 +4,6 @@ import { ExchangeRegistryService } from '../../exchange-registry/exchange-regist
 import { ExchangeOperationService } from '../../exchange-operation/exchange-operation.service';
 import { CustomLogger } from '../../logger/logger.service';
 import {
-  MarketTradeCommand,
   MarketLimitCommand,
   CancelOrderCommand,
 } from '../model/exchange-trade.model';
@@ -13,6 +12,8 @@ import {
   OrderStatus,
 } from '../../../common/enums/exchange-operation.enums';
 import { OperationCommand } from '../../exchange-operation/model/exchange-operation.model';
+import { Decimal } from 'decimal.js';
+import { marketTradeCommandFixture } from './exchange-trade.fixtures';
 
 describe('ExchangeTradeService', () => {
   let service: ExchangeTradeService;
@@ -38,6 +39,7 @@ describe('ExchangeTradeService', () => {
   };
 
   beforeEach(async () => {
+    exchangeInstanceMock.createOrder.mockClear();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangeTradeService,
@@ -61,15 +63,6 @@ describe('ExchangeTradeService', () => {
   });
 
   describe('executeMarketTrade', () => {
-    const marketTradeCommand: MarketTradeCommand = {
-      userId: 'user123',
-      clientId: 'client456',
-      exchange: 'binance',
-      symbol: 'BTC/USDT',
-      side: 'buy',
-      amount: 1,
-    };
-
     it('should execute market trade successfully', async () => {
       mockExchangeRegistryService.getExchangeByName.mockReturnValue(
         exchangeInstanceMock,
@@ -77,7 +70,7 @@ describe('ExchangeTradeService', () => {
       mockExchangeOperationService.saveOrderData.mockResolvedValue({ id: 1 });
       exchangeInstanceMock.createOrder.mockResolvedValue({ id: 'order123' });
 
-      await service.executeMarketTrade(marketTradeCommand);
+      await service.executeMarketTrade(marketTradeCommandFixture);
 
       expect(
         mockExchangeRegistryService.getExchangeByName,
@@ -88,7 +81,7 @@ describe('ExchangeTradeService', () => {
         exchangeName: 'binance',
         symbol: 'BTC/USDT',
         side: 'buy',
-        amount: 1,
+        amount: new Decimal(1),
         price: undefined,
         orderType: MarketOrderType.MARKET_ORDER,
       });
@@ -96,7 +89,7 @@ describe('ExchangeTradeService', () => {
         'BTC/USDT',
         MarketOrderType.MARKET_ORDER,
         'buy',
-        1,
+        new Decimal(1),
       );
       expect(
         mockExchangeOperationService.saveExchangeOperation,
@@ -118,7 +111,7 @@ describe('ExchangeTradeService', () => {
       );
 
       await expect(
-        service.executeMarketTrade(marketTradeCommand),
+        service.executeMarketTrade(marketTradeCommandFixture),
       ).rejects.toThrow('Trade failed');
 
       expect(
@@ -130,7 +123,7 @@ describe('ExchangeTradeService', () => {
         exchangeName: 'binance',
         symbol: 'BTC/USDT',
         side: 'buy',
-        amount: 1,
+        amount: new Decimal(1),
         price: undefined,
         orderType: MarketOrderType.MARKET_ORDER,
       });
@@ -152,7 +145,7 @@ describe('ExchangeTradeService', () => {
       exchange: 'binance',
       symbol: 'BTC/USDT',
       side: 'sell',
-      amount: 1,
+      amount: new Decimal(1),
       price: 30000,
     };
 
@@ -174,7 +167,7 @@ describe('ExchangeTradeService', () => {
         exchangeName: 'binance',
         symbol: 'BTC/USDT',
         side: 'sell',
-        amount: 1,
+        amount: new Decimal(1),
         price: 30000,
         orderType: MarketOrderType.LIMIT_ORDER,
       });
@@ -182,7 +175,7 @@ describe('ExchangeTradeService', () => {
         'BTC/USDT',
         MarketOrderType.LIMIT_ORDER,
         'sell',
-        1,
+        new Decimal(1),
         30000,
       );
       expect(
@@ -217,7 +210,7 @@ describe('ExchangeTradeService', () => {
         exchangeName: 'binance',
         symbol: 'BTC/USDT',
         side: 'sell',
-        amount: 1,
+        amount: new Decimal(1),
         price: 30000,
         orderType: MarketOrderType.LIMIT_ORDER,
       });

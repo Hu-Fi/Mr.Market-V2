@@ -1,5 +1,4 @@
 import {
-  createStrategyKey,
   isArbitrageOpportunityBuyOnA,
   isArbitrageOpportunityBuyOnB,
   calculateVWAPForAmount,
@@ -16,41 +15,57 @@ import {
   AmountChangeType,
   PriceSourceType,
 } from '../enums/strategy-type.enums';
+import { Decimal } from 'decimal.js';
 
 describe('Trading Strategy Utilities', () => {
-  describe('createStrategyKey', () => {
-    it('should create a strategy key based on user_id, client_id, and type', () => {
-      const key = {
-        user_id: 'user1',
-        client_id: 'client1',
-        type: 'ARBITRAGE',
-      };
-
-      const result = createStrategyKey(key);
-      expect(result).toBe('user1-client1-ARBITRAGE');
-    });
-  });
-
   describe('isArbitrageOpportunityBuyOnA', () => {
     it('should return true if there is a profitable arbitrage opportunity to buy on A', () => {
-      const result = isArbitrageOpportunityBuyOnA(100, 110, 0.05);
+      const vwapA = new Decimal(100);
+      const vwapB = new Decimal(110);
+      const minProfitability = new Decimal(0.05);
+      const result = isArbitrageOpportunityBuyOnA(
+        vwapA,
+        vwapB,
+        minProfitability,
+      );
       expect(result).toBe(true);
     });
 
     it('should return false if there is no profitable arbitrage opportunity to buy on A', () => {
-      const result = isArbitrageOpportunityBuyOnA(100, 105, 0.1);
+      const vwapA = new Decimal(100);
+      const vwapB = new Decimal(105);
+      const minProfitability = new Decimal(0.1);
+      const result = isArbitrageOpportunityBuyOnA(
+        vwapA,
+        vwapB,
+        minProfitability,
+      );
       expect(result).toBe(false);
     });
   });
 
   describe('isArbitrageOpportunityBuyOnB', () => {
     it('should return true if there is a profitable arbitrage opportunity to buy on B', () => {
-      const result = isArbitrageOpportunityBuyOnB(110, 100, 0.05);
+      const vwapA = new Decimal(110);
+      const vwapB = new Decimal(100);
+      const minProfitability = new Decimal(0.05);
+      const result = isArbitrageOpportunityBuyOnB(
+        vwapA,
+        vwapB,
+        minProfitability,
+      );
       expect(result).toBe(true);
     });
 
     it('should return false if there is no profitable arbitrage opportunity to buy on B', () => {
-      const result = isArbitrageOpportunityBuyOnB(105, 100, 0.1);
+      const vwapA = new Decimal(105);
+      const vwapB = new Decimal(100);
+      const minProfitability = new Decimal(0.1);
+      const result = isArbitrageOpportunityBuyOnB(
+        vwapA,
+        vwapB,
+        minProfitability,
+      );
       expect(result).toBe(false);
     });
   });
@@ -64,9 +79,9 @@ describe('Trading Strategy Utilities', () => {
         ],
         bids: [],
       };
-      const amountToTrade = 8;
+      const amountToTrade = new Decimal(8);
       const result = calculateVWAPForAmount(orderBook, amountToTrade, 'buy');
-      expect(result).toBeCloseTo(100.375);
+      expect(result).toStrictEqual(new Decimal(100.375));
     });
 
     it('should calculate the correct VWAP for sell direction', () => {
@@ -77,9 +92,9 @@ describe('Trading Strategy Utilities', () => {
           [98, 5],
         ],
       };
-      const amountToTrade = 7;
+      const amountToTrade = new Decimal(7);
       const result = calculateVWAPForAmount(orderBook, amountToTrade, 'sell');
-      expect(result).toBeCloseTo(98.7142);
+      expect(result.toNumber()).toBeCloseTo(98.71428571428571, 10);
     });
 
     it('should return 0 if there is no available volume', () => {
@@ -87,9 +102,9 @@ describe('Trading Strategy Utilities', () => {
         asks: [],
         bids: [],
       };
-      const amountToTrade = 5;
+      const amountToTrade = new Decimal(5);
       const result = calculateVWAPForAmount(orderBook, amountToTrade, 'buy');
-      expect(result).toBe(0);
+      expect(result).toStrictEqual(new Decimal(0));
     });
   });
 
@@ -112,12 +127,12 @@ describe('Trading Strategy Utilities', () => {
   describe('calculateProfitLoss', () => {
     it('should calculate profit correctly', () => {
       const result = calculateProfitLoss(100, 110, 10, 1, 1);
-      expect(result).toBe(98);
+      expect(result).toStrictEqual(new Decimal(98));
     });
 
     it('should calculate loss correctly', () => {
       const result = calculateProfitLoss(110, 100, 10, 1, 1);
-      expect(result).toBe(-102);
+      expect(result).toStrictEqual(new Decimal(-102));
     });
   });
 
@@ -221,18 +236,36 @@ describe('Trading Strategy Utilities', () => {
 
   describe('adjustOrderAmount', () => {
     it('should adjust the order amount using a fixed increment', () => {
-      const result = adjustOrderAmount(100, 3, AmountChangeType.FIXED, 10);
-      expect(result).toBe(120);
+      const initialOrderAmount = new Decimal(100);
+      const result = adjustOrderAmount(
+        initialOrderAmount,
+        3,
+        AmountChangeType.FIXED,
+        10,
+      );
+      expect(result).toStrictEqual(new Decimal(120));
     });
 
     it('should adjust the order amount using a percentage increment', () => {
-      const result = adjustOrderAmount(100, 3, AmountChangeType.PERCENTAGE, 10);
-      expect(result).toBeCloseTo(121);
+      const initialOrderAmount = new Decimal(100);
+      const result = adjustOrderAmount(
+        initialOrderAmount,
+        3,
+        AmountChangeType.PERCENTAGE,
+        10,
+      );
+      expect(result).toStrictEqual(new Decimal(121));
     });
 
     it('should return the initial amount if layer is 1', () => {
-      const result = adjustOrderAmount(100, 1, AmountChangeType.FIXED, 10);
-      expect(result).toBe(100);
+      const initialOrderAmount = new Decimal(100);
+      const result = adjustOrderAmount(
+        initialOrderAmount,
+        1,
+        AmountChangeType.FIXED,
+        10,
+      );
+      expect(result).toStrictEqual(new Decimal(100));
     });
   });
 
@@ -272,8 +305,9 @@ describe('Trading Strategy Utilities', () => {
 
   describe('calculateOrderDetails', () => {
     it('should return the correct order details for a single layer', () => {
+      const initialOrderAmount = new Decimal(100);
       const result = calculateOrderDetails(
-        100,
+        initialOrderAmount,
         1,
         AmountChangeType.FIXED,
         10,
@@ -284,7 +318,7 @@ describe('Trading Strategy Utilities', () => {
       expect(result).toEqual([
         {
           layer: 1,
-          currentOrderAmount: 100,
+          currentOrderAmount: new Decimal(100),
           buyPrice: 99,
           sellPrice: 102,
           shouldBuy: true,
@@ -294,8 +328,9 @@ describe('Trading Strategy Utilities', () => {
     });
 
     it('should calculate correct details for multiple layers', () => {
+      const initialOrderAmount = new Decimal(100);
       const result = calculateOrderDetails(
-        100,
+        initialOrderAmount,
         2,
         AmountChangeType.FIXED,
         10,
@@ -306,7 +341,7 @@ describe('Trading Strategy Utilities', () => {
       expect(result).toEqual([
         {
           layer: 1,
-          currentOrderAmount: 100,
+          currentOrderAmount: new Decimal(100),
           buyPrice: 99,
           sellPrice: 102,
           shouldBuy: true,
@@ -314,7 +349,7 @@ describe('Trading Strategy Utilities', () => {
         },
         {
           layer: 2,
-          currentOrderAmount: 110,
+          currentOrderAmount: new Decimal(110),
           buyPrice: 98,
           sellPrice: 104,
           shouldBuy: true,
@@ -324,8 +359,9 @@ describe('Trading Strategy Utilities', () => {
     });
 
     it('should return an empty array if no layers should place an order', () => {
+      const initialOrderAmount = new Decimal(100);
       const result = calculateOrderDetails(
-        100,
+        initialOrderAmount,
         0,
         AmountChangeType.FIXED,
         10,

@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderRepository } from '../order.repository';
 import { Order } from '../../../common/entities/order.entity';
+import { Decimal } from 'decimal.js';
 
 describe('OrderRepository', () => {
   let repository: OrderRepository;
@@ -35,7 +36,7 @@ describe('OrderRepository', () => {
         symbol: 'BTC/USD',
         side: 'buy',
         type: 'limit',
-        amount: 1.0,
+        amount: new Decimal(1.0),
         price: 10000.0,
       };
       const expectedOrder = new Order();

@@ -22,6 +22,7 @@ import {
 import { TradeSideType } from '../../../../common/enums/exchange-operation.enums';
 import { ExchangeDataService } from '../../../exchange-data/exchange-data.service';
 import { CcxtIntegrationService } from '../../../../integrations/ccxt.integration.service';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class MarketMakingStrategy implements Strategy {
@@ -338,7 +339,7 @@ export class MarketMakingStrategy implements Strategy {
         exchangeName,
         pair,
         side: TradeSideType.BUY,
-        amount: parseFloat(adjustedAmount),
+        amount: new Decimal(adjustedAmount),
         price: parseFloat(adjustedPrice),
       });
     } else {
@@ -368,7 +369,7 @@ export class MarketMakingStrategy implements Strategy {
         exchangeName,
         pair,
         side: TradeSideType.SELL,
-        amount: parseFloat(adjustedAmount),
+        amount: new Decimal(adjustedAmount),
         price: parseFloat(adjustedPrice),
       });
     } else {

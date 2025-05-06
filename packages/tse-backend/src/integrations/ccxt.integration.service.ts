@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class CcxtIntegrationService {
@@ -96,7 +97,7 @@ export class CcxtIntegrationService {
   priceToPrecision(
     exchangeInstance: ccxt.Exchange,
     pair: string,
-    sellPrice: any,
+    sellPrice: number | string | Decimal,
   ) {
     return exchangeInstance.priceToPrecision(pair, sellPrice);
   }
@@ -104,7 +105,7 @@ export class CcxtIntegrationService {
   amountToPrecision(
     exchangeInstance: ccxt.Exchange,
     pair: string,
-    amount: any,
+    amount: number | string | Decimal,
   ) {
     return exchangeInstance.amountToPrecision(pair, amount);
   }

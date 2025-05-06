@@ -1,6 +1,6 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { createMap, Mapper } from '@automapper/core';
+import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
   CancelOrderCommand,
   CancelOrderDto,
@@ -9,6 +9,7 @@ import {
   MarketTradeCommand,
   MarketTradeDto,
 } from './model/exchange-trade.model';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class MarketTradeProfile extends AutomapperProfile {
@@ -18,8 +19,24 @@ export class MarketTradeProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, MarketTradeDto, MarketTradeCommand);
-      createMap(mapper, MarketLimitDto, MarketLimitCommand);
+      createMap(
+        mapper,
+        MarketTradeDto,
+        MarketTradeCommand,
+        forMember(
+          (destination) => destination.amount,
+          mapFrom((source) => new Decimal(source.amount)),
+        ),
+      );
+      createMap(
+        mapper,
+        MarketLimitDto,
+        MarketLimitCommand,
+        forMember(
+          (destination) => destination.amount,
+          mapFrom((source) => new Decimal(source.amount)),
+        ),
+      );
       createMap(mapper, CancelOrderDto, CancelOrderCommand);
     };
   }
