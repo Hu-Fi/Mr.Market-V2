@@ -115,7 +115,7 @@ describe('ExchangeOperationService (e2e)', () => {
         exchangeName: 'exchange-1',
         symbol: 'BTC/USD',
         side: TradeSideType.BUY,
-        amount: 1,
+        amount: new Decimal(1),
         price: 50000,
       };
 
