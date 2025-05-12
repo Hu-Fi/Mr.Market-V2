@@ -1,42 +1,41 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   adminLoginCommandFixture,
   adminLoginResponseFixture,
-  mixinOAuthCommandFixture,
-  mixinOAuthResponseFixture,
-  oauthResponseFixture,
 } from './auth.fixtures';
-import { UserService } from '../../user/user.service';
 import { ConfigService } from '@nestjs/config';
-import { AuthSessionRepository } from '../auth-session.repository';
 import { EncryptionService } from '../../../common/utils/auth/encryption.service';
+import { MixinAuthService } from '../../mixin/auth/auth.service';
+import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
+import { UserService } from '../../user/user.service';
+import { AuthSessionRepository } from '../../mixin/auth/auth-session.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mixinGateway: MixinIntegrationService;
   let jwtService: JwtService;
 
+  const mockAuthSessionRepository = {
+    findByUserId: jest.fn(),
+    findAuthSessionByClientId: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+  };
+
+  const mockCacheManager = {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
-    const mockAuthSessionRepository = {
-      findByUserId: jest.fn(),
-      findAuthSessionByClientId: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    };
-
-    const mockCacheManager = {
-      get: jest.fn().mockResolvedValue(null),
-      set: jest.fn().mockResolvedValue(undefined),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        MixinAuthService,
+        EncryptionService,
         EncryptionService,
         {
           provide: CACHE_MANAGER,
@@ -81,7 +80,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    mixinGateway = module.get<MixinIntegrationService>(MixinIntegrationService);
     jwtService = module.get<JwtService>(JwtService);
   });
 
@@ -106,30 +104,6 @@ describe('AuthService', () => {
 
       await expect(service.validateUser(command)).rejects.toThrow(
         UnauthorizedException,
-      );
-    });
-  });
-
-  describe('mixinOauthHandler', () => {
-    it('should call mixinGateway.oauthHandler and return JWT token', async () => {
-      const command = mixinOAuthCommandFixture;
-      const response = mixinOAuthResponseFixture;
-      jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
-      jest
-        .spyOn(mixinGateway, 'oauthHandler')
-        .mockResolvedValue(oauthResponseFixture);
-
-      const result = await service.mixinOauthHandler(command);
-
-      expect(mixinGateway.oauthHandler).toHaveBeenCalledWith(command.code);
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should throw BadRequestException if code is invalid', async () => {
-      const command = { ...mixinOAuthCommandFixture, code: 'short_code' };
-
-      await expect(service.mixinOauthHandler(command)).rejects.toThrow(
-        BadRequestException,
       );
     });
   });

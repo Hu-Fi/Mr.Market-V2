@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
-import { Arbitrage } from '../../../../common/entities/arbitrage.entity';
+import { StrategyArbitrage } from '../../../../common/entities/startegy-arbitrage.entity';
 
 @Injectable()
 export class ArbitrageStrategyRepository {
   constructor(
-    @InjectRepository(Arbitrage)
-    private readonly repository: Repository<Arbitrage>,
+    @InjectRepository(StrategyArbitrage)
+    private readonly repository: Repository<StrategyArbitrage>,
   ) {}
-  async createStrategy(strategy: Partial<Arbitrage>): Promise<Arbitrage> {
+  async createStrategy(
+    strategy: Partial<StrategyArbitrage>,
+  ): Promise<StrategyArbitrage> {
     return this.repository.save(strategy);
   }
 
@@ -29,17 +31,20 @@ export class ArbitrageStrategyRepository {
     return await this.repository.update({ id }, { pausedReason: newReason });
   }
 
-  async findRunningStrategies(): Promise<Arbitrage[]> {
+  async findRunningStrategies(): Promise<StrategyArbitrage[]> {
     return this.repository.findBy({ status: StrategyInstanceStatus.RUNNING });
   }
 
-  async findStrategiesByUserId(userId: string): Promise<Arbitrage[]> {
+  async findStrategiesByUserId(userId: string): Promise<StrategyArbitrage[]> {
     return this.repository.find({
       where: { userId: userId, status: Not(StrategyInstanceStatus.DELETED) },
     });
   }
 
-  async findStrategyById(id: number, options?: any): Promise<Arbitrage> {
+  async findStrategyById(
+    id: number,
+    options?: any,
+  ): Promise<StrategyArbitrage> {
     return this.repository.findOne({
       where: { id: id, ...options },
     });

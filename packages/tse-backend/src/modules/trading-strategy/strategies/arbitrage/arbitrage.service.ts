@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ArbitrageStrategyRepository } from './arbitrage.repository';
-import { Arbitrage } from '../../../../common/entities/arbitrage.entity';
+import { StrategyArbitrage } from '../../../../common/entities/startegy-arbitrage.entity';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 
 @Injectable()
@@ -9,7 +9,9 @@ export class ArbitrageService {
 
   constructor(private readonly repository: ArbitrageStrategyRepository) {}
 
-  async createStrategy(strategy: Partial<Arbitrage>): Promise<Arbitrage> {
+  async createStrategy(
+    strategy: Partial<StrategyArbitrage>,
+  ): Promise<StrategyArbitrage> {
     try {
       return this.repository.createStrategy(strategy);
     } catch (error) {
@@ -51,7 +53,7 @@ export class ArbitrageService {
     }
   }
 
-  async findRunningStrategies(): Promise<Arbitrage[]> {
+  async findRunningStrategies(): Promise<StrategyArbitrage[]> {
     try {
       return this.repository.findRunningStrategies();
     } catch (error) {

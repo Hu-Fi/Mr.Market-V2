@@ -8,6 +8,7 @@ import {
   ExchangeNotFoundException,
 } from '../../../common/filters/deposit-address.exception.filter';
 import { ExchangeRegistryService } from '../../exchange-registry/exchange-registry.service';
+import { Decimal } from 'decimal.js';
 
 describe('ExchangeDepositService', () => {
   let service: ExchangeDepositService;
@@ -22,6 +23,7 @@ describe('ExchangeDepositService', () => {
 
   const createDepositCommand: CreateDepositCommand = {
     userId: '1',
+    amount: new Decimal(100),
     exchangeName: 'binance',
     symbol: 'ETH',
     network: 'eth',

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from './order.repository';
-import { Order } from '../../common/entities/order.entity';
+import { TradeOrder } from '../../common/entities/trade-order.entity';
 import {
   CancelOperationCommand,
   OperationCommand,
@@ -14,7 +14,7 @@ export class OrderService {
     private readonly operationService: OperationService,
   ) {}
 
-  async createOrder(data: Partial<Order>) {
+  async createOrder(data: Partial<TradeOrder>) {
     return await this.repository.create(data);
   }
 

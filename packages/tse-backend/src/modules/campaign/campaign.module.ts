@@ -11,7 +11,7 @@ import { Web3IdentityRepository } from './web3-identity-manager/web3-identity.re
 import { Web3IdentityProfile } from './web3-identity-manager/web3-identity.mapper';
 import { Web3IdentityService } from './web3-identity-manager/web3-identity.service';
 import { Web3IdentityController } from './web3-identity-manager/web3-identity.controller';
-import { Contribution } from '../../common/entities/contribution.entity';
+import { CampaignContribution } from '../../common/entities/campaign-contribution.entity';
 import { CampaignController } from './campaign.controller';
 import { CampaignRepository } from './campaign.repository';
 
@@ -21,7 +21,11 @@ import { CampaignRepository } from './campaign.repository';
     HttpModule,
     IntegrationsModule,
     ExchangeRegistryModule,
-    TypeOrmModule.forFeature([Web3IdentityKey, Web3IdentityRpc, Contribution]),
+    TypeOrmModule.forFeature([
+      Web3IdentityKey,
+      Web3IdentityRpc,
+      CampaignContribution,
+    ]),
   ],
   providers: [
     CampaignService,

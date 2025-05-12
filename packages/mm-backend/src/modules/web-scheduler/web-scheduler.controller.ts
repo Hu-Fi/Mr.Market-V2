@@ -8,7 +8,10 @@ export class WebSchedulerController {
   constructor(private readonly service: WebSchedulerService) {}
 
   @Get('transaction/execute')
-  @ApiOperation({ summary: 'Trigger transaction cron job' })
+  @ApiOperation({
+    summary:
+      'Trigger the cron job for Mixin deposit and withdrawal transactions',
+  })
   async triggerTransactionCronJob() {
     await this.service.triggerTransactionCronJob();
   }

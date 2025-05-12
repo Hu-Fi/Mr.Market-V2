@@ -6,6 +6,7 @@ import {
   Body,
   Get,
   Query,
+  Request,
 } from '@nestjs/common';
 import { ExchangeDepositService } from './exchange-deposit.service';
 import { InjectMapper } from '@automapper/nestjs';
@@ -15,6 +16,7 @@ import {
   CreateDepositDto,
 } from './model/exchange-deposit.model';
 import { ApiExcludeController } from '@nestjs/swagger';
+import { RequestWithUser } from '../../common/interfaces/http-request.interfaces';
 
 @UsePipes(new ValidationPipe())
 @Controller('exchange-deposit')
@@ -26,12 +28,13 @@ export class ExchangeDepositController {
   ) {}
 
   @Post()
-  async createDepositAddress(@Body() dto: CreateDepositDto) {
+  async createDepositAddress(@Body() dto: CreateDepositDto, @Request() req: RequestWithUser) {
     const command = this.mapper.map(
       dto,
       CreateDepositDto,
       CreateDepositCommand,
     );
+    command.userId = req.user.userId;
     return await this.exchangeDepositService.handleDeposit(command);
   }
 
@@ -39,13 +42,12 @@ export class ExchangeDepositController {
   async getDeposits(
     @Query('exchangeName') exchangeName: string,
     @Query('symbol') symbol: string,
-    @Query('userId') userId: string,
+    @Request() req: RequestWithUser
   ) {
     return await this.exchangeDepositService.fetchDeposits(
       exchangeName,
       symbol,
-      userId,
+      req.user.userId,
     );
   }
 }
-// TODO: handle jwt user

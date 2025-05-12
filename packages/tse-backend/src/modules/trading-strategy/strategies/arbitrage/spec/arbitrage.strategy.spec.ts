@@ -17,7 +17,7 @@ import {
   ArbitrageStrategyActionCommand,
 } from '../model/arbitrage.dto';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
-import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
+import { StrategyArbitrage } from '../../../../../common/entities/startegy-arbitrage.entity';
 import { ExchangeDataService } from '../../../../exchange-data/exchange-data.service';
 import { Decimal } from 'decimal.js';
 export const ArbitrageDtoFixture: ArbitrageStrategyDto = {
@@ -30,7 +30,7 @@ export const ArbitrageDtoFixture: ArbitrageStrategyDto = {
   maxOpenOrders: 1,
 };
 
-export const ArbitrageDataFixture: Arbitrage = {
+export const ArbitrageDataFixture: StrategyArbitrage = {
   createdAt: undefined,
   pausedReason: '',
   updatedAt: undefined,

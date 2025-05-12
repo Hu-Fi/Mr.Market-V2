@@ -44,7 +44,6 @@ describe('Exchange Oracle (Mr. Market) integration with Hu-Fi (e2e)', () => {
   // let RECORDING_ORACLE_ACCESS_TOKEN: string = null;
   const RECORDING_ORACLE_ACCESS_TOKEN: string = null;
 
-
   beforeAll(async () => {
     await setupTestApp();
     // RECORDING_ORACLE_ACCESS_TOKEN = await signinToRecordingOracleApi();

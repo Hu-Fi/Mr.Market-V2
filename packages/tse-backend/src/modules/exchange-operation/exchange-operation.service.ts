@@ -6,7 +6,7 @@ import {
 } from './model/exchange-operation.model';
 import { CustomLogger } from '../logger/logger.service';
 import { OrderStatus } from '../../common/enums/exchange-operation.enums';
-import { Order } from '../../common/entities/order.entity';
+import { TradeOrder } from '../../common/entities/trade-order.entity';
 import { OrderService } from './order.service';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ExchangeOperationService {
 
   constructor(private readonly orderService: OrderService) {}
 
-  async saveOrderData(command: OrderCommand): Promise<Order> {
+  async saveOrderData(command: OrderCommand): Promise<TradeOrder> {
     const { orderType, userId, clientId, exchangeName, symbol, side, amount } =
       command;
 

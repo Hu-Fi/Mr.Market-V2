@@ -20,10 +20,10 @@ import {
   ClientSession,
   OAuthResponse,
 } from '../common/interfaces/auth.interfaces';
-import { DepositCommand } from '../modules/transaction/mixin-deposit/model/mixin-deposit.model';
+import { DepositCommand } from '../modules/mixin/deposit/model/mixin-deposit.model';
 import { v4 } from 'uuid';
 import { Fee } from '../common/interfaces/mixin.interfaces';
-import { WithdrawCommand } from '../modules/transaction/mixin-withdraw/model/mixin-withdrawal.model';
+import { WithdrawCommand } from '../modules/mixin/withdrawal/model/mixin-withdrawal.model';
 import { Decimal } from 'decimal.js';
 
 @Injectable()

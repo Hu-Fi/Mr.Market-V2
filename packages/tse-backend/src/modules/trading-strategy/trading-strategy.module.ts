@@ -6,10 +6,10 @@ import { ArbitrageController } from './strategies/arbitrage/arbitrage.controller
 import { ArbitrageStrategyProfile } from './strategies/arbitrage/arbitrage.mapper';
 import { ArbitrageStrategyRepository } from './strategies/arbitrage/arbitrage.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Arbitrage } from '../../common/entities/arbitrage.entity';
+import { StrategyArbitrage } from '../../common/entities/startegy-arbitrage.entity';
 import { ArbitrageService } from './strategies/arbitrage/arbitrage.service';
 import { ArbitrageStrategy } from './strategies/arbitrage/arbitrage.strategy';
-import { MarketMaking } from '../../common/entities/market-making.entity';
+import { StrategyMarketMaking } from '../../common/entities/strategy-market-making.entity';
 import { MarketMakingStrategy } from './strategies/market-making/market-making.strategy';
 import { MarketMakingService } from './strategies/market-making/market-making.service';
 import { MarketMakingRepository } from './strategies/market-making/market-making.repository';
@@ -22,14 +22,18 @@ import { VolumeStrategy } from './strategies/volume/volume.strategy';
 import { VolumeService } from './strategies/volume/volume.service';
 import { VolumeStrategyRepository } from './strategies/volume/volume.repository';
 import { VolumeStrategyProfile } from './strategies/volume/volume.mapper';
-import { Volume } from '../../common/entities/volume.entity';
+import { StrategyVolume } from '../../common/entities/strategy-volume.entity';
 import { GetAdditionalAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
 import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
 import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-manager/strategies/get-all-default-accounts.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Arbitrage, MarketMaking, Volume]),
+    TypeOrmModule.forFeature([
+      StrategyArbitrage,
+      StrategyMarketMaking,
+      StrategyVolume,
+    ]),
     ExchangeRegistryModule,
     ExchangeOperationModule,
     ExchangeDataModule,

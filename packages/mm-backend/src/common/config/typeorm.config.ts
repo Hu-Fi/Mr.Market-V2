@@ -2,11 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { UserBalance } from '../entities/user-balance.entity';
 import { MixinDeposit } from '../entities/mixin-deposit.entity';
 import { MixinWithdrawal } from '../entities/mixin-withdrawal.entity';
-import { ExchangeDeposit } from '../entities/exchange-deposit.entity';
-import { ExchangeWithdrawal } from '../entities/exchange-withdrawal.entity';
 import { MixinAuthSession } from '../entities/mixin-auth-session.entity';
 
 @Injectable()
@@ -22,15 +19,7 @@ export class TypeormConfig {
       username: this.configService.get<string>('POSTGRES_USER'),
       password: this.configService.get<string>('POSTGRES_PASSWORD'),
       database: this.configService.get<string>('POSTGRES_DATABASE'),
-      entities: [
-        User,
-        UserBalance,
-        MixinDeposit,
-        MixinWithdrawal,
-        ExchangeDeposit,
-        ExchangeWithdrawal,
-        MixinAuthSession,
-      ],
+      entities: [User, MixinDeposit, MixinWithdrawal, MixinAuthSession],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: this.configService
         .get<string>('DATABASE_LOGGING_LEVEL', 'query,error,migration')

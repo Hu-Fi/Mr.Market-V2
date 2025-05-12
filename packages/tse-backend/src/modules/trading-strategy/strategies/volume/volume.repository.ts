@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
-import { Volume } from '../../../../common/entities/volume.entity';
+import { StrategyVolume } from '../../../../common/entities/strategy-volume.entity';
 
 @Injectable()
 export class VolumeStrategyRepository {
   constructor(
-    @InjectRepository(Volume)
-    private readonly repository: Repository<Volume>,
+    @InjectRepository(StrategyVolume)
+    private readonly repository: Repository<StrategyVolume>,
   ) {}
-  async createStrategy(strategy: Partial<Volume>): Promise<Volume> {
+  async createStrategy(
+    strategy: Partial<StrategyVolume>,
+  ): Promise<StrategyVolume> {
     return this.repository.save(strategy);
   }
 
@@ -29,24 +31,26 @@ export class VolumeStrategyRepository {
     return await this.repository.update({ id }, { pausedReason: newReason });
   }
 
-  async findRunningStrategies(): Promise<Volume[]> {
+  async findRunningStrategies(): Promise<StrategyVolume[]> {
     return this.repository.findBy({ status: StrategyInstanceStatus.RUNNING });
   }
 
-  async findLatestStrategyByUserId(userId: string): Promise<Volume | null> {
+  async findLatestStrategyByUserId(
+    userId: string,
+  ): Promise<StrategyVolume | null> {
     return this.repository.findOne({
       where: { userId: userId },
       order: { createdAt: 'DESC' },
     });
   }
 
-  async findStrategiesByUserId(userId: string): Promise<Volume[]> {
+  async findStrategiesByUserId(userId: string): Promise<StrategyVolume[]> {
     return this.repository.find({
       where: { userId: userId, status: Not(StrategyInstanceStatus.DELETED) },
     });
   }
 
-  async findStrategyById(id: number, options?: any): Promise<Volume> {
+  async findStrategyById(id: number, options?: any): Promise<StrategyVolume> {
     return this.repository.findOne({
       where: { id: id, ...options },
     });

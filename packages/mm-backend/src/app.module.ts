@@ -11,8 +11,8 @@ import { UserModule } from './modules/user/user.module';
 import { HealthModule } from './modules/health/health.module';
 import { CacheModule } from '@nestjs/common/cache';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
-import { UserBalanceModule } from './modules/user-balance/user-balance.module';
-import { TransactionModule } from './modules/transaction/transaction.module';
+import { UserBalanceModule } from './modules/mixin/balance/user-balance.module';
+import { TransactionModule } from './modules/mixin/transaction.module';
 import { DataSource } from 'typeorm';
 import {
   addTransactionalDataSource,

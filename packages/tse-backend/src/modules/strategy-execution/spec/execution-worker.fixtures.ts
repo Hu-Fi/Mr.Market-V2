@@ -3,12 +3,12 @@ import {
   PriceSourceType,
   StrategyInstanceStatus,
 } from '../../../common/enums/strategy-type.enums';
-import { Arbitrage } from '../../../common/entities/arbitrage.entity';
-import { MarketMaking } from '../../../common/entities/market-making.entity';
-import { Volume } from '../../../common/entities/volume.entity';
+import { StrategyArbitrage } from '../../../common/entities/startegy-arbitrage.entity';
+import { StrategyMarketMaking } from '../../../common/entities/strategy-market-making.entity';
+import { StrategyVolume } from '../../../common/entities/strategy-volume.entity';
 import { Decimal } from 'decimal.js';
 
-export const arbitrageStrategiesDataFixture: Arbitrage[] = [
+export const arbitrageStrategiesDataFixture: StrategyArbitrage[] = [
   {
     id: 1,
     userId: 'user1',
@@ -46,7 +46,7 @@ export const arbitrageStrategiesDataFixture: Arbitrage[] = [
   },
 ];
 
-export const marketMakingStrategiesDataFixture: MarketMaking[] = [
+export const marketMakingStrategiesDataFixture: StrategyMarketMaking[] = [
   {
     id: 1,
     userId: 'user1',
@@ -97,7 +97,7 @@ export const marketMakingStrategiesDataFixture: MarketMaking[] = [
   },
 ];
 
-export const volumeStrategiesDataFixture: Volume[] = [
+export const volumeStrategiesDataFixture: StrategyVolume[] = [
   {
     id: 1,
     userId: 'user123',

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { WebSchedulerService } from './web-scheduler.service';
 import { WebSchedulerController } from './web-scheduler.controller';
-import { TransactionModule } from '../transaction/transaction.module';
+import { TransactionModule } from '../mixin/transaction.module';
 import Redlock from 'redlock';
 import Redis from 'ioredis';
 import { RedisClientProvider } from '../../common/config/redis.provider';

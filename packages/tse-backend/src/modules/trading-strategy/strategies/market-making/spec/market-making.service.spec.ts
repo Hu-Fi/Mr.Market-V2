@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MarketMakingService } from '../market-making.service';
 import { MarketMakingRepository } from '../market-making.repository';
-import { MarketMaking } from '../../../../../common/entities/market-making.entity';
+import { StrategyMarketMaking } from '../../../../../common/entities/strategy-market-making.entity';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import {
   MarketMakingDataFixture,
@@ -37,8 +37,9 @@ describe('MarketMakingService', () => {
 
   describe('createStrategy', () => {
     it('should create a strategy and return it', async () => {
-      const strategy: Partial<MarketMaking> = MarketMakingPartialDataFixture;
-      const result: MarketMaking = MarketMakingDataFixture;
+      const strategy: Partial<StrategyMarketMaking> =
+        MarketMakingPartialDataFixture;
+      const result: StrategyMarketMaking = MarketMakingDataFixture;
 
       jest.spyOn(repository, 'createStrategy').mockResolvedValue(result);
 
@@ -47,7 +48,7 @@ describe('MarketMakingService', () => {
     });
 
     it('should throw an error if creation fails', async () => {
-      const strategy: Partial<MarketMaking> = {};
+      const strategy: Partial<StrategyMarketMaking> = {};
       const error = new Error('Creation failed');
       jest.spyOn(repository, 'createStrategy').mockRejectedValue(error);
       await expect(service.createStrategy(strategy)).rejects.toThrow(error);
@@ -150,7 +151,7 @@ describe('MarketMakingService', () => {
 
   describe('findRunningStrategies', () => {
     it('should return a list of running strategies', async () => {
-      const strategies: MarketMaking[] = [MarketMakingDataFixture];
+      const strategies: StrategyMarketMaking[] = [MarketMakingDataFixture];
 
       jest
         .spyOn(repository, 'findRunningStrategies')
@@ -171,7 +172,7 @@ describe('MarketMakingService', () => {
   describe('findStrategyById', () => {
     it('should return strategy by ID', async () => {
       const id = 1;
-      const strategy: MarketMaking = MarketMakingDataFixture;
+      const strategy: StrategyMarketMaking = MarketMakingDataFixture;
 
       jest.spyOn(repository, 'findStrategyById').mockResolvedValue(strategy);
 
