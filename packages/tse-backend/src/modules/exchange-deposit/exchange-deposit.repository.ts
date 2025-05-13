@@ -14,4 +14,18 @@ export class ExchangeDepositRepository {
   async save(data: ExchangeDepositData) {
     return await this.repository.save(data);
   }
+
+  async get(data: {
+    exchangeName: string;
+    symbol: string;
+    userId: string;
+    txTimestamp?: string;
+    network: string;
+  }): Promise<ExchangeDepositData[]> {
+    return await this.repository.find(
+      {
+        where: data,
+      },
+    )
+  }
 }
