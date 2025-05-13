@@ -5,26 +5,27 @@ import { Decimal } from 'decimal.js';
 
 export class CreateWithdrawalDto {
   @AutoMap()
-  @IsString()
-  userId: string;
-
-  @AutoMap()
+  @ApiProperty()
   @IsString()
   exchangeName: string;
 
   @AutoMap()
+  @ApiProperty()
   @IsString()
   symbol: string;
 
   @AutoMap()
+  @ApiProperty()
   @IsString()
   network: string;
 
   @AutoMap()
+  @ApiProperty()
   @IsString()
   address: string;
 
   @AutoMap()
+  @ApiProperty()
   @IsString()
   tag: string;
 
@@ -35,8 +36,6 @@ export class CreateWithdrawalDto {
 }
 
 export class CreateWithdrawalCommand {
-  @AutoMap()
-  @IsString()
   userId: string;
   @AutoMap()
   exchangeName: string;

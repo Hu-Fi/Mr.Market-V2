@@ -4,8 +4,7 @@ import {
   Body,
   UsePipes,
   ValidationPipe,
-  Get,
-  Query,
+  UseGuards, Request,
 } from '@nestjs/common';
 import { ExchangeWithdrawalService } from './exchange-withdrawal.service';
 import { InjectMapper } from '@automapper/nestjs';
@@ -14,38 +13,35 @@ import {
   CreateWithdrawalCommand,
   CreateWithdrawalDto,
 } from './model/exchange-withdrawal.model';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from '../../common/utils/auth/guards/roles.guard';
+import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
+import { Roles } from '../../common/utils/auth/roles.decorator';
+import { Role } from '../../common/enums/role.enums';
+import { RequestWithUser } from '../../common/interfaces/http-request.interfaces';
 
+@ApiTags('transaction')
+@Controller('transaction')
+@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @UsePipes(new ValidationPipe())
-@Controller('exchange-withdrawal')
-@ApiExcludeController()
 export class ExchangeWithdrawalController {
   constructor(
     private readonly exchangeWithdrawalService: ExchangeWithdrawalService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post()
-  async createWithdrawal(@Body() dto: CreateWithdrawalDto) {
+  @Roles(Role.USER)
+  @Post('exchange-withdraw')
+  @ApiOperation({ summary: 'Execute a withdraw transaction' })
+  async createWithdrawal(@Body() dto: CreateWithdrawalDto, @Request() req: RequestWithUser) {
     const command = this.mapper.map(
       dto,
       CreateWithdrawalDto,
       CreateWithdrawalCommand,
     );
+    command.userId = req.user.userId;
     return await this.exchangeWithdrawalService.handleWithdrawal(command);
   }
-
-  @Get()
-  async getWithdrawal(
-    @Query('exchangeName') exchangeName: string,
-    @Query('transactionHash') transactionHash: string,
-    @Query('userId') userId: string,
-  ) {
-    return await this.exchangeWithdrawalService.fetchWithdrawal(
-      exchangeName,
-      transactionHash,
-      userId,
-    );
-  }
 }
-//TODO: handle jwt user
