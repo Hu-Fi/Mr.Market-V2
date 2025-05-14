@@ -65,7 +65,7 @@ import { SecretGeneratorUtils } from './common/utils/auth/secret-generator.utils
         const secret = await secretGeneratorUtils.getOrGenerateSecret();
         return {
           secret,
-          signOptions: { expiresIn: '7d' },
+          signOptions: { expiresIn: '15m' },
         };
       },
       inject: [SecretGeneratorUtils],

@@ -16,4 +16,5 @@ export const adminLoginCommandFixture: AdminLoginCommand = {
 
 export const adminLoginResponseFixture: JwtResponse = {
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+  refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
 };

@@ -12,6 +12,7 @@ export const mixinOAuthCommandFixture: MixinOAuthCommand = {
 
 export const mixinOAuthResponseFixture: JwtResponse = {
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+  refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
 };
 
 export const oauthResponseFixture: OAuthResponse = {
