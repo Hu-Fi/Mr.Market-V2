@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Decimal } from 'decimal.js';
-import { TransactionType, TransactionStatus } from '../../../common/enums/exchange-data.enums';
+import {
+  TransactionType,
+  TransactionStatus,
+} from '../../../common/enums/exchange-data.enums';
 import { ExchangeBalanceService } from '../exchange-balance.service';
 import { BalanceStrategy } from '../../../common/interfaces/exchange-data.interfaces';
 import { ExchangeBalanceCommand } from '../model/exchange-balance.model';
