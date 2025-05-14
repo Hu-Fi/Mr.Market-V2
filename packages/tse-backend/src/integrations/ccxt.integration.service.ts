@@ -20,10 +20,6 @@ export class CcxtIntegrationService {
     await this.cacheManager.set(name, marketsData);
   }
 
-  async getDefaultExchange(exchangeName: string) {
-    return await this.cacheManager.get(`${exchangeName}-true`);
-  }
-
   async getExchangeNames(): Promise<Set<string>> {
     if (typeof this.cacheManager.store.keys !== 'function') {
       throw new Error('Cache store does not support key listing.');
@@ -54,8 +50,11 @@ export class CcxtIntegrationService {
           apiKey: config.key,
           secret: config.secret,
         });
+
         this.configureSandboxMode(exchange);
-        await exchange.loadMarkets(); // TODO: check if we need its response data
+
+        await this.initExchangeDependencies(config.name, exchange);
+
         return exchange;
       } catch (e) {
         const toRemoveExchange =
@@ -72,6 +71,18 @@ export class CcxtIntegrationService {
 
   getExchangeClass(name: string): typeof ccxt.Exchange | null {
     return ccxt.pro[name] ?? ccxt[name] ?? null;
+  }
+
+  async initExchangeDependencies(name: string, exchange: ccxt.Exchange) {
+    const cacheKey = `ccxt-${name}-dependencies`;
+    const cachedValue = await this.cacheManager.get<string>(cacheKey);
+    const marketsCached = cachedValue ? JSON.parse(cachedValue) : null;
+    if (marketsCached) {
+      exchange.setMarkets(marketsCached);
+      return;
+    }
+    await exchange.loadMarkets();
+    await this.cacheManager.set(cacheKey, exchange.markets);
   }
 
   private configureSandboxMode(exchange: ccxt.Exchange): void {

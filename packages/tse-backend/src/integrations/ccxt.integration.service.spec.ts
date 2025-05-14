@@ -19,22 +19,39 @@ const mockConfigService = {
 };
 
 const mockCacheManager: Cache = {
-  set: jest.fn(),
-  get: jest.fn(),
-  del: jest.fn(),
+  set: jest.fn((key: string, value: any) => {
+    mockCacheManager.store[key] = value;
+  }),
+  get: jest.fn((key: string) => {
+    return mockCacheManager.store[key];
+  }),
+  del: jest.fn((key: string) => {
+    delete mockCacheManager.store[key];
+  }),
   store: {
-    keys: jest.fn(),
+    keys: jest.fn(() => {
+      return Object.keys(mockCacheManager.store);
+    }),
   },
 } as any;
 
 jest.mock('ccxt', () => {
-  const mockBinance = jest.fn().mockImplementation(({ apiKey, secret }) => ({
-    apiKey,
-    secret,
-    loadMarkets: jest.fn().mockResolvedValue(true),
-    setSandboxMode: jest.fn(),
-    has: { sandbox: true },
-  }));
+  const mockBinance = jest.fn().mockImplementation(({ apiKey, secret }) => {
+    return {
+      apiKey,
+      secret,
+      markets: null,
+      loadMarkets: jest.fn().mockImplementation(function () {
+        this.markets = { someMarket: 'data' };
+        return Promise.resolve(true);
+      }),
+      setSandboxMode: jest.fn(),
+      has: { sandbox: true },
+      setMarkets: jest.fn(function (markets) {
+        this.markets = markets;
+      }),
+    };
+  });
 
   return {
     binance: mockBinance,
@@ -75,17 +92,6 @@ describe('CcxtIntegrationService', () => {
     });
   });
 
-  describe('getDefaultExchange', () => {
-    it('should return the value from cacheManager.get using key `${exchangeName}-true`', async () => {
-      (mockCacheManager.get as jest.Mock).mockResolvedValue(
-        'defaultExchangeData',
-      );
-      const result = await service.getDefaultExchange('binance');
-      expect(mockCacheManager.get).toHaveBeenCalledWith('binance-true');
-      expect(result).toEqual('defaultExchangeData');
-    });
-  });
-
   describe('getExchangeNames', () => {
     it('should return a set of exchange names from cache keys ending with "-true"', async () => {
       (mockCacheManager.store.keys as jest.Mock).mockResolvedValue([
@@ -106,8 +112,10 @@ describe('CcxtIntegrationService', () => {
   });
 
   describe('initializeExchange', () => {
-    it('should initialize and return the exchange instance', async () => {
+    it('should initialize exchange, call initExchangeDependencies, and cache markets', async () => {
       jest.spyOn(mockConfigService, 'get').mockReturnValue('true');
+
+      const spyInitDeps = jest.spyOn(service, 'initExchangeDependencies');
 
       const exchange = await service.initializeExchange('binance', {
         name: 'binance',
@@ -120,6 +128,14 @@ describe('CcxtIntegrationService', () => {
       expect(exchange.secret).toBe('testSecret');
       expect(exchange.loadMarkets).toHaveBeenCalled();
       expect(exchange.setSandboxMode).toHaveBeenCalledWith(true);
+      expect(exchange.markets).toEqual({ someMarket: 'data' });
+
+      expect(spyInitDeps).toHaveBeenCalledWith('binance', exchange);
+
+      expect(mockCacheManager.set).toHaveBeenCalledWith(
+        `ccxt-binance-dependencies`,
+        exchange.markets,
+      );
     });
 
     it('should throw an error for a non-existing exchange', async () => {
