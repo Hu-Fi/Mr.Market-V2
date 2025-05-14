@@ -2,7 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { ExchangeBalanceCommand } from './model/exchange-balance.model';
 import { BalanceStrategy } from '../../common/interfaces/exchange-data.interfaces';
-import { TransactionStatus, TransactionType } from '../../common/enums/exchange-data.enums';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '../../common/enums/exchange-data.enums';
 
 @Injectable()
 export class ExchangeBalanceService {
