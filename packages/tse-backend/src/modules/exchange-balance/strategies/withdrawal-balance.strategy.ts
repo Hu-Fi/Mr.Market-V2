@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ExchangeWithdrawalService } from '../../exchange-withdrawal/exchange-withdrawal.service';
 import { ExchangeBalanceCommand } from '../model/exchange-balance.model';
-import { BalanceStrategy } from '../../../common/interfaces/exchange-data.interfaces';
+import {
+  BalanceStrategy,
+  Transaction,
+} from '../../../common/interfaces/exchange-data.interfaces';
 import { TransactionType } from '../../../common/enums/exchange-data.enums';
 
 @Injectable()
@@ -11,9 +14,15 @@ export class WithdrawalBalanceStrategy implements BalanceStrategy {
   constructor(private readonly withdrawalService: ExchangeWithdrawalService) {}
 
   async getPersisted(command: ExchangeBalanceCommand) {
-    return this.withdrawalService.getPersistedUserSuccessfullyWithdrawalData(
-      command,
-    );
+    const data =
+      await this.withdrawalService.getPersistedUserSuccessfullyWithdrawalData(
+        command,
+      );
+    return data.map((d) => ({
+      amount: d.amount,
+      txTimestamp: d.txTimestamp,
+      symbol: d.symbol,
+    }));
   }
 
   async fetchAndPersist(
@@ -27,11 +36,16 @@ export class WithdrawalBalanceStrategy implements BalanceStrategy {
       command.userId,
       lastTimestamp,
     );
+
     if (fetched.length > 0) {
       await this.withdrawalService.persistInDatabaseUserSuccessfullyWithdrawal(
         fetched,
       );
     }
-    return fetched;
+
+    return fetched.map((f: Transaction) => ({
+      amount: f.amount,
+      symbol: f.currency,
+    }));
   }
 }

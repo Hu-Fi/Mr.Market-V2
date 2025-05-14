@@ -12,27 +12,90 @@ export class ExchangeBalanceService {
   ) {}
 
   async getExchangeBalance(command: ExchangeBalanceCommand): Promise<{
-    depositBalance: string;
-    withdrawalBalance: string;
-    totalBalance: string;
+    balances: Record<
+      string,
+      {
+        depositBalance: string;
+        withdrawalBalance: string;
+        totalBalance: string;
+      }
+    >;
   }> {
     const depositStrategy = this.getStrategy(TransactionType.DEPOSIT);
     const withdrawalStrategy = this.getStrategy(TransactionType.WITHDRAWAL);
 
-    const depositBalance = await this.calculateBalance(
+    const depositMap = await this.calculateBalanceBySymbol(
       depositStrategy,
       command,
     );
-    const withdrawalBalance = await this.calculateBalance(
+    const withdrawalMap = await this.calculateBalanceBySymbol(
       withdrawalStrategy,
       command,
     );
 
-    return {
-      depositBalance: depositBalance.toString(),
-      withdrawalBalance: withdrawalBalance.toString(),
-      totalBalance: depositBalance.minus(withdrawalBalance).toString(),
-    };
+    const allSymbols = new Set([
+      ...Object.keys(depositMap),
+      ...Object.keys(withdrawalMap),
+    ]);
+
+    const balances: Record<string, any> = {};
+
+    for (const symbol of allSymbols) {
+      const deposit = depositMap[symbol] || new Decimal(0);
+      const withdrawal = withdrawalMap[symbol] || new Decimal(0);
+
+      balances[symbol] = {
+        depositBalance: deposit.toString(),
+        withdrawalBalance: withdrawal.toString(),
+        totalBalance: deposit.minus(withdrawal).toString(),
+      };
+    }
+
+    return { balances };
+  }
+
+  private async calculateBalanceBySymbol(
+    strategy: BalanceStrategy,
+    command: ExchangeBalanceCommand,
+  ): Promise<Record<string, Decimal>> {
+    const persisted = await strategy.getPersisted(command);
+    const lastTimestamps: Record<string, string | undefined> = {};
+
+    for (const tx of persisted) {
+      const current = lastTimestamps[tx.symbol];
+      if (!current || tx.txTimestamp > current) {
+        lastTimestamps[tx.symbol] = tx.txTimestamp;
+      }
+    }
+
+    const fetched: { symbol: string; amount: number }[] = [];
+    for (const symbol in lastTimestamps) {
+      const symbolCommand = { ...command, symbol };
+      const newFetched = await strategy.fetchAndPersist(
+        symbolCommand,
+        lastTimestamps[symbol],
+      );
+      fetched.push(...newFetched.map((f) => ({ symbol, amount: f.amount })));
+    }
+
+    const allTxs = [
+      ...persisted.map((tx) => ({ symbol: tx.symbol, amount: tx.amount })),
+      ...fetched.map((tx) => ({
+        symbol: tx.symbol,
+        amount: new Decimal(tx.amount),
+      })),
+    ];
+
+    const balanceMap: Record<string, Decimal> = {};
+
+    for (const { symbol, amount } of allTxs) {
+      if (!balanceMap[symbol]) {
+        balanceMap[symbol] = new Decimal(0);
+      }
+      balanceMap[symbol] = balanceMap[symbol].plus(amount);
+    }
+
+    return balanceMap;
   }
 
   private getStrategy(type: TransactionType): BalanceStrategy {
@@ -41,25 +104,5 @@ export class ExchangeBalanceService {
       throw new Error(`Strategy for type ${type} not found`);
     }
     return strategy;
-  }
-
-  private async calculateBalance(
-    strategy: BalanceStrategy,
-    command: ExchangeBalanceCommand,
-  ): Promise<Decimal> {
-    const persisted = await strategy.getPersisted(command);
-    const lastTimestamp = persisted[persisted.length - 1]?.txTimestamp;
-    const fetched = await strategy.fetchAndPersist(command, lastTimestamp);
-
-    const persistedSum = persisted.reduce(
-      (acc, tx) => acc.plus(tx.amount),
-      new Decimal(0),
-    );
-    const fetchedSum = fetched.reduce(
-      (acc, tx) => acc.plus(new Decimal(tx.amount)),
-      new Decimal(0),
-    );
-
-    return persistedSum.plus(fetchedSum);
   }
 }

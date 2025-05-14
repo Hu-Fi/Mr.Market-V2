@@ -68,9 +68,9 @@ export interface BalanceStrategy {
   type: TransactionType;
   getPersisted(
     command: ExchangeBalanceCommand,
-  ): Promise<{ amount: Decimal; txTimestamp: string }[]>;
+  ): Promise<{ amount: Decimal; txTimestamp: string; symbol: string }[]>;
   fetchAndPersist(
     command: ExchangeBalanceCommand,
     lastTxTimestamp?: string,
-  ): Promise<{ amount: number }[]>;
+  ): Promise<{ amount: number; symbol: string }[]>;
 }

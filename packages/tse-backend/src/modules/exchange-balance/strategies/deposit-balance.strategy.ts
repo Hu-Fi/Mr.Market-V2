@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ExchangeDepositService } from '../../exchange-deposit/exchange-deposit.service';
 import { ExchangeBalanceCommand } from '../model/exchange-balance.model';
-import { BalanceStrategy } from '../../../common/interfaces/exchange-data.interfaces';
+import {
+  BalanceStrategy,
+  Transaction,
+} from '../../../common/interfaces/exchange-data.interfaces';
 import { TransactionType } from '../../../common/enums/exchange-data.enums';
 
 @Injectable()
@@ -11,7 +14,15 @@ export class DepositBalanceStrategy implements BalanceStrategy {
   constructor(private readonly depositService: ExchangeDepositService) {}
 
   async getPersisted(command: ExchangeBalanceCommand) {
-    return this.depositService.getPersistedUserSuccessfullyDepositData(command);
+    const data =
+      await this.depositService.getPersistedUserSuccessfullyDepositData(
+        command,
+      );
+    return data.map((d) => ({
+      amount: d.amount,
+      txTimestamp: d.txTimestamp,
+      symbol: d.symbol,
+    }));
   }
 
   async fetchAndPersist(
@@ -25,11 +36,16 @@ export class DepositBalanceStrategy implements BalanceStrategy {
       command.userId,
       lastTimestamp,
     );
+
     if (fetched.length > 0) {
       await this.depositService.persistInDatabaseUserSuccessfullyDeposit(
         fetched,
       );
     }
-    return fetched;
+
+    return fetched.map((f: Transaction) => ({
+      amount: f.amount,
+      symbol: f.currency,
+    }));
   }
 }

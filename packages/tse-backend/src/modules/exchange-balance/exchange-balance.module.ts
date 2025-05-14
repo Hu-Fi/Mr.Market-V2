@@ -5,7 +5,7 @@ import { ExchangeBalanceProfile } from './exchange-balance.mapper';
 import { ExchangeDepositModule } from '../exchange-deposit/exchange-deposit.module';
 import { ExchangeWithdrawalModule } from '../exchange-withdrawal/exchange-withdrawal.module';
 import { DepositBalanceStrategy } from './strategies/deposit-balance.strategy';
-import { WithdrawalBalanceStrategy } from './strategies/withdarawal-balance.strategy';
+import { WithdrawalBalanceStrategy } from './strategies/withdrawal-balance.strategy';
 
 @Module({
   imports: [ExchangeDepositModule, ExchangeWithdrawalModule],
