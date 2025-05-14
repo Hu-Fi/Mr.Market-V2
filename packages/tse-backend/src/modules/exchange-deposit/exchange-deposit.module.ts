@@ -17,7 +17,7 @@ import { ExchangeDepositRepository } from './exchange-deposit.repository';
   providers: [
     ExchangeDepositService,
     ExchangeDepositRepository,
-    ExchangeDepositProfile
+    ExchangeDepositProfile,
   ],
   controllers: [ExchangeDepositController],
   exports: [ExchangeDepositService],

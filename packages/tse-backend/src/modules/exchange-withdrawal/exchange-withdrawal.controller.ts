@@ -4,7 +4,8 @@ import {
   Body,
   UsePipes,
   ValidationPipe,
-  UseGuards, Request,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ExchangeWithdrawalService } from './exchange-withdrawal.service';
 import { InjectMapper } from '@automapper/nestjs';
@@ -35,7 +36,10 @@ export class ExchangeWithdrawalController {
   @Roles(Role.USER)
   @Post('exchange-withdraw')
   @ApiOperation({ summary: 'Execute a withdraw transaction' })
-  async createWithdrawal(@Body() dto: CreateWithdrawalDto, @Request() req: RequestWithUser) {
+  async createWithdrawal(
+    @Body() dto: CreateWithdrawalDto,
+    @Request() req: RequestWithUser,
+  ) {
     const command = this.mapper.map(
       dto,
       CreateWithdrawalDto,

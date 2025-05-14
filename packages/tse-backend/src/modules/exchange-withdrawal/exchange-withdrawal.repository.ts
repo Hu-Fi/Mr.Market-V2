@@ -14,4 +14,16 @@ export class ExchangeWithdrawalRepository {
   async save(data: ExchangeWithdrawalData) {
     return await this.repository.save(data);
   }
+
+  async get(data: {
+    exchangeName: string;
+    symbol: string;
+    userId: string;
+    txTimestamp?: string;
+    network: string;
+  }): Promise<ExchangeWithdrawalData[]> {
+    return await this.repository.find({
+      where: data,
+    });
+  }
 }

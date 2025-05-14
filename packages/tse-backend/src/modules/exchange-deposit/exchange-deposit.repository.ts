@@ -22,10 +22,8 @@ export class ExchangeDepositRepository {
     txTimestamp?: string;
     network: string;
   }): Promise<ExchangeDepositData[]> {
-    return await this.repository.find(
-      {
-        where: data,
-      },
-    )
+    return await this.repository.find({
+      where: data,
+    });
   }
 }

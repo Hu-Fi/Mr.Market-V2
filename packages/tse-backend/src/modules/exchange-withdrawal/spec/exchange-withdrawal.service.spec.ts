@@ -8,6 +8,7 @@ import {
 } from '../../../common/filters/withdrawal.exception.filter';
 import { ExchangeRegistryService } from '../../exchange-registry/exchange-registry.service';
 import { Decimal } from 'decimal.js';
+import { ExchangeWithdrawalRepository } from '../exchange-withdrawal.repository';
 
 describe('ExchangeWithdrawalService', () => {
   let service: ExchangeWithdrawalService;
@@ -20,6 +21,11 @@ describe('ExchangeWithdrawalService', () => {
     interpretError: jest.fn(),
   };
 
+  const mockExchangeWithdrawalRepository = {
+    save: jest.fn(),
+    get: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -27,6 +33,10 @@ describe('ExchangeWithdrawalService', () => {
         {
           provide: CcxtIntegrationService,
           useValue: mockCcxtGateway,
+        },
+        {
+          provide: ExchangeWithdrawalRepository,
+          useValue: mockExchangeWithdrawalRepository,
         },
         {
           provide: ExchangeRegistryService,

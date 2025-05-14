@@ -4,7 +4,8 @@ import {
   UsePipes,
   ValidationPipe,
   Body,
-  Request, UseGuards,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { ExchangeDepositService } from './exchange-deposit.service';
 import { InjectMapper } from '@automapper/nestjs';
@@ -35,7 +36,10 @@ export class ExchangeDepositController {
   @Roles(Role.USER)
   @Post('exchange-deposit')
   @ApiOperation({ summary: 'Create address for a deposit' })
-  async createDepositAddress(@Body() dto: CreateDepositDto, @Request() req: RequestWithUser) {
+  async createDepositAddress(
+    @Body() dto: CreateDepositDto,
+    @Request() req: RequestWithUser,
+  ) {
     const command = this.mapper.map(
       dto,
       CreateDepositDto,

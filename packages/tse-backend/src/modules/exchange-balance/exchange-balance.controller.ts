@@ -8,7 +8,10 @@ import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
 import { Roles } from '../../common/utils/auth/roles.decorator';
 import { Role } from '../../common/enums/role.enums';
 import { RequestWithUser } from '../../common/interfaces/http-request.interfaces';
-import { ExchangeBalanceCommand, ExchangeBalanceDto } from './model/exchange-balance.model';
+import {
+  ExchangeBalanceCommand,
+  ExchangeBalanceDto,
+} from './model/exchange-balance.model';
 
 @ApiTags('transaction')
 @Controller('transaction')

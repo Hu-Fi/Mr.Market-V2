@@ -15,11 +15,15 @@ export class ExchangeWithdrawalProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, CreateWithdrawalDto, CreateWithdrawalCommand,
+      createMap(
+        mapper,
+        CreateWithdrawalDto,
+        CreateWithdrawalCommand,
         forMember(
           (dest) => dest.amount,
           mapFrom((src) => new Decimal(src.amount)),
-        ));
+        ),
+      );
     };
   }
 }

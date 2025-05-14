@@ -6,6 +6,7 @@ import { ExchangeWithdrawalProfile } from './exchange-withdrawal.mapper';
 import { ExchangeRegistryModule } from '../exchange-registry/exchange-registry.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ExchangeWithdrawal } from '../../common/entities/exchange-withdrawal.entity';
+import { ExchangeWithdrawalRepository } from './exchange-withdrawal.repository';
 
 @Module({
   imports: [
@@ -13,7 +14,12 @@ import { ExchangeWithdrawal } from '../../common/entities/exchange-withdrawal.en
     ExchangeRegistryModule,
     TypeOrmModule.forFeature([ExchangeWithdrawal]),
   ],
-  providers: [ExchangeWithdrawalService, ExchangeWithdrawalProfile],
+  providers: [
+    ExchangeWithdrawalService,
+    ExchangeWithdrawalRepository,
+    ExchangeWithdrawalProfile,
+  ],
   controllers: [ExchangeWithdrawalController],
+  exports: [ExchangeWithdrawalService],
 })
 export class ExchangeWithdrawalModule {}

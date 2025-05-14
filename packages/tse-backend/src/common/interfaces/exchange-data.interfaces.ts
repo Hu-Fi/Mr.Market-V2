@@ -1,4 +1,9 @@
 import { Decimal } from 'decimal.js';
+import { ExchangeBalanceCommand } from '../../modules/exchange-balance/model/exchange-balance.model';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '../enums/exchange-data.enums';
 
 export interface OHLCVResponse {
   timestamp: number;
@@ -26,11 +31,12 @@ export interface ExchangeDepositData {
 
 export interface ExchangeWithdrawalData {
   userId: string;
+  txId: string;
+  txTimestamp: string;
   exchangeName: string;
-  assetId: string;
+  network: string;
+  symbol: string;
   amount: Decimal;
-  destination: string;
-  status: string;
 }
 
 export interface Transaction {
@@ -45,10 +51,10 @@ export interface Transaction {
   tagFrom?: string;
   tag?: string;
   tagTo?: string;
-  type: 'deposit' | 'withdrawal' | 'transfer';
+  type: TransactionType;
   amount: number;
   currency: string;
-  status: 'ok' | 'failed' | 'canceled' | 'pending';
+  status: TransactionStatus;
   updated?: number;
   comment?: string;
   fee?: {
@@ -56,4 +62,15 @@ export interface Transaction {
     cost: number;
     rate?: number;
   };
+}
+
+export interface BalanceStrategy {
+  type: TransactionType;
+  getPersisted(
+    command: ExchangeBalanceCommand,
+  ): Promise<{ amount: Decimal; txTimestamp: string }[]>;
+  fetchAndPersist(
+    command: ExchangeBalanceCommand,
+    lastTxTimestamp?: string,
+  ): Promise<{ amount: number }[]>;
 }

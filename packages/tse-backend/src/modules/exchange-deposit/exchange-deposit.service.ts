@@ -107,7 +107,7 @@ export class ExchangeDepositService {
     symbol: string,
     userId: string,
     txTimestamp?: string,
-    ): Promise<Transaction[]> {
+  ): Promise<Transaction[]> {
     const exchange = await this.exchangeRegistryService.getExchangeByName({
       exchangeName,
       userId,
@@ -149,7 +149,10 @@ export class ExchangeDepositService {
       memo,
     };
 
-    await this.cacheManager.set(`${userId}::${exchangeName}`, JSON.stringify(data));
+    await this.cacheManager.set(
+      `${userId}::${exchangeName}`,
+      JSON.stringify(data),
+    );
   }
 
   async persistInDatabaseUserSuccessfullyDeposit(data: any) {

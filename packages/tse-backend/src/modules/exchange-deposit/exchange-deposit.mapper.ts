@@ -15,11 +15,15 @@ export class ExchangeDepositProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, CreateDepositDto, CreateDepositCommand,
+      createMap(
+        mapper,
+        CreateDepositDto,
+        CreateDepositCommand,
         forMember(
           (dest) => dest.amount,
           mapFrom((src) => new Decimal(src.amount)),
-        ))
+        ),
+      );
     };
   }
 }

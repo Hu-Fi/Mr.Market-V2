@@ -66,9 +66,9 @@ describe('ExchangeDepositController', () => {
 
       const req = {
         user: {
-          userId: "userId",
-          clientId: "clientId"
-        }
+          userId: 'userId',
+          clientId: 'clientId',
+        },
       } as RequestWithUser;
 
       await controller.createDepositAddress(createDepositDtoFixture, req);

@@ -63,7 +63,7 @@ import { ExchangeBalanceModule } from './modules/exchange-balance/exchange-balan
     ExchangeWithdrawalModule,
     WebSchedulerModule,
     CampaignModule,
-    ExchangeBalanceModule
+    ExchangeBalanceModule,
   ],
   providers: [
     SecretUtils,

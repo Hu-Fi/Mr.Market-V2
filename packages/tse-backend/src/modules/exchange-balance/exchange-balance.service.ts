@@ -1,81 +1,65 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ExchangeBalanceCommand } from './model/exchange-balance.model';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { ExchangeDepositService } from '../exchange-deposit/exchange-deposit.service';
 import { Decimal } from 'decimal.js';
-import { ExchangeDepositData, Transaction } from '../../common/interfaces/exchange-data.interfaces';
+import { ExchangeBalanceCommand } from './model/exchange-balance.model';
+import { BalanceStrategy } from '../../common/interfaces/exchange-data.interfaces';
+import { TransactionType } from '../../common/enums/exchange-data.enums';
 
 @Injectable()
 export class ExchangeBalanceService {
   constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    //TODO: Consider use cache to recognise deposits per userId
-    private readonly exchangeDepositService: ExchangeDepositService,
+    @Inject('BALANCE_STRATEGIES')
+    private readonly strategies: BalanceStrategy[],
   ) {}
 
-  async getExchangeBalance(command: ExchangeBalanceCommand): Promise<{ balance: number }> {
-    const lastDeposits = await this.getLastDeposits(command);
-    const fetchedDeposits = await this.fetchAndPersistNewDeposits(command, lastDeposits);
+  async getExchangeBalance(command: ExchangeBalanceCommand): Promise<{
+    depositBalance: string;
+    withdrawalBalance: string;
+    totalBalance: string;
+  }> {
+    const depositStrategy = this.getStrategy(TransactionType.DEPOSIT);
+    const withdrawalStrategy = this.getStrategy(TransactionType.WITHDRAWAL);
 
-    const totalBalance = this.calculateTotalBalance(lastDeposits, fetchedDeposits);
+    const depositBalance = await this.calculateBalance(
+      depositStrategy,
+      command,
+    );
+    const withdrawalBalance = await this.calculateBalance(
+      withdrawalStrategy,
+      command,
+    );
 
     return {
-      balance: totalBalance.toNumber(),
+      depositBalance: depositBalance.toString(),
+      withdrawalBalance: withdrawalBalance.toString(),
+      totalBalance: depositBalance.minus(withdrawalBalance).toString(),
     };
   }
 
-  private async getLastDeposits(command: ExchangeBalanceCommand): Promise<ExchangeDepositData[]> {
-    return this.exchangeDepositService.getPersistedUserSuccessfullyDepositData({
-      exchangeName: command.exchangeName,
-      symbol: command.symbol,
-      userId: command.userId,
-      network: command.network,
-    });
-  }
-
-  private async fetchAndPersistNewDeposits(
-    command: ExchangeBalanceCommand,
-    lastDeposits: ExchangeDepositData[],
-  ): Promise<Transaction[]> {
-    const lastDepositTimestamp: string | undefined =
-      lastDeposits[lastDeposits.length - 1]?.txTimestamp;
-
-    const fetchedDeposits = await this.exchangeDepositService.fetchDeposits(
-      command.exchangeName,
-      command.network,
-      command.symbol,
-      command.userId,
-      lastDepositTimestamp,
-    );
-
-    if (fetchedDeposits.length > 0) {
-      await this.exchangeDepositService.persistInDatabaseUserSuccessfullyDeposit(fetchedDeposits);
+  private getStrategy(type: TransactionType): BalanceStrategy {
+    const strategy = this.strategies.find((s) => s.type === type);
+    if (!strategy) {
+      throw new Error(`Strategy for type ${type} not found`);
     }
-
-    return fetchedDeposits;
+    return strategy;
   }
 
-  private calculateTotalBalance(
-    lastDeposits: ExchangeDepositData[],
-    fetchedDeposits: Transaction[],
-  ): Decimal {
-    const lastDepositsBalance = this.sumExchangeDepositData(lastDeposits);
-    const fetchedDepositsBalance = this.sumTransactionData(fetchedDeposits);
-    return lastDepositsBalance.plus(fetchedDepositsBalance);
-  }
+  private async calculateBalance(
+    strategy: BalanceStrategy,
+    command: ExchangeBalanceCommand,
+  ): Promise<Decimal> {
+    const persisted = await strategy.getPersisted(command);
+    const lastTimestamp = persisted[persisted.length - 1]?.txTimestamp;
+    const fetched = await strategy.fetchAndPersist(command, lastTimestamp);
 
-  private sumExchangeDepositData(deposits: ExchangeDepositData[]): Decimal {
-    return deposits.reduce(
-      (acc, deposit) => acc.plus(deposit.amount),
+    const persistedSum = persisted.reduce(
+      (acc, tx) => acc.plus(tx.amount),
       new Decimal(0),
     );
-  }
-
-  private sumTransactionData(deposits: Transaction[]): Decimal {
-    return deposits.reduce(
-      (acc, deposit) => acc.plus(new Decimal(deposit.amount)),
+    const fetchedSum = fetched.reduce(
+      (acc, tx) => acc.plus(new Decimal(tx.amount)),
       new Decimal(0),
     );
+
+    return persistedSum.plus(fetchedSum);
   }
 }

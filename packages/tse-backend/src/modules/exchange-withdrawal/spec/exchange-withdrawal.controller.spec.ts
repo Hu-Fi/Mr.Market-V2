@@ -84,7 +84,9 @@ describe('ExchangeWithdrawalController', () => {
 
   describe('createWithdrawal', () => {
     it('should call handleWithdrawal with correct command', async () => {
-      await controller.createWithdrawal(createWithdrawalDtoFixture, {user: {userId: 'userId', clientId: 'clientId'}} as RequestWithUser);
+      await controller.createWithdrawal(createWithdrawalDtoFixture, {
+        user: { userId: 'userId', clientId: 'clientId' },
+      } as RequestWithUser);
       expect(service.handleWithdrawal).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'userId',

@@ -13,3 +13,16 @@ export enum ExchangeNetwork {
   HECO = 'HECO',
   OMNI = 'OMNI',
 }
+
+export enum TransactionType {
+  DEPOSIT = 'deposit',
+  WITHDRAWAL = 'withdrawal',
+  TRANSFER = 'transfer',
+}
+
+export enum TransactionStatus {
+  PENDING = 'pending',
+  CANCELED = 'canceled',
+  FAILED = 'failed',
+  OK = 'ok',
+}
