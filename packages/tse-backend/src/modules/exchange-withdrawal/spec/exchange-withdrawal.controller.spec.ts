@@ -16,6 +16,7 @@ import {
   MappingProfile,
 } from '@automapper/core';
 import { AutomapperProfile } from '@automapper/nestjs';
+import { RequestWithUser } from '../../../common/interfaces/http-request.interfaces';
 
 export class WithdrawalMappingTestProfile extends AutomapperProfile {
   constructor(@InjectMapper() mapper: Mapper) {
@@ -46,7 +47,6 @@ describe('ExchangeWithdrawalController', () => {
   };
 
   const createWithdrawalDtoFixture: CreateWithdrawalDto = {
-    userId: '',
     exchangeName: 'binance',
     symbol: 'ETH',
     network: 'eth',
@@ -84,10 +84,12 @@ describe('ExchangeWithdrawalController', () => {
 
   describe('createWithdrawal', () => {
     it('should call handleWithdrawal with correct command', async () => {
-      await controller.createWithdrawal(createWithdrawalDtoFixture);
+      await controller.createWithdrawal(createWithdrawalDtoFixture, {
+        user: { userId: 'userId', clientId: 'clientId' },
+      } as RequestWithUser);
       expect(service.handleWithdrawal).toHaveBeenCalledWith(
         expect.objectContaining({
-          userId: createWithdrawalDtoFixture.userId,
+          userId: 'userId',
           exchangeName: createWithdrawalDtoFixture.exchangeName,
           symbol: createWithdrawalDtoFixture.symbol,
           network: createWithdrawalDtoFixture.network,

@@ -4,10 +4,13 @@ import { ExchangeDepositService } from '../exchange-deposit.service';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import {
-  CreateDepositDto,
   CreateDepositCommand,
+  CreateDepositDto,
 } from '../model/exchange-deposit.model';
 import { ExchangeDepositProfile } from '../exchange-deposit.mapper';
+import { ExchangeNetwork } from '../../../common/enums/exchange-data.enums';
+import { Decimal } from 'decimal.js';
+import { RequestWithUser } from '../../../common/interfaces/http-request.interfaces';
 
 describe('ExchangeDepositController', () => {
   let controller: ExchangeDepositController;
@@ -18,10 +21,10 @@ describe('ExchangeDepositController', () => {
   };
 
   const createDepositDtoFixture: CreateDepositDto = {
-    userId: '',
+    amount: '100',
     exchangeName: 'binance',
     symbol: 'ETH',
-    network: 'eth',
+    network: ExchangeNetwork.ERC20,
   };
 
   beforeEach(async () => {
@@ -54,13 +57,21 @@ describe('ExchangeDepositController', () => {
   describe('createDepositAddress', () => {
     it('should call handleDeposit with correct command', async () => {
       const command: CreateDepositCommand = {
-        userId: createDepositDtoFixture.userId,
+        userId: 'userId',
+        amount: new Decimal(100),
         exchangeName: createDepositDtoFixture.exchangeName,
         symbol: createDepositDtoFixture.symbol,
         network: createDepositDtoFixture.network,
       };
 
-      await controller.createDepositAddress(createDepositDtoFixture);
+      const req = {
+        user: {
+          userId: 'userId',
+          clientId: 'clientId',
+        },
+      } as RequestWithUser;
+
+      await controller.createDepositAddress(createDepositDtoFixture, req);
       expect(service.handleDeposit).toHaveBeenCalledWith(command);
     });
   });

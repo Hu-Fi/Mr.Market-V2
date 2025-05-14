@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { TransactionService } from '../transaction/transaction.service';
+import { TransactionService } from '../mixin/transaction.service';
 import Redlock, { Lock } from 'redlock';
 
 @Injectable()

@@ -7,7 +7,7 @@ import {
   CreateLimitOrderCommand,
   ExchangeOperationCommand,
 } from '../model/exchange-operation.model';
-import { Order } from '../../../common/entities/order.entity';
+import { TradeOrder } from '../../../common/entities/trade-order.entity';
 import {
   MarketOrderType,
   OrderStatus,
@@ -56,7 +56,7 @@ describe('ExchangeOperationService', () => {
         price: 10000,
       };
 
-      const expectedOrder = new Order();
+      const expectedOrder = new TradeOrder();
       jest.spyOn(orderService, 'createOrder').mockResolvedValue(expectedOrder);
 
       const result = await service.saveOrderData(command);

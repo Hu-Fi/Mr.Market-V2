@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MarketMakingRepository } from './market-making.repository';
-import { MarketMaking } from '../../../../common/entities/market-making.entity';
+import { StrategyMarketMaking } from '../../../../common/entities/strategy-market-making.entity';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 
 @Injectable()
@@ -9,7 +9,9 @@ export class MarketMakingService {
 
   constructor(private readonly repository: MarketMakingRepository) {}
 
-  async createStrategy(strategy: Partial<MarketMaking>): Promise<MarketMaking> {
+  async createStrategy(
+    strategy: Partial<StrategyMarketMaking>,
+  ): Promise<StrategyMarketMaking> {
     try {
       return this.repository.createStrategy(strategy);
     } catch (error) {
@@ -51,7 +53,7 @@ export class MarketMakingService {
     }
   }
 
-  async findRunningStrategies(): Promise<MarketMaking[]> {
+  async findRunningStrategies(): Promise<StrategyMarketMaking[]> {
     try {
       return this.repository.findRunningStrategies();
     } catch (error) {
@@ -66,7 +68,7 @@ export class MarketMakingService {
   async findStrategyById(
     id: number,
     options?: any,
-  ): Promise<MarketMaking | null> {
+  ): Promise<StrategyMarketMaking | null> {
     try {
       return this.repository.findStrategyById(id, options);
     } catch (error) {

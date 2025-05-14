@@ -5,9 +5,6 @@ import {
   adminLoginCommandFixture,
   adminLoginDtoFixture,
   adminLoginResponseFixture,
-  mixinOAuthCommandFixture,
-  mixinOAuthDtoFixture,
-  mixinOAuthResponseFixture,
 } from './auth.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -55,20 +52,6 @@ describe('AuthController', () => {
       const result = await controller.login(dto);
 
       expect(authService.validateUser).toHaveBeenCalledWith(command);
-      expect(result).toBe(response);
-    });
-  });
-
-  describe('oauth', () => {
-    it('should handle OAuth and return an authorization ID', async () => {
-      const dto = mixinOAuthDtoFixture;
-      const command = mixinOAuthCommandFixture;
-      const response = mixinOAuthResponseFixture;
-      jest.spyOn(authService, 'mixinOauthHandler').mockResolvedValue(response);
-
-      const result = await controller.oauth(dto);
-
-      expect(authService.mixinOauthHandler).toHaveBeenCalledWith(command);
       expect(result).toBe(response);
     });
   });

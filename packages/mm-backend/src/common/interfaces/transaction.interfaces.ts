@@ -1,6 +1,4 @@
 import {
-  ExchangeDepositStatus,
-  ExchangeWithdrawalStatus,
   MixinDepositStatus,
   MixinWithdrawalStatus,
 } from '../enums/transaction.enum';
@@ -39,24 +37,4 @@ export interface MixinDepositResponse {
 export interface MixinWithdrawResponse {
   transactionHash: string;
   snapshotId: string;
-}
-
-export interface ExchangeDepositData {
-  userId: string;
-  exchangeName: string;
-  assetId: string;
-  chainId: string;
-  amount: Decimal;
-  destination: string;
-  status: ExchangeDepositStatus;
-  transactionHash?: string;
-}
-
-export interface ExchangeWithdrawalData {
-  userId: string;
-  exchangeName: string;
-  assetId: string;
-  amount: Decimal;
-  destination: string;
-  status: ExchangeWithdrawalStatus;
 }

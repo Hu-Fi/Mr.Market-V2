@@ -1,16 +1,16 @@
 import { DeleteResult, FindManyOptions, LessThan, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from '../../common/entities/order.entity';
+import { TradeOrder } from '../../common/entities/trade-order.entity';
 
 @Injectable()
 export class OrderRepository {
   constructor(
-    @InjectRepository(Order)
-    private readonly repository: Repository<Order>,
+    @InjectRepository(TradeOrder)
+    private readonly repository: Repository<TradeOrder>,
   ) {}
 
-  async create(transactionData: Partial<Order>): Promise<Order> {
+  async create(transactionData: Partial<TradeOrder>): Promise<TradeOrder> {
     return this.repository.save(transactionData);
   }
 
@@ -24,7 +24,7 @@ export class OrderRepository {
     });
   }
 
-  async save(data: Partial<Order>) {
+  async save(data: Partial<TradeOrder>) {
     return await this.repository.save(data);
   }
 

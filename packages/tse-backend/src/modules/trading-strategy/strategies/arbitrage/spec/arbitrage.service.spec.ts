@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ArbitrageService } from '../arbitrage.service';
 import { ArbitrageStrategyRepository } from '../arbitrage.repository';
-import { Arbitrage } from '../../../../../common/entities/arbitrage.entity';
+import { StrategyArbitrage } from '../../../../../common/entities/startegy-arbitrage.entity';
 import { StrategyInstanceStatus } from '../../../../../common/enums/strategy-type.enums';
 import { ArbitrageDataFixture } from './arbitrage.fixtures';
 import { Decimal } from 'decimal.js';
@@ -40,11 +40,11 @@ describe('ArbitrageService', () => {
 
   describe('createStrategy', () => {
     it('should create a strategy and return it', async () => {
-      const strategy: Partial<Arbitrage> = {
+      const strategy: Partial<StrategyArbitrage> = {
         userId: 'user1',
         amountToTrade: new Decimal(10),
       };
-      const result: Arbitrage = ArbitrageDataFixture;
+      const result: StrategyArbitrage = ArbitrageDataFixture;
 
       jest.spyOn(repository, 'createStrategy').mockResolvedValue(result);
 
@@ -52,7 +52,7 @@ describe('ArbitrageService', () => {
     });
 
     it('should throw an error if creation fails', async () => {
-      const strategy: Partial<Arbitrage> = {
+      const strategy: Partial<StrategyArbitrage> = {
         userId: 'user1',
         amountToTrade: new Decimal(10),
       };
@@ -170,7 +170,7 @@ describe('ArbitrageService', () => {
 
   describe('findRunningStrategies', () => {
     it('should return a list of running strategies', async () => {
-      const strategies: Arbitrage[] = [ArbitrageDataFixture];
+      const strategies: StrategyArbitrage[] = [ArbitrageDataFixture];
 
       jest
         .spyOn(repository, 'findRunningStrategies')

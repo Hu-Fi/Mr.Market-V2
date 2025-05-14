@@ -13,8 +13,8 @@ import {
   OrderStatus,
   TradeSideType,
 } from '../src/common/enums/exchange-operation.enums';
-import { Order } from '../src/common/entities/order.entity';
-import { Operation } from '../src/common/entities/operation.entity';
+import { TradeOrder } from '../src/common/entities/trade-order.entity';
+import { TradeOperation } from '../src/common/entities/trade-operation.entity';
 import {
   CreateLimitOrderCommand,
   OperationCommand,
@@ -53,12 +53,12 @@ describe('ExchangeOperationService (e2e)', () => {
               username: postgresContainer.getUsername(),
               password: postgresContainer.getPassword(),
               database: postgresContainer.getDatabase(),
-              entities: [Order, Operation],
+              entities: [TradeOrder, TradeOperation],
               synchronize: true,
             };
           },
         }),
-        TypeOrmModule.forFeature([Order, Operation]),
+        TypeOrmModule.forFeature([TradeOrder, TradeOperation]),
       ],
       providers: [
         ExchangeOperationService,

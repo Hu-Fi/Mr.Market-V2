@@ -8,6 +8,9 @@ import {
   ExchangeNotFoundException,
 } from '../../../common/filters/deposit-address.exception.filter';
 import { ExchangeRegistryService } from '../../exchange-registry/exchange-registry.service';
+import { Decimal } from 'decimal.js';
+import { ExchangeDepositRepository } from '../exchange-deposit.repository';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('ExchangeDepositService', () => {
   let service: ExchangeDepositService;
@@ -20,8 +23,14 @@ describe('ExchangeDepositService', () => {
     getExchangeByName: jest.fn(),
   };
 
+  const mockExchangeDepositRepository = {
+    save: jest.fn(),
+    get: jest.fn(),
+  };
+
   const createDepositCommand: CreateDepositCommand = {
     userId: '1',
+    amount: new Decimal(100),
     exchangeName: 'binance',
     symbol: 'ETH',
     network: 'eth',
@@ -31,6 +40,11 @@ describe('ExchangeDepositService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExchangeDepositService,
+        ExchangeDepositRepository,
+        {
+          provide: ExchangeDepositRepository,
+          useValue: mockExchangeDepositRepository,
+        },
         {
           provide: CcxtIntegrationService,
           useValue: mockCcxtGateway,
@@ -38,6 +52,10 @@ describe('ExchangeDepositService', () => {
         {
           provide: ExchangeRegistryService,
           useValue: mockExchangeRegistryService,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: { get: jest.fn(), set: jest.fn() },
         },
       ],
     }).compile();

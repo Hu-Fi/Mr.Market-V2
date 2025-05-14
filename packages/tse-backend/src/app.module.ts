@@ -22,6 +22,7 @@ import { CampaignModule } from './modules/campaign/campaign.module';
 import { SecretUtils } from './common/utils/auth/secret-fetcher.utils';
 import { JwtStrategy } from './common/utils/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { ExchangeBalanceModule } from './modules/exchange-balance/exchange-balance.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { PassportModule } from '@nestjs/passport';
     ExchangeWithdrawalModule,
     WebSchedulerModule,
     CampaignModule,
+    ExchangeBalanceModule,
   ],
   providers: [
     SecretUtils,

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VolumeStrategyRepository } from './volume.repository';
-import { Volume } from '../../../../common/entities/volume.entity';
+import { StrategyVolume } from '../../../../common/entities/strategy-volume.entity';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 
 @Injectable()
@@ -9,7 +9,9 @@ export class VolumeService {
 
   constructor(private readonly repository: VolumeStrategyRepository) {}
 
-  async createStrategy(strategy: Partial<Volume>): Promise<Volume> {
+  async createStrategy(
+    strategy: Partial<StrategyVolume>,
+  ): Promise<StrategyVolume> {
     try {
       return this.repository.createStrategy(strategy);
     } catch (error) {
@@ -51,7 +53,7 @@ export class VolumeService {
     }
   }
 
-  async findRunningStrategies(): Promise<Volume[]> {
+  async findRunningStrategies(): Promise<StrategyVolume[]> {
     try {
       return this.repository.findRunningStrategies();
     } catch (error) {

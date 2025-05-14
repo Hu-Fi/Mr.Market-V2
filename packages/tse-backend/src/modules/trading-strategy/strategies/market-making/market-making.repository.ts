@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MarketMaking } from '../../../../common/entities/market-making.entity';
+import { StrategyMarketMaking } from '../../../../common/entities/strategy-market-making.entity';
 import { Not, Repository } from 'typeorm';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 
 @Injectable()
 export class MarketMakingRepository {
   constructor(
-    @InjectRepository(MarketMaking)
-    private readonly repository: Repository<MarketMaking>,
+    @InjectRepository(StrategyMarketMaking)
+    private readonly repository: Repository<StrategyMarketMaking>,
   ) {}
 
-  async createStrategy(strategy: Partial<MarketMaking>): Promise<MarketMaking> {
+  async createStrategy(
+    strategy: Partial<StrategyMarketMaking>,
+  ): Promise<StrategyMarketMaking> {
     return this.repository.save(strategy);
   }
 
@@ -30,19 +32,24 @@ export class MarketMakingRepository {
     );
   }
 
-  async findRunningStrategies(): Promise<MarketMaking[]> {
+  async findRunningStrategies(): Promise<StrategyMarketMaking[]> {
     return this.repository.find({
       where: { status: StrategyInstanceStatus.RUNNING },
     });
   }
 
-  async findStrategyById(id: number, options?: any): Promise<MarketMaking> {
+  async findStrategyById(
+    id: number,
+    options?: any,
+  ): Promise<StrategyMarketMaking> {
     return this.repository.findOne({
       where: { id, ...options },
     });
   }
 
-  async findStrategiesByUserId(userId: string): Promise<MarketMaking[]> {
+  async findStrategiesByUserId(
+    userId: string,
+  ): Promise<StrategyMarketMaking[]> {
     return this.repository.find({
       where: { userId: userId, status: Not(StrategyInstanceStatus.DELETED) },
     });

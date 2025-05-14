@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSourceOptions, LoggerOptions } from 'typeorm';
-import { Order } from '../entities/order.entity';
-import { Operation } from '../entities/operation.entity';
-import { Arbitrage } from '../entities/arbitrage.entity';
-import { MarketMaking } from '../entities/market-making.entity';
+import { TradeOrder } from '../entities/trade-order.entity';
+import { TradeOperation } from '../entities/trade-operation.entity';
+import { StrategyArbitrage } from '../entities/startegy-arbitrage.entity';
+import { StrategyMarketMaking } from '../entities/strategy-market-making.entity';
 import { ExchangeApiKey } from '../entities/exchange-api-key.entity';
 import { Web3IdentityKey } from '../entities/web3-identity-key.entity';
 import { Web3IdentityRpc } from '../entities/web3-identity-rpc.entity';
-import { Contribution } from '../entities/contribution.entity';
+import { CampaignContribution } from '../entities/campaign-contribution.entity';
 import { ExchangeApiKeyReadOnly } from '../entities/exchange-api-key-read-only.entity';
-import { Volume } from '../entities/volume.entity';
+import { StrategyVolume } from '../entities/strategy-volume.entity';
+import { ExchangeDeposit } from '../entities/exchange-deposit.entity';
+import { ExchangeWithdrawal } from '../entities/exchange-withdrawal.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -26,16 +28,18 @@ export class TypeormConfig {
       password: this.configService.get<string>('POSTGRES_PASSWORD'),
       database: this.configService.get<string>('POSTGRES_DATABASE'),
       entities: [
-        Order,
-        Operation,
-        Arbitrage,
-        MarketMaking,
+        ExchangeDeposit,
+        ExchangeWithdrawal,
+        TradeOrder,
+        TradeOperation,
+        StrategyArbitrage,
+        StrategyMarketMaking,
+        StrategyVolume,
         ExchangeApiKey,
         Web3IdentityKey,
         Web3IdentityRpc,
-        Contribution,
         ExchangeApiKeyReadOnly,
-        Volume,
+        CampaignContribution,
       ],
       migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
       logging: this.configService

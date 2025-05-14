@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Contribution } from '../../common/entities/contribution.entity';
+import { CampaignContribution } from '../../common/entities/campaign-contribution.entity';
 
 @Injectable()
 export class CampaignRepository {
   constructor(
-    @InjectRepository(Contribution)
-    private readonly repository: Repository<Contribution>,
+    @InjectRepository(CampaignContribution)
+    private readonly repository: Repository<CampaignContribution>,
   ) {}
 
   async save(data: any) {

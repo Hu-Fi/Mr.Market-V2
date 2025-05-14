@@ -4,8 +4,8 @@ import {
   UsePipes,
   ValidationPipe,
   Body,
-  Get,
-  Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { ExchangeDepositService } from './exchange-deposit.service';
 import { InjectMapper } from '@automapper/nestjs';
@@ -14,38 +14,38 @@ import {
   CreateDepositCommand,
   CreateDepositDto,
 } from './model/exchange-deposit.model';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { RequestWithUser } from '../../common/interfaces/http-request.interfaces';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from '../../common/utils/auth/guards/roles.guard';
+import { JwtAuthGuard } from '../../common/utils/auth/guards/jwt-auth.guard';
+import { Role } from '../../common/enums/role.enums';
+import { Roles } from '../../common/utils/auth/roles.decorator';
 
+@ApiTags('transaction')
+@Controller('transaction')
+@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @UsePipes(new ValidationPipe())
-@Controller('exchange-deposit')
-@ApiExcludeController()
 export class ExchangeDepositController {
   constructor(
     private readonly exchangeDepositService: ExchangeDepositService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post()
-  async createDepositAddress(@Body() dto: CreateDepositDto) {
+  @Roles(Role.USER)
+  @Post('exchange-deposit')
+  @ApiOperation({ summary: 'Create address for a deposit' })
+  async createDepositAddress(
+    @Body() dto: CreateDepositDto,
+    @Request() req: RequestWithUser,
+  ) {
     const command = this.mapper.map(
       dto,
       CreateDepositDto,
       CreateDepositCommand,
     );
+    command.userId = req.user.userId;
     return await this.exchangeDepositService.handleDeposit(command);
   }
-
-  @Get()
-  async getDeposits(
-    @Query('exchangeName') exchangeName: string,
-    @Query('symbol') symbol: string,
-    @Query('userId') userId: string,
-  ) {
-    return await this.exchangeDepositService.fetchDeposits(
-      exchangeName,
-      symbol,
-      userId,
-    );
-  }
 }
-// TODO: handle jwt user

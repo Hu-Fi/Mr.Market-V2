@@ -2,26 +2,28 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderRepository } from '../order.repository';
-import { Order } from '../../../common/entities/order.entity';
+import { TradeOrder } from '../../../common/entities/trade-order.entity';
 import { Decimal } from 'decimal.js';
 
 describe('OrderRepository', () => {
   let repository: OrderRepository;
-  let orderRepository: Repository<Order>;
+  let orderRepository: Repository<TradeOrder>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrderRepository,
         {
-          provide: getRepositoryToken(Order),
+          provide: getRepositoryToken(TradeOrder),
           useClass: Repository,
         },
       ],
     }).compile();
 
     repository = module.get<OrderRepository>(OrderRepository);
-    orderRepository = module.get<Repository<Order>>(getRepositoryToken(Order));
+    orderRepository = module.get<Repository<TradeOrder>>(
+      getRepositoryToken(TradeOrder),
+    );
   });
 
   it('should be defined', () => {
@@ -39,7 +41,7 @@ describe('OrderRepository', () => {
         amount: new Decimal(1.0),
         price: 10000.0,
       };
-      const expectedOrder = new Order();
+      const expectedOrder = new TradeOrder();
 
       jest.spyOn(orderRepository, 'save').mockResolvedValue(expectedOrder);
 
@@ -51,7 +53,7 @@ describe('OrderRepository', () => {
   describe('findById', () => {
     it('should return an order by ID', async () => {
       const id = 1;
-      const expectedOrder = new Order();
+      const expectedOrder = new TradeOrder();
 
       jest.spyOn(orderRepository, 'findOne').mockResolvedValue(expectedOrder);
 

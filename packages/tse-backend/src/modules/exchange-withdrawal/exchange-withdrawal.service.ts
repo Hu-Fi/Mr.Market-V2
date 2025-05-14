@@ -6,6 +6,7 @@ import {
 } from '../../common/filters/withdrawal.exception.filter';
 import { CreateWithdrawalCommand } from './model/exchange-withdrawal.model';
 import { ExchangeRegistryService } from '../exchange-registry/exchange-registry.service';
+import { ExchangeWithdrawalRepository } from './exchange-withdrawal.repository';
 
 @Injectable()
 export class ExchangeWithdrawalService {
@@ -14,6 +15,7 @@ export class ExchangeWithdrawalService {
   constructor(
     private readonly ccxtGateway: CcxtIntegrationService,
     private readonly exchangeRegistryService: ExchangeRegistryService,
+    private readonly exchangeWithdrawalRepository: ExchangeWithdrawalRepository,
   ) {}
 
   async handleWithdrawal(command: CreateWithdrawalCommand) {
@@ -54,11 +56,14 @@ export class ExchangeWithdrawalService {
     }
   }
 
-  async fetchWithdrawal(
+  async fetchWithdrawals(
     exchangeName: string,
-    transactionHash: string,
+    network: string,
+    symbol: string,
     userId: string,
+    txTimestamp?: string,
   ) {
+    console.debug(`${txTimestamp} is not used in this method.`);
     const exchange = await this.exchangeRegistryService.getExchangeByName({
       exchangeName,
       userId,
@@ -68,7 +73,7 @@ export class ExchangeWithdrawalService {
     }
 
     try {
-      return await exchange.fetchWithdrawals(transactionHash);
+      return await exchange.fetchWithdrawals();
     } catch (error) {
       const interpretedError = this.ccxtGateway.interpretError(
         error,
@@ -77,5 +82,19 @@ export class ExchangeWithdrawalService {
       this.logger.error(interpretedError.message);
       throw interpretedError;
     }
+  }
+
+  async persistInDatabaseUserSuccessfullyWithdrawal(data: any) {
+    await this.exchangeWithdrawalRepository.save(data);
+  }
+
+  async getPersistedUserSuccessfullyWithdrawalData(data: {
+    exchangeName: string;
+    symbol: string;
+    userId: string;
+    txTimestamp?: string;
+    network: string;
+  }) {
+    return await this.exchangeWithdrawalRepository.get(data);
   }
 }

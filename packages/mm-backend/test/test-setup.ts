@@ -12,8 +12,8 @@ import { MixinDeposit } from '../src/common/entities/mixin-deposit.entity';
 import { MixinWithdrawal } from '../src/common/entities/mixin-withdrawal.entity';
 import { Wait } from 'testcontainers';
 import { MixinIntegrationService } from '../src/integrations/mixin.integration.service';
-import { MixinDepositService } from '../src/modules/transaction/mixin-deposit/mixin-deposit.service';
-import { MixinDepositRepository } from '../src/modules/transaction/mixin-deposit/mixin-deposit.repository';
+import { MixinDepositService } from '../src/modules/mixin/deposit/mixin-deposit.service';
+import { MixinDepositRepository } from '../src/modules/mixin/deposit/mixin-deposit.repository';
 import { handleUserAuthentication } from './test-utils';
 
 export let app: INestApplication;
