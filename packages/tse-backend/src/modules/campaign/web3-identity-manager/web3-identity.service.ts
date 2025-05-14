@@ -9,13 +9,18 @@ import {
   IdentityRpcData,
 } from './model/web3-identity.model';
 import { ethers, Wallet } from 'ethers';
+import { EncryptionService } from '../../../common/utils/encryption.service';
+import { CustomLogger } from '../../logger/logger.service';
 
 @Injectable()
 export class Web3IdentityService implements OnModuleInit {
+  private readonly logger = new CustomLogger(Web3IdentityService.name);
   private signers: { [key: number]: Wallet } = {};
+
   constructor(
     private repository: Web3IdentityRepository,
     @InjectMapper() private readonly mapper: Mapper,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async onModuleInit() {
@@ -24,11 +29,17 @@ export class Web3IdentityService implements OnModuleInit {
 
   async initSigners() {
     const privateKey = await this.getIdentityPrivateKey();
+    if (!privateKey) {
+      this.logger.warn('No web3 private key found. Skipping initialization.');
+      return;
+    }
+    const decryptedPrivateKey =
+      await this.encryptionService.decrypt(privateKey);
     const networks = await this.getAllIdentityRpc();
 
     for (const network of networks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
-      this.signers[network.chainId] = new Wallet(privateKey, provider);
+      this.signers[network.chainId] = new Wallet(decryptedPrivateKey, provider);
     }
   }
 
@@ -38,6 +49,8 @@ export class Web3IdentityService implements OnModuleInit {
 
   async addIdentityPrivateKey(command: IdentityKeyCommand) {
     const data = this.mapper.map(command, IdentityKeyCommand, IdentityKeyData);
+
+    data.privateKey = await this.encryptionService.encrypt(data.privateKey);
 
     await this.repository.saveKey(data);
 
@@ -59,11 +72,11 @@ export class Web3IdentityService implements OnModuleInit {
     await this.initSigners();
   }
 
-  async getIdentityPrivateKey() {
+  private async getIdentityPrivateKey() {
     return await this.repository.findKey();
   }
 
-  async getAllIdentityRpc() {
+  private async getAllIdentityRpc() {
     return await this.repository.findAllRpc();
   }
 

@@ -14,6 +14,7 @@ import { Web3IdentityController } from './web3-identity-manager/web3-identity.co
 import { CampaignContribution } from '../../common/entities/campaign-contribution.entity';
 import { CampaignController } from './campaign.controller';
 import { CampaignRepository } from './campaign.repository';
+import { EncryptionService } from '../../common/utils/encryption.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CampaignRepository } from './campaign.repository';
     Web3IdentityProfile,
     Web3IdentityService,
     CampaignRepository,
+    EncryptionService,
   ],
   controllers: [Web3IdentityController, CampaignController],
   exports: [CampaignService],
