@@ -46,6 +46,7 @@ export class WithdrawalBalanceStrategy implements BalanceStrategy {
     return fetched.map((f: Transaction) => ({
       amount: f.amount,
       symbol: f.currency,
+      status: f.status,
     }));
   }
 }
