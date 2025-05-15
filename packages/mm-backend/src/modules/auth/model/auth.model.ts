@@ -25,3 +25,27 @@ export class MixinOAuthCommand {
   @AutoMap()
   code: string;
 }
+
+export class RefreshTokenDto {
+  @AutoMap()
+  @ApiProperty()
+  @IsString()
+  refreshToken: string;
+}
+
+export class RefreshTokenCommand {
+  @AutoMap()
+  refreshToken: string;
+}
+
+export class LogoutDto {
+  @AutoMap()
+  @ApiProperty()
+  @IsString()
+  refreshToken: string;
+}
+
+export class LogoutCommand {
+  @AutoMap()
+  refreshToken: string;
+}

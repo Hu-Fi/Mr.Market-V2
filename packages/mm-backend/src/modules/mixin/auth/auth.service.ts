@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { v4 } from 'uuid';
 import { CustomLogger } from '../../logger/logger.service';
 import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
@@ -14,7 +13,6 @@ import { EncryptionService } from '../../../common/utils/auth/encryption.service
 import {
   ClientDetails,
   ClientSession,
-  JwtResponse,
   OAuthResponse,
 } from '../../../common/interfaces/auth.interfaces';
 import { Role } from '../../../common/enums/role.enum';
@@ -29,13 +27,12 @@ export class MixinAuthService {
   constructor(
     private readonly mixinGateway: MixinIntegrationService,
     private configService: ConfigService,
-    private jwtService: JwtService,
     private readonly userService: UserService,
     private readonly authSessionRepository: AuthSessionRepository,
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async mixinOauthHandler(command: MixinOAuthCommand): Promise<JwtResponse> {
+  async mixinOauthHandler(command: MixinOAuthCommand) {
     const { code } = command;
     this.validateAuthorizationCode(code);
 
@@ -58,12 +55,11 @@ export class MixinAuthService {
       );
     }
 
-    const payload = {
-      sub: userId,
+    return {
+      userId: userId,
       clientId: clientDetails.clientId,
       roles: [Role.USER],
     };
-    return { accessToken: this.jwtService.sign(payload) };
   }
 
   private validateAuthorizationCode(code: string): void {

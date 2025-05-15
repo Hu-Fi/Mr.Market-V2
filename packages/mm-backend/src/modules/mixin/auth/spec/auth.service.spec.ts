@@ -1,5 +1,4 @@
 import { BadRequestException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   mixinOAuthCommandFixture,
@@ -14,10 +13,13 @@ import { MixinIntegrationService } from '../../../../integrations/mixin.integrat
 import { EncryptionService } from '../../../../common/utils/auth/encryption.service';
 import { UserService } from '../../../user/user.service';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('00fcc4f4-8703-44ba-8d14-f5ef02a3b8a1'),
+}));
+
 describe('AuthService', () => {
   let service: MixinAuthService;
   let mixinGateway: MixinIntegrationService;
-  let jwtService: JwtService;
 
   beforeEach(async () => {
     const mockAuthSessionRepository = {
@@ -52,18 +54,12 @@ describe('AuthService', () => {
           },
         },
         {
-          provide: JwtService,
-          useValue: {
-            sign: jest.fn(),
-          },
-        },
-        {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
               const config = {
-                ADMIN_PASSWORD: 'admin_password',
-                JWT_SECRET: 'jwt_secret',
+                MIXIN_APP_ID: 'id',
+                MIXIN_OAUTH_SCOPE: 'scope',
               };
               return config[key] || null;
             }),
@@ -72,7 +68,12 @@ describe('AuthService', () => {
         {
           provide: UserService,
           useValue: {
-            createUser: jest.fn(),
+            createUser: jest.fn().mockImplementation((dto) => {
+              return Promise.resolve({
+                userId: '00fcc4f4-8703-44ba-8d14-f5ef02a3b8a1',
+                ...dto,
+              });
+            }),
           },
         },
       ],
@@ -80,14 +81,12 @@ describe('AuthService', () => {
 
     service = module.get<MixinAuthService>(MixinAuthService);
     mixinGateway = module.get<MixinIntegrationService>(MixinIntegrationService);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   describe('mixinOauthHandler', () => {
     it('should call mixinGateway.oauthHandler and return JWT token', async () => {
       const command = mixinOAuthCommandFixture;
       const response = mixinOAuthResponseFixture;
-      jest.spyOn(jwtService, 'sign').mockReturnValue(response.accessToken);
       jest
         .spyOn(mixinGateway, 'oauthHandler')
         .mockResolvedValue(oauthResponseFixture);
