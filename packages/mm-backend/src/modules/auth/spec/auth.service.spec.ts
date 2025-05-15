@@ -9,53 +9,43 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { EncryptionService } from '../../../common/utils/auth/encryption.service';
 import { MixinAuthService } from '../../mixin/auth/auth.service';
-import { MixinIntegrationService } from '../../../integrations/mixin.integration.service';
-import { UserService } from '../../user/user.service';
-import { AuthSessionRepository } from '../../mixin/auth/auth-session.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('AuthService', () => {
   let service: AuthService;
   let jwtService: JwtService;
 
-  const mockAuthSessionRepository = {
-    findByUserId: jest.fn(),
-    findAuthSessionByClientId: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-  };
-
   const mockCacheManager = {
     get: jest.fn().mockResolvedValue(null),
     set: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockMixinAuthService = {
+    getOauthLink: jest.fn(),
+    mixinOauthHandler: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        MixinAuthService,
-        EncryptionService,
+        {
+          provide: MixinAuthService,
+          useValue: mockMixinAuthService,
+        },
         EncryptionService,
         {
           provide: CACHE_MANAGER,
           useValue: mockCacheManager,
         },
-
-        {
-          provide: AuthSessionRepository,
-          useValue: mockAuthSessionRepository,
-        },
-        {
-          provide: MixinIntegrationService,
-          useValue: {
-            oauthHandler: jest.fn(),
-          },
-        },
         {
           provide: JwtService,
           useValue: {
             sign: jest.fn(),
+            decode: jest.fn().mockReturnValue({
+              sub: 'Admin',
+              jti: 'mocked-jti',
+            }),
           },
         },
         {
@@ -64,16 +54,9 @@ describe('AuthService', () => {
             get: jest.fn((key: string) => {
               const config = {
                 ADMIN_PASSWORD: 'admin_password',
-                JWT_SECRET: 'jwt_secret',
               };
               return config[key] || null;
             }),
-          },
-        },
-        {
-          provide: UserService,
-          useValue: {
-            createUser: jest.fn(),
           },
         },
       ],

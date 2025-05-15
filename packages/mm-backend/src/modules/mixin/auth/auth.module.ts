@@ -20,9 +20,6 @@ import { AuthSessionRepository } from './auth-session.repository';
     AuthSessionRepository,
     EncryptionService,
   ],
-  exports: [
-    MixinAuthService,
-    AuthSessionRepository
-  ],
+  exports: [MixinAuthService, AuthSessionRepository],
 })
 export class MixinAuthModule {}
