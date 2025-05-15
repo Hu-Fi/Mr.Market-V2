@@ -98,10 +98,6 @@ describe('ExchangeRegistryService', () => {
           secret: 'decrypted-encrypted',
         },
       );
-      expect(ccxtGateway.addExchange).toHaveBeenCalledWith(
-        'binance-true',
-        'loadMarkets',
-      );
 
       expect(result).toEqual({
         id: 'binance-true',
@@ -150,7 +146,6 @@ describe('ExchangeRegistryService', () => {
       expect(ccxtGateway.initializeExchange).toHaveBeenCalledTimes(
         mockApiKeys.length,
       );
-      expect(ccxtGateway.addExchange).toHaveBeenCalledTimes(mockApiKeys.length);
       expect(result).toHaveLength(mockApiKeys.length);
     });
   });

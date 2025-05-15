@@ -82,16 +82,6 @@ describe('CcxtIntegrationService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('addExchange', () => {
-    it('should call cacheManager.set with the correct parameters', async () => {
-      await service.addExchange('binance', 'marketsData');
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        'binance',
-        'marketsData',
-      );
-    });
-  });
-
   describe('getExchangeNames', () => {
     it('should return a set of exchange names from cache keys ending with "-true"', async () => {
       (mockCacheManager.store.keys as jest.Mock).mockResolvedValue([
@@ -129,12 +119,10 @@ describe('CcxtIntegrationService', () => {
       expect(exchange.loadMarkets).toHaveBeenCalled();
       expect(exchange.setSandboxMode).toHaveBeenCalledWith(true);
       expect(exchange.markets).toEqual({ someMarket: 'data' });
-
       expect(spyInitDeps).toHaveBeenCalledWith('binance', exchange);
-
       expect(mockCacheManager.set).toHaveBeenCalledWith(
         `ccxt-binance-dependencies`,
-        exchange.markets,
+        JSON.stringify(exchange.markets),
       );
     });
 
@@ -163,7 +151,7 @@ describe('CcxtIntegrationService', () => {
         }),
       ).rejects.toThrow('Initialization error');
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith('binance');
+      expect(mockCacheManager.del).toHaveBeenCalledWith('ccxt-binance-dependencies');
     });
   });
 });
