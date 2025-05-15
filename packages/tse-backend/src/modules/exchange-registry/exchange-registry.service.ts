@@ -55,8 +55,6 @@ export class ExchangeRegistryService {
         exchangeIdentifier,
         exchange,
       });
-
-      await this.ccxtGateway.addExchange(exchangeIdentifier, 'loadMarkets');
     }
 
     let index = 1;
@@ -74,7 +72,10 @@ export class ExchangeRegistryService {
         exchangeIdentifier,
         exchange,
       });
-      await this.ccxtGateway.addExchange(exchangeIdentifier, 'loadMarkets');
+    }
+
+    if (initializedExchanges.length === 0) {
+      throw new Error('No API keys found for exchange');
     }
 
     return initializedExchanges;
