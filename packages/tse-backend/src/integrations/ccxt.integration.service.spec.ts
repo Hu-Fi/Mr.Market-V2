@@ -151,7 +151,9 @@ describe('CcxtIntegrationService', () => {
         }),
       ).rejects.toThrow('Initialization error');
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith('ccxt-binance-dependencies');
+      expect(mockCacheManager.del).toHaveBeenCalledWith(
+        'ccxt-binance-dependencies',
+      );
     });
   });
 });
