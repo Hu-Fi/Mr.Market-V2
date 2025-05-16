@@ -86,8 +86,10 @@ export class ArbitrageStrategy implements Strategy {
 
   async attemptEvaluation(strategy: ArbitrageStrategyData) {
     try {
-      await this.evaluateArbitrage(strategy);
-      await this.updateStrategyLastTradingAttempt(strategy.id, new Date());
+      await Promise.all([
+      this.evaluateArbitrage(strategy),
+      this.updateStrategyLastTradingAttempt(strategy.id, new Date()),
+    ]);
     } catch (e) {
       await this.updateStrategyStatusById(
         strategy.id,

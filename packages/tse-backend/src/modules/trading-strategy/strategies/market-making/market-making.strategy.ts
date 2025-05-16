@@ -106,8 +106,10 @@ export class MarketMakingStrategy implements Strategy {
 
   async attemptEvaluation(strategy: MarketMakingStrategyData) {
     try {
-      await this.evaluateMarketMaking(strategy);
-      await this.updateStrategyLastTradingAttempt(strategy.id, new Date());
+      await Promise.all([
+        this.evaluateMarketMaking(strategy),
+        this.updateStrategyLastTradingAttempt(strategy.id, new Date()),
+      ]);
     } catch (e) {
       await this.updateStrategyStatusById(
         strategy.id,
@@ -275,12 +277,13 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice,
     );
 
-    for (const detail of orderDetails) {
+    const orderPromises = orderDetails.map(async (detail) => {
       const adjustedAmount = this.ccxtGateway.amountToPrecision(
         exchangeInstance,
         pair,
         detail.currentOrderAmount,
       );
+
       let adjustedPrice = this.ccxtGateway.priceToPrecision(
         exchangeInstance,
         pair,
@@ -316,7 +319,9 @@ export class MarketMakingStrategy implements Strategy {
         exchangeName,
         floorPrice,
       );
-    }
+    });
+
+    await Promise.all(orderPromises);
   }
 
   private async handleBuyOrder(

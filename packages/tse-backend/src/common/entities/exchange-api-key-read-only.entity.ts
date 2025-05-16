@@ -2,11 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  Unique,
+  CreateDateColumn
 } from 'typeorm';
 
-@Unique(['userId', 'clientId', 'exchangeName'])
 @Entity()
 export class ExchangeApiKeyReadOnly {
   @PrimaryGeneratedColumn()

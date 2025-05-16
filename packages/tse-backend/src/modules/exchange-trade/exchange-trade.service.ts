@@ -29,14 +29,12 @@ export class ExchangeTradeService {
 
   async executeMarketTrade(command: MarketTradeCommand) {
     const { exchange } = command;
-    const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName({
+    const [exchangeInstance, savedData] = await Promise.all([
+      this.exchangeRegistryService.getExchangeByName({
         exchangeName: exchange,
-      });
-    const savedData = await this.saveOrder(
-      command,
-      MarketOrderType.MARKET_ORDER,
-    );
+      }),
+      this.saveOrder(command, MarketOrderType.MARKET_ORDER),
+    ]);
 
     try {
       const result = await this.createMarketOrder(exchangeInstance, command);
@@ -82,14 +80,12 @@ export class ExchangeTradeService {
 
   async executeLimitTrade(command: MarketLimitCommand) {
     const { exchange } = command;
-    const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName({
+    const [exchangeInstance, savedData] = await Promise.all([
+      this.exchangeRegistryService.getExchangeByName({
         exchangeName: exchange,
-      });
-    const savedData = await this.saveOrder(
-      command,
-      MarketOrderType.LIMIT_ORDER,
-    );
+      }),
+      this.saveOrder(command, MarketOrderType.LIMIT_ORDER),
+    ]);
 
     try {
       const result = await exchangeInstance.createOrder(
