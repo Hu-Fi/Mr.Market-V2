@@ -15,6 +15,7 @@ import { MixinIntegrationService } from '../src/integrations/mixin.integration.s
 import { MixinDepositService } from '../src/modules/mixin/deposit/mixin-deposit.service';
 import { MixinDepositRepository } from '../src/modules/mixin/deposit/mixin-deposit.repository';
 import { handleUserAuthentication } from './test-utils';
+import { User } from '../src/common/entities/user.entity';
 
 export let app: INestApplication;
 export let dataSource: DataSource;
@@ -53,11 +54,11 @@ export const setupTestApp = async () => {
           username: postgresContainer.getUsername(),
           password: postgresContainer.getPassword(),
           database: postgresContainer.getDatabase(),
-          entities: [MixinDeposit, MixinWithdrawal],
+          entities: [User, MixinDeposit, MixinWithdrawal],
           synchronize: true,
         }),
       }),
-      TypeOrmModule.forFeature([MixinDeposit, MixinWithdrawal]),
+      TypeOrmModule.forFeature([User, MixinDeposit, MixinWithdrawal]),
     ],
     providers: [
       MixinDepositService,
