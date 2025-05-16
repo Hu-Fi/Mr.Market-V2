@@ -87,9 +87,9 @@ export class ArbitrageStrategy implements Strategy {
   async attemptEvaluation(strategy: ArbitrageStrategyData) {
     try {
       await Promise.all([
-      this.evaluateArbitrage(strategy),
-      this.updateStrategyLastTradingAttempt(strategy.id, new Date()),
-    ]);
+        this.evaluateArbitrage(strategy),
+        this.updateStrategyLastTradingAttempt(strategy.id, new Date()),
+      ]);
     } catch (e) {
       await this.updateStrategyStatusById(
         strategy.id,
@@ -277,8 +277,14 @@ export class ArbitrageStrategy implements Strategy {
     } = command;
 
     const [exchangeA, exchangeB] = await Promise.all([
-      this.exchangeRegistryService.getExchangeByName({ exchangeName: exchangeAName, userId }),
-      this.exchangeRegistryService.getExchangeByName({ exchangeName: exchangeBName, userId }),
+      this.exchangeRegistryService.getExchangeByName({
+        exchangeName: exchangeAName,
+        userId,
+      }),
+      this.exchangeRegistryService.getExchangeByName({
+        exchangeName: exchangeBName,
+        userId,
+      }),
     ]);
 
     const pair = `${sideA}/${sideB}`;
