@@ -4,17 +4,21 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { DecimalTransformer } from '../utils/transformer/decimal.utils';
 import { Decimal } from 'decimal.js';
+import { User } from './user.entity';
 
 @Entity()
 export class MixinDeposit {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  userId: string;
+  @ManyToOne(() => User, (user) => user.deposits, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
   assetId: string;

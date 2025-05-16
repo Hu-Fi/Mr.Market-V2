@@ -68,6 +68,7 @@ describe('AuthService', () => {
         {
           provide: UserService,
           useValue: {
+            getUserById: jest.fn(),
             createUser: jest.fn().mockImplementation((dto) => {
               return Promise.resolve({
                 userId: '00fcc4f4-8703-44ba-8d14-f5ef02a3b8a1',

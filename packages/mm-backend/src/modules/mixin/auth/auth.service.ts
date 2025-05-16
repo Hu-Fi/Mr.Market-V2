@@ -108,7 +108,7 @@ export class MixinAuthService {
     );
 
     if (foundSession) {
-      const userId = foundSession.userId?.userId;
+      const userId = foundSession.user.userId;
       if (!userId) {
         this.logger.error(
           `Found session for clientId ${clientId} (Session ID: ${foundSession.id}) is missing userId information.`,
@@ -178,8 +178,10 @@ export class MixinAuthService {
       clientSession.publicKey,
     );
 
+    const user = await this.userService.getUserById(userId);
+
     await this.authSessionRepository.create({
-      userId: { userId: userId },
+      user,
       clientId,
       authorizationId: encryptedAuthorizationId,
       privateKey: encryptedPrivateKey,

@@ -7,6 +7,7 @@ import { MixinDepositResponse } from '../../../../common/interfaces/transaction.
 import { MixinDeposit } from '../../../../common/entities/mixin-deposit.entity';
 import { MixinDepositStatus } from '../../../../common/enums/transaction.enum';
 import { Decimal } from 'decimal.js';
+import { User } from '../../../../common/entities/user.entity';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () =>
@@ -98,7 +99,7 @@ describe('DepositService', () => {
       const pendingDeposits: MixinDeposit[] = [
         {
           id: 1,
-          userId: 'user-id-123',
+          user: {userId: 'user-id-123'} as User,
           amount: new Decimal(100),
           assetId: 'asset-id-456',
           chainId: 'chain-id-789',
