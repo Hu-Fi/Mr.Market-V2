@@ -250,16 +250,18 @@ export class ArbitrageStrategy implements Strategy {
     strategyEntity: ArbitrageStrategyData,
     pair: string,
   ): Promise<void> {
-    await this.tradeService.cancelUnfilledOrders(
-      strategyEntity.exchangeAName,
-      pair,
-      strategyEntity.userId,
-    );
-    await this.tradeService.cancelUnfilledOrders(
-      strategyEntity.exchangeBName,
-      pair,
-      strategyEntity.userId,
-    );
+    await Promise.all([
+      this.tradeService.cancelUnfilledOrders(
+        strategyEntity.exchangeAName,
+        pair,
+        strategyEntity.userId,
+      ),
+      this.tradeService.cancelUnfilledOrders(
+        strategyEntity.exchangeBName,
+        pair,
+        strategyEntity.userId,
+      ),
+    ]);
   }
 
   async evaluateArbitrage(command: ArbitrageStrategyCommand): Promise<void> {
@@ -274,19 +276,17 @@ export class ArbitrageStrategy implements Strategy {
       exchangeBName,
     } = command;
 
-    const exchangeA = await this.exchangeRegistryService.getExchangeByName({
-      exchangeName: exchangeAName,
-      userId,
-    });
-    const exchangeB = await this.exchangeRegistryService.getExchangeByName({
-      exchangeName: exchangeBName,
-      userId,
-    });
+    const [exchangeA, exchangeB] = await Promise.all([
+      this.exchangeRegistryService.getExchangeByName({ exchangeName: exchangeAName, userId }),
+      this.exchangeRegistryService.getExchangeByName({ exchangeName: exchangeBName, userId }),
+    ]);
 
     const pair = `${sideA}/${sideB}`;
 
-    const orderBookA = await exchangeA.fetchOrderBook(pair);
-    const orderBookB = await exchangeB.fetchOrderBook(pair);
+    const [orderBookA, orderBookB] = await Promise.all([
+      exchangeA.fetchOrderBook(pair),
+      exchangeB.fetchOrderBook(pair),
+    ]);
 
     const vwapA: Decimal = calculateVWAPForAmount(
       orderBookA,
@@ -347,25 +347,26 @@ export class ArbitrageStrategy implements Strategy {
     } = params;
 
     try {
-      const buyOrder: any = await this.tradeService.executeLimitTrade({
-        userId,
-        clientId,
-        exchange: buyExchange.id,
-        symbol,
-        side: TradeSideType.BUY,
-        amount,
-        price: buyPrice,
-      });
-
-      const sellOrder: any = await this.tradeService.executeLimitTrade({
-        userId,
-        clientId,
-        exchange: sellExchange.id,
-        symbol,
-        side: TradeSideType.SELL,
-        amount,
-        price: sellPrice,
-      });
+      const [buyOrder, sellOrder] = await Promise.all([
+        this.tradeService.executeLimitTrade({
+          userId,
+          clientId,
+          exchange: buyExchange.id,
+          symbol,
+          side: TradeSideType.BUY,
+          amount,
+          price: buyPrice,
+        }),
+        this.tradeService.executeLimitTrade({
+          userId,
+          clientId,
+          exchange: sellExchange.id,
+          symbol,
+          side: TradeSideType.SELL,
+          amount,
+          price: sellPrice,
+        }),
+      ]);
 
       const buyFee = getFee(buyOrder);
       const sellFee = getFee(sellOrder);
