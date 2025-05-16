@@ -14,9 +14,9 @@ export class MixinAuthSession {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne(() => User, (user) => user.mixinAuthSession, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  userId: User;
+  user: User;
 
   @Column()
   clientId: string;
