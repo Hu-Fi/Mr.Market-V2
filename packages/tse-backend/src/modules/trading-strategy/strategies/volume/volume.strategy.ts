@@ -86,8 +86,10 @@ export class VolumeStrategy implements Strategy {
 
   async attemptEvaluation(strategy: VolumeStrategyData) {
     try {
-      await this.executeVolumeStrategy(strategy);
-      await this.updateStrategyLastTradingAttempt(strategy.id, new Date());
+      await Promise.all([
+        this.executeVolumeStrategy(strategy),
+        this.updateStrategyLastTradingAttempt(strategy.id, new Date()),
+      ]);
     } catch (e) {
       await this.updateStrategyStatusById(
         strategy.id,
@@ -275,19 +277,19 @@ export class VolumeStrategy implements Strategy {
       }
     }
 
-    const defaultAccount = await this.exchangeRegistryService.getExchangeByName(
-      {
+    const [defaultAccount, additionalAccount] = await Promise.all([
+      this.exchangeRegistryService.getExchangeByName({
         exchangeName,
         strategy: this.defaultStrategy,
         userId,
-      },
-    );
-    const additionalAccount =
-      await this.exchangeRegistryService.getExchangeByName({
+      }),
+      this.exchangeRegistryService.getExchangeByName({
         exchangeName,
         strategy: this.additionalAccountStrategy,
         userId,
-      });
+      }),
+    ]);
+
     const pair = `${sideA}/${sideB}`;
 
     if (tradesExecuted >= numTotalTrades) {
@@ -336,29 +338,30 @@ export class VolumeStrategy implements Strategy {
         `Maker placing limit BUY: ${tradeAmount.toFixed(6)} ${pair} @ ${newMakerPrice.toFixed(6)} on ${makerExchange.id}`,
       );
 
-      const makerOrder = await makerExchange.createOrder(
-        pair,
-        MarketOrderType.LIMIT_ORDER,
-        TradeSideType.BUY,
-        tradeAmount,
-        newMakerPrice,
-        { postOnly: true },
-      );
+      const [makerOrder, takerOrder] = await Promise.all([
+        makerExchange.createOrder(
+          pair,
+          MarketOrderType.LIMIT_ORDER,
+          TradeSideType.BUY,
+          tradeAmount,
+          newMakerPrice,
+          { postOnly: true },
+        ),
+        takerExchange.createOrder(
+          pair,
+          MarketOrderType.LIMIT_ORDER,
+          TradeSideType.SELL,
+          tradeAmount,
+          newMakerPrice,
+        ),
+      ]);
 
       this.logger.log(`Maker order executed: ${makerOrder.id}`);
+      this.logger.log(`Taker order executed: ${takerOrder.id}`);
 
       this.logger.log(
         `Taker placing limit SELL: ${tradeAmount.toFixed(6)} ${pair} @ ${newMakerPrice.toFixed(6)} on ${takerExchange.id}`,
       );
-      const takerOrder = await takerExchange.createOrder(
-        pair,
-        MarketOrderType.LIMIT_ORDER,
-        TradeSideType.SELL,
-        tradeAmount,
-        newMakerPrice,
-      );
-
-      this.logger.log(`Taker order executed: ${takerOrder.id}`);
 
       const updatedTradesExecuted = tradesExecuted + 1;
 

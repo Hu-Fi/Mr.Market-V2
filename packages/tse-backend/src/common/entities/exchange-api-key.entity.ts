@@ -4,10 +4,8 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Unique,
 } from 'typeorm';
 
-@Unique(['userId', 'clientId', 'exchangeName'])
 @Entity()
 export class ExchangeApiKey {
   @PrimaryGeneratedColumn()

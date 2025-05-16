@@ -7,11 +7,13 @@
   ],
   "scripts": {
     "start:mm": "pnpm --filter mm-backend start",
+    "wait:mm": "wait-on http://localhost:3000",
     "start:tse": "pnpm --filter tse-backend start",
-    "start": "concurrently --kill-others --success first \"pnpm run start:mm\" \"pnpm run start:tse\"",
+    "start": "concurrently --kill-others-on-fail \"pnpm run start:mm\" \"pnpm run wait:mm && pnpm run start:tse\"",
     "test": "pnpm --filter mm-backend test && pnpm --filter tse-backend test"
   },
   "dependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "wait-on": "^8.0.3"
   }
 }

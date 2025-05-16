@@ -6,7 +6,7 @@ import { Decimal } from 'decimal.js';
 
 export class MarketTradeDto {
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: 'bybit' })
   @IsString()
   exchange: string;
 
@@ -34,7 +34,7 @@ export class MarketTradeDto {
 
 export class MarketLimitDto {
   @AutoMap()
-  @ApiProperty()
+  @ApiProperty({ example: 'bybit' })
   @IsString()
   exchange: string;
 

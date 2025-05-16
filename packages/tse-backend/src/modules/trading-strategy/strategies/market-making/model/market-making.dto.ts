@@ -26,7 +26,7 @@ export class MarketMakingStrategyDto {
   @ApiPropertyOptional({
     description:
       'If provided, this exchange is used as an oracle for price data instead of `exchangeName`',
-    example: 'mexc',
+    example: 'optional – remove if not used',
   })
   oracleExchangeName?: string;
 

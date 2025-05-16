@@ -27,8 +27,8 @@ export class CcxtIntegrationService {
 
     keys.forEach((key) => {
       const parts = key.split('-');
-      if (parts[1] === 'true') {
-        exchangeNames.add(parts[0]);
+      if (parts[0] === 'ccxt') {
+        exchangeNames.add(parts[1]);
       }
     });
 

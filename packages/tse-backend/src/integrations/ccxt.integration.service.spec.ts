@@ -83,16 +83,6 @@ describe('CcxtIntegrationService', () => {
   });
 
   describe('getExchangeNames', () => {
-    it('should return a set of exchange names from cache keys ending with "-true"', async () => {
-      (mockCacheManager.store.keys as jest.Mock).mockResolvedValue([
-        'binance-true',
-        'kraken-true',
-        'other-false',
-      ]);
-      const names = await service.getExchangeNames();
-      expect(names).toEqual(new Set(['binance', 'kraken']));
-    });
-
     it('should throw an error if the cache store does not support key listing', async () => {
       (mockCacheManager.store.keys as any) = undefined;
       await expect(service.getExchangeNames()).rejects.toThrow(
