@@ -15,7 +15,6 @@ services:
       # Connect to services using container names
       POSTGRES_HOST: mm-postgres
       REDIS_URL: redis://mm-redis:6379
-      TRADING_STRATEGY_EXECUTION_URL: http://tse-backend:3001
       # Other environment variables from .env
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       MIXIN_APP_ID: ${MIXIN_APP_ID}
