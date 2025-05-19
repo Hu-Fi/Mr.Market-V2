@@ -30,7 +30,7 @@ export class ExchangeApiKeyDto {
   apiSecret: string;
 
   @AutoMap()
-  @ApiPropertyOptional({ example: 'api_passphrase' })
+  @ApiPropertyOptional({ example: 'optional – remove if not used' })
   @IsOptional()
   @IsString()
   apiPassphrase: string;

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 import {
   ExchangeErrorException,
@@ -11,6 +11,8 @@ import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class CcxtIntegrationService {
+  private readonly logger = new Logger(CcxtIntegrationService.name);
+
   constructor(
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -27,8 +29,8 @@ export class CcxtIntegrationService {
 
     keys.forEach((key) => {
       const parts = key.split('-');
-      if (parts[1] === 'true') {
-        exchangeNames.add(parts[0]);
+      if (parts[0] === 'ccxt') {
+        exchangeNames.add(parts[1]);
       }
     });
 
@@ -79,6 +81,7 @@ export class CcxtIntegrationService {
     }
     await exchange.loadMarkets();
     await this.cacheManager.set(cacheKey, JSON.stringify(exchange.markets));
+    await this.clearPrecisionCache();
   }
 
   private configureSandboxMode(exchange: ccxt.Exchange): void {
@@ -101,19 +104,116 @@ export class CcxtIntegrationService {
     return ExceptionClass ? ExceptionClass() : error;
   }
 
-  priceToPrecision(
-    exchangeInstance: ccxt.Exchange,
+  private getPrecisionCacheKey(
+    exchangeId: string,
     pair: string,
-    sellPrice: number | string | Decimal,
-  ) {
-    return exchangeInstance.priceToPrecision(pair, sellPrice);
+    type: 'price' | 'amount',
+  ): string {
+    return `precision-${exchangeId}-${pair}-${type}`;
   }
 
-  amountToPrecision(
+  async priceToPrecision(
+    exchangeInstance: ccxt.Exchange,
+    pair: string,
+    price: number | string | Decimal,
+  ): Promise<string> {
+    const priceStr = price.toString();
+
+    try {
+      const cacheKey = this.getPrecisionCacheKey(
+        exchangeInstance.id,
+        pair,
+        'price',
+      );
+
+      const cachedData = await this.cacheManager.get<string>(cacheKey);
+      if (cachedData) {
+        const [cachedPrice, cachedResult] = cachedData.split(':');
+        if (cachedPrice === priceStr) {
+          return cachedResult;
+        }
+      }
+
+      const result = exchangeInstance.priceToPrecision(pair, price);
+
+      await this.cacheManager.set(cacheKey, `${priceStr}:${result}`);
+
+      return result;
+    } catch (error) {
+      this.logger.warn(`Price precision cache failed: ${error.message}`);
+      return exchangeInstance.priceToPrecision(pair, price);
+    }
+  }
+
+  async amountToPrecision(
     exchangeInstance: ccxt.Exchange,
     pair: string,
     amount: number | string | Decimal,
-  ) {
-    return exchangeInstance.amountToPrecision(pair, amount);
+  ): Promise<string> {
+    const amountStr = amount.toString();
+
+    try {
+      const cacheKey = this.getPrecisionCacheKey(
+        exchangeInstance.id,
+        pair,
+        'amount',
+      );
+
+      const cachedData = await this.cacheManager.get<string>(cacheKey);
+      if (cachedData) {
+        const [cachedAmount, cachedResult] = cachedData.split(':');
+        if (cachedAmount === amountStr) {
+          return cachedResult;
+        }
+      }
+
+      const result = exchangeInstance.amountToPrecision(pair, amount);
+
+      await this.cacheManager.set(cacheKey, `${amountStr}:${result}`);
+
+      return result;
+    } catch (error) {
+      this.logger.warn(`Amount precision cache failed: ${error.message}`);
+      return exchangeInstance.amountToPrecision(pair, amount);
+    }
+  }
+
+  async formatOrderValues(
+    exchangeInstance: ccxt.Exchange,
+    pair: string,
+    price: number | string | Decimal,
+    amount: number | string | Decimal,
+  ): Promise<{ price: string; amount: string }> {
+    const [precisedPrice, precisedAmount] = await Promise.all([
+      this.priceToPrecision(exchangeInstance, pair, price),
+      this.amountToPrecision(exchangeInstance, pair, amount),
+    ]);
+
+    return {
+      price: precisedPrice,
+      amount: precisedAmount,
+    };
+  }
+
+  async clearPrecisionCache(): Promise<void> {
+    try {
+      const keys = await this.cacheManager.store.keys('precision-*');
+
+      for (const key of keys) {
+        await this.cacheManager.del(key);
+      }
+
+      this.logger.debug(`Precision cache cleared'}`);
+    } catch (error) {
+      this.logger.warn(`Failed to clear precision cache: ${error.message}`);
+    }
+  }
+
+  async getExchangeSymbols(exchangeName: string) {
+    const marketData = await this.cacheManager.get<string>(
+      `ccxt-${exchangeName}-dependencies`,
+    );
+    const parsedData = JSON.parse(marketData);
+    return Object.keys(parsedData);
   }
 }

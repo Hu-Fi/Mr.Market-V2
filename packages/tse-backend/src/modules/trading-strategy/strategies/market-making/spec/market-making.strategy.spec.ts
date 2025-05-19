@@ -15,6 +15,7 @@ jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   getPriceSource: jest.fn(),
   isExchangeSupported: jest.fn().mockReturnValue(true),
   isPairSupported: jest.fn().mockReturnValue(true),
+  buildPair: jest.fn((sideA: string, sideB: string) => `${sideA}/${sideB}`),
 }));
 
 describe('MarketMakingStrategy', () => {

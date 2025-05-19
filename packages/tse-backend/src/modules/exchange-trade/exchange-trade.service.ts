@@ -29,20 +29,15 @@ export class ExchangeTradeService {
 
   async executeMarketTrade(command: MarketTradeCommand) {
     const { exchange } = command;
-    const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName({
+    const [exchangeInstance, savedData] = await Promise.all([
+      this.exchangeRegistryService.getExchangeByName({
         exchangeName: exchange,
-      });
-    const savedData = await this.saveOrder(
-      command,
-      MarketOrderType.MARKET_ORDER,
-    );
+      }),
+      this.saveOrder(command, MarketOrderType.MARKET_ORDER),
+    ]);
 
     try {
       const result = await this.createMarketOrder(exchangeInstance, command);
-      this.logger.log(
-        `Market trade executed successfully: ${JSON.stringify(result)}`,
-      );
       await this.saveExchangeOperation({
         orderEntityId: savedData.id,
         status: OrderStatus.EXECUTED,
@@ -82,14 +77,12 @@ export class ExchangeTradeService {
 
   async executeLimitTrade(command: MarketLimitCommand) {
     const { exchange } = command;
-    const exchangeInstance =
-      await this.exchangeRegistryService.getExchangeByName({
+    const [exchangeInstance, savedData] = await Promise.all([
+      this.exchangeRegistryService.getExchangeByName({
         exchangeName: exchange,
-      });
-    const savedData = await this.saveOrder(
-      command,
-      MarketOrderType.LIMIT_ORDER,
-    );
+      }),
+      this.saveOrder(command, MarketOrderType.LIMIT_ORDER),
+    ]);
 
     try {
       const result = await exchangeInstance.createOrder(
@@ -98,9 +91,6 @@ export class ExchangeTradeService {
         command.side,
         command.amount,
         command.price,
-      );
-      this.logger.log(
-        `Limit trade executed successfully: ${JSON.stringify(result)}`,
       );
       await this.saveExchangeOperation({
         orderEntityId: savedData.id,
@@ -132,7 +122,6 @@ export class ExchangeTradeService {
         command.orderId,
         command.symbol,
       );
-      this.logger.log(`Order ${command.orderId} cancelled successfully.`);
       await this.saveExchangeOperation({
         status: OrderStatus.CANCELED,
         orderExtId: command.orderId,
@@ -153,7 +142,11 @@ export class ExchangeTradeService {
         exchangeName,
         userId,
       });
-    let openOrders: { id: string }[];
+    let openOrders: {
+      id: string;
+      datetime?: string | number;
+      timestamp?: number;
+    }[];
 
     try {
       openOrders = await exchangeInstance.fetchOpenOrders(pair);
@@ -162,7 +155,27 @@ export class ExchangeTradeService {
       return 0;
     }
 
-    const cancelPromises = openOrders.map(async (order: { id: string }) => {
+    const HALF_ONE_MINUTE_MS = 30 * 1000;
+    const now = Date.now();
+
+    const ordersToCancel = openOrders.filter((order) => {
+      const ts =
+        typeof order.timestamp === 'number'
+          ? order.timestamp
+          : typeof order.datetime === 'number'
+            ? order.datetime
+            : order.datetime
+              ? new Date(order.datetime).getTime()
+              : 0;
+
+      return ts !== 0 && now - ts > HALF_ONE_MINUTE_MS;
+    });
+
+    if (ordersToCancel.length === 0) {
+      return 0;
+    }
+
+    const cancelPromises = ordersToCancel.map(async (order) => {
       try {
         await exchangeInstance.cancelOrder(order.id, pair);
         return true;

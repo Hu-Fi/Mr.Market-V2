@@ -99,4 +99,8 @@ export class ExchangeRegistryService {
   async getSupportedExchanges(): Promise<string[]> {
     return Array.from(await this.ccxtGateway.getExchangeNames());
   }
+
+  async getSupportedSymbols(exchangeName: string) {
+    return this.ccxtGateway.getExchangeSymbols(exchangeName);
+  }
 }

@@ -96,6 +96,6 @@ export class ExchangeDataController {
       GetSupportedSymbolsDto,
       GetSupportedSymbolsCommand,
     );
-    return this.exchangeDataService.getSupportedSymbols(command);
+    return await this.exchangeDataService.getSupportedSymbols(command);
   }
 }

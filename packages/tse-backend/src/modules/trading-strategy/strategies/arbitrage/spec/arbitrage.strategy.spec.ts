@@ -55,6 +55,7 @@ jest.mock('../../../../../common/utils/trading-strategy.utils', () => ({
   isArbitrageOpportunityBuyOnA: jest.fn(),
   isArbitrageOpportunityBuyOnB: jest.fn(),
   isPairSupported: jest.fn(),
+  buildPair: jest.fn(),
 }));
 
 describe('ArbitrageStrategy', () => {

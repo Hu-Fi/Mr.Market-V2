@@ -225,3 +225,7 @@ export function calculateOrderDetails(
 
   return orderDetails;
 }
+
+export function buildPair(sideA: string, sideB: string): string {
+  return `${sideA}/${sideB}`;
+}
