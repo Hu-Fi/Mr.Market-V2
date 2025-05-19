@@ -8,6 +8,7 @@ import {
   ArbitrageStrategyData,
 } from './model/arbitrage.dto';
 import {
+  buildPair,
   calculateProfitLoss,
   calculateVWAPForAmount,
   getFee,
@@ -128,7 +129,7 @@ export class ArbitrageStrategy implements Strategy {
       StrategyInstanceStatus.STOPPED,
     );
 
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    const pair = buildPair(strategyEntity.sideA, strategyEntity.sideB);
     await this.cancelStrategyOrders(strategyEntity, pair);
 
     this.logger.debug(
@@ -146,7 +147,7 @@ export class ArbitrageStrategy implements Strategy {
       StrategyInstanceStatus.DELETED,
     );
 
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    const pair = buildPair(strategyEntity.sideA, strategyEntity.sideB);
     await this.cancelStrategyOrders(strategyEntity, pair);
 
     this.logger.debug('Soft deleted arbitrage strategy');
@@ -162,10 +163,11 @@ export class ArbitrageStrategy implements Strategy {
       this.validateExchange(exchangeBName, userId),
     ]);
 
-    const pair = `${sideA}/${sideB}:${sideB}`;
+    const pair = buildPair(sideA, sideB);
+    const altPair = `${pair}:${sideB}`;
     await Promise.all([
-      this.validatePair(pair, exchangeAName),
-      this.validatePair(pair, exchangeBName),
+      this.validatePair(altPair, exchangeAName),
+      this.validatePair(altPair, exchangeBName),
     ]);
   }
 
@@ -287,8 +289,7 @@ export class ArbitrageStrategy implements Strategy {
       }),
     ]);
 
-    const pair = `${sideA}/${sideB}`;
-
+    const pair = buildPair(sideA, sideB);
     const [orderBookA, orderBookB] = await Promise.all([
       exchangeA.fetchOrderBook(pair),
       exchangeB.fetchOrderBook(pair),
@@ -315,28 +316,37 @@ export class ArbitrageStrategy implements Strategy {
       sellPrice: Number(vwapB),
     };
 
+    let orderResult = {
+      profitLoss: new Decimal(0),
+      ordersExecuted: false,
+    };
+
     if (isArbitrageOpportunityBuyOnA(vwapA, vwapB, minProfitability)) {
-      this.logger.debug(
-        `User ${userId}, Client ${clientId}: Arbitrage opportunity for ${pair} (VWAP): Buy on ${exchangeAName} at ${vwapA}, sell on ${exchangeBName} at ${vwapB}`,
-      );
-      await this.executeArbitrageTrade(tradeParams);
+      const profitLoss = await this.executeArbitrageTrade(tradeParams);
+      orderResult = {
+        profitLoss,
+        ordersExecuted: true,
+      };
     } else if (isArbitrageOpportunityBuyOnB(vwapA, vwapB, minProfitability)) {
-      this.logger.debug(
-        `User ${userId}, Client ${clientId}: Arbitrage opportunity for ${pair} (VWAP): Buy on ${exchangeBName} at ${vwapB}, sell on ${exchangeAName} at ${vwapA}`,
-      );
-      await this.executeArbitrageTrade({
+      const reversedTradeParams = {
+        ...tradeParams,
         buyExchange: exchangeB,
         sellExchange: exchangeA,
-        symbol: pair,
-        amount: amountToTrade,
-        userId,
-        clientId,
         buyPrice: Number(vwapB),
         sellPrice: Number(vwapA),
-      });
-    } else {
-      this.logger.debug('No arbitrage opportunity found');
-      return;
+      };
+      const profitLoss = await this.executeArbitrageTrade(reversedTradeParams);
+      orderResult = {
+        profitLoss,
+        ordersExecuted: true,
+      };
+    }
+
+    const { profitLoss, ordersExecuted } = orderResult;
+    if (ordersExecuted) {
+      this.logger.debug(
+        `Executed arbitrage: User ${userId}, Pair ${pair}, Buy on ${ordersExecuted ? exchangeAName : exchangeBName} at ${ordersExecuted ? vwapA : vwapB}, Sell on ${ordersExecuted ? exchangeBName : exchangeAName} at ${ordersExecuted ? vwapB : vwapA}. Profit: ${profitLoss}`,
+      );
     }
   }
 
@@ -376,17 +386,7 @@ export class ArbitrageStrategy implements Strategy {
 
       const buyFee = getFee(buyOrder);
       const sellFee = getFee(sellOrder);
-      const profitLoss = calculateProfitLoss(
-        buyPrice,
-        sellPrice,
-        amount,
-        buyFee,
-        sellFee,
-      );
-
-      this.logger.debug(
-        `Arbitrage trade executed for user ${userId}, client ${clientId}: Buy on ${buyExchange.id} at ${buyPrice}, sell on ${sellExchange.id} at ${sellPrice}, Profit/Loss: ${profitLoss}`,
-      );
+      return calculateProfitLoss(buyPrice, sellPrice, amount, buyFee, sellFee);
     } catch (error) {
       this.logger.error(`Failed to execute arbitrage trade: ${error.message}`);
     }

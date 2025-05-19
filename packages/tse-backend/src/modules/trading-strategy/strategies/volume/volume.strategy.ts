@@ -8,6 +8,7 @@ import {
   VolumeStrategyData,
 } from './model/volume.model';
 import {
+  buildPair,
   isExchangeSupported,
   isPairSupported,
 } from '../../../../common/utils/trading-strategy.utils';
@@ -20,6 +21,7 @@ import {
   MarketOrderType,
   TradeSideType,
 } from '../../../../common/enums/exchange-operation.enums';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class VolumeStrategy implements Strategy {
@@ -128,7 +130,7 @@ export class VolumeStrategy implements Strategy {
       StrategyInstanceStatus.STOPPED,
     );
 
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    const pair = buildPair(strategyEntity.sideA, strategyEntity.sideB);
     await this.cancelStrategyOrders(strategyEntity, pair);
 
     this.logger.debug(
@@ -146,7 +148,7 @@ export class VolumeStrategy implements Strategy {
       StrategyInstanceStatus.DELETED,
     );
 
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    const pair = buildPair(strategyEntity.sideA, strategyEntity.sideB);
     await this.cancelStrategyOrders(strategyEntity, pair);
 
     this.logger.debug('Soft deleted volume strategy');
@@ -156,9 +158,10 @@ export class VolumeStrategy implements Strategy {
     command: VolumeStrategyCommand,
   ): Promise<void> {
     const { userId, exchangeName, sideA, sideB } = command;
-    const pair = `${sideA}/${sideB}:${sideB}`;
+    const pair = buildPair(sideA, sideB);
+    const altPair = `${pair}:${sideB}`;
     await Promise.all([
-      this.validatePair(pair, exchangeName),
+      this.validatePair(altPair, exchangeName),
       this.validateExchange(exchangeName, userId),
     ]);
   }
@@ -263,21 +266,96 @@ export class VolumeStrategy implements Strategy {
       pricePushRate,
       tradesExecuted = 0,
       currentMakerPrice = null,
+      lastTradingAttemptAt,
+      clientId,
     } = data;
 
-    if (data.lastTradingAttemptAt) {
-      const nextAllowedTime = new Date(
-        data.lastTradingAttemptAt.getTime() + tradeIntervalSeconds * 1000,
+    const pair = buildPair(sideA, sideB);
+
+    if (
+      this.shouldWaitBeforeNextTrade(
+        now,
+        lastTradingAttemptAt,
+        tradeIntervalSeconds,
+      )
+    ) {
+      const nextTime = new Date(
+        lastTradingAttemptAt!.getTime() + tradeIntervalSeconds * 1000,
       );
-      if (now < nextAllowedTime) {
-        this.logger.debug(
-          `Strategy ${id} for ${sideA}/${sideB} not executed: waiting until ${nextAllowedTime.toISOString()}.`,
-        );
-        return;
-      }
+      this.logger.debug(
+        `Strategy ${id} for ${sideA}/${sideB} not executed: waiting until ${nextTime.toISOString()}.`,
+      );
+      return;
     }
 
-    const [defaultAccount, additionalAccount] = await Promise.all([
+    if (tradesExecuted >= numTotalTrades) {
+      await this.finishStrategy(id, userId, clientId, pair, numTotalTrades);
+      return;
+    }
+
+    try {
+      const [defaultAccount, additionalAccount] =
+        await this.loadExchangeAccounts(exchangeName, userId);
+      const orderBook = await defaultAccount.fetchOrderBook(pair);
+
+      if (!orderBook.bids.length || !orderBook.asks.length) {
+        return await this.pauseStrategyDueToOrderBook(id, pair);
+      }
+
+      const bestBid = orderBook.bids[0][0];
+      const bestAsk = orderBook.asks[0][0];
+
+      const useAccount1AsMaker = tradesExecuted % 2 === 0;
+      const makerExchange = useAccount1AsMaker
+        ? defaultAccount
+        : additionalAccount;
+      const takerExchange = useAccount1AsMaker
+        ? additionalAccount
+        : defaultAccount;
+
+      const tradeAmount = this.calculateTradeAmount(amountToTrade);
+      const newMakerPrice = this.calculateMakerPrice(
+        currentMakerPrice,
+        bestBid,
+        bestAsk,
+        incrementPercentage,
+        pricePushRate,
+      );
+
+      await this.placeOrders(
+        pair,
+        makerExchange,
+        takerExchange,
+        tradeAmount,
+        newMakerPrice,
+      );
+      this.logger.log(`Best bid: ${bestBid}, best ask: ${bestAsk} for ${pair}`);
+
+      await this.volumeService.updateStrategyAfterTrade(id, {
+        tradesExecuted: tradesExecuted + 1,
+        currentMakerPrice: newMakerPrice,
+      });
+
+      await this.updateStrategyLastTradingAttempt(id, now);
+    } catch (error) {
+      await this.handleTradeError(id, error);
+    }
+  }
+
+  private shouldWaitBeforeNextTrade(
+    now: Date,
+    lastTradingAttemptAt: Date | null | undefined,
+    tradeIntervalSeconds: number,
+  ): boolean {
+    if (!lastTradingAttemptAt) return false;
+    const nextAllowedTime = new Date(
+      lastTradingAttemptAt.getTime() + tradeIntervalSeconds * 1000,
+    );
+    return now < nextAllowedTime;
+  }
+
+  private async loadExchangeAccounts(exchangeName: string, userId: string) {
+    return Promise.all([
       this.exchangeRegistryService.getExchangeByName({
         exchangeName,
         strategy: this.defaultStrategy,
@@ -289,102 +367,93 @@ export class VolumeStrategy implements Strategy {
         userId,
       }),
     ]);
+  }
 
-    const pair = `${sideA}/${sideB}`;
+  private async finishStrategy(
+    id: number,
+    userId: string,
+    clientId: string,
+    pair: string,
+    numTotalTrades: number,
+  ) {
+    await this.delete({ id, userId, clientId });
+    this.logger.log(
+      `Volume strategy ${id} for ${pair} has completed all ${numTotalTrades} trades.`,
+    );
+  }
 
-    if (tradesExecuted >= numTotalTrades) {
-      this.logger.log(
-        `Volume strategy ${id} for ${pair} has completed all ${numTotalTrades} trades.`,
-      );
-      await this.delete({ id, userId: data.userId, clientId: data.clientId });
-      return;
+  private async pauseStrategyDueToOrderBook(id: number, pair: string) {
+    const errorMsg = `Incomplete order book data for ${pair}`;
+    this.logger.error(errorMsg);
+    await this.updateStrategyStatusById(id, StrategyInstanceStatus.PAUSED);
+    await this.updateStrategyPausedReasonById(id, errorMsg);
+    this.logger.warn(`Paused strategy ${id} due to: ${errorMsg}`);
+  }
+
+  private calculateTradeAmount(baseAmount: Decimal): Decimal {
+    const randomFactor = 1 + (Math.random() * 0.1 - 0.05);
+    return baseAmount.mul(randomFactor);
+  }
+
+  private calculateMakerPrice(
+    currentMakerPrice: number | null,
+    bestBid: number,
+    bestAsk: number,
+    incrementPercentage: number,
+    pricePushRate: number,
+  ): number {
+    let newPrice: number;
+
+    if (currentMakerPrice === null) {
+      const midPrice = (bestBid + bestAsk) / 2;
+      newPrice = midPrice * (1 + incrementPercentage / 100);
+    } else {
+      newPrice = currentMakerPrice * (1 + pricePushRate / 100);
     }
 
-    try {
-      const orderBook = await defaultAccount.fetchOrderBook(pair);
-      if (!orderBook.bids.length || !orderBook.asks.length) {
-        const errorMsg = `Incomplete order book data for ${pair}`;
-        this.logger.error(errorMsg);
-        await this.updateStrategyStatusById(id, StrategyInstanceStatus.PAUSED);
-        await this.updateStrategyPausedReasonById(id, errorMsg);
-        return;
-      }
-      const bestBid = orderBook.bids[0][0];
-      const bestAsk = orderBook.asks[0][0];
-      this.logger.log(`Best bid: ${bestBid}, best ask: ${bestAsk} for ${pair}`);
+    return Math.min(newPrice, bestAsk - 0.000001);
+  }
 
-      const useAccount1AsMaker = tradesExecuted % 2 === 0;
-      const makerExchange = useAccount1AsMaker
-        ? defaultAccount
-        : additionalAccount;
-      const takerExchange = useAccount1AsMaker
-        ? additionalAccount
-        : defaultAccount;
+  private async placeOrders(
+    pair: string,
+    makerExchange: any,
+    takerExchange: any,
+    tradeAmount: Decimal,
+    price: number,
+  ) {
+    await Promise.all([
+      makerExchange.createOrder(
+        pair,
+        MarketOrderType.LIMIT_ORDER,
+        TradeSideType.BUY,
+        tradeAmount,
+        price,
+        { postOnly: true },
+      ),
+      takerExchange.createOrder(
+        pair,
+        MarketOrderType.LIMIT_ORDER,
+        TradeSideType.SELL,
+        tradeAmount,
+        price,
+      ),
+    ]);
 
-      const randomFactor = 1 + (Math.random() * 0.1 - 0.05);
-      const tradeAmount = amountToTrade.mul(randomFactor);
+    this.logger.log(
+      `Maker placing limit BUY: ${tradeAmount.toFixed(6)} ${pair} @ ${price.toFixed(6)} on ${makerExchange.id}`,
+    );
+    this.logger.log(
+      `Taker placing limit SELL: ${tradeAmount.toFixed(6)} ${pair} @ ${price.toFixed(6)} on ${takerExchange.id}`,
+    );
+  }
 
-      let newMakerPrice: number;
-      if (currentMakerPrice == null) {
-        const midPrice = (bestBid + bestAsk) / 2;
-        newMakerPrice = midPrice * (1 + incrementPercentage / 100);
-      } else {
-        newMakerPrice = currentMakerPrice * (1 + pricePushRate / 100);
-      }
-
-      newMakerPrice = Math.min(newMakerPrice, bestAsk - 0.000001);
-
-      this.logger.log(
-        `Maker placing limit BUY: ${tradeAmount.toFixed(6)} ${pair} @ ${newMakerPrice.toFixed(6)} on ${makerExchange.id}`,
-      );
-
-      const [makerOrder, takerOrder] = await Promise.all([
-        makerExchange.createOrder(
-          pair,
-          MarketOrderType.LIMIT_ORDER,
-          TradeSideType.BUY,
-          tradeAmount,
-          newMakerPrice,
-          { postOnly: true },
-        ),
-        takerExchange.createOrder(
-          pair,
-          MarketOrderType.LIMIT_ORDER,
-          TradeSideType.SELL,
-          tradeAmount,
-          newMakerPrice,
-        ),
-      ]);
-
-      this.logger.log(`Maker order executed: ${makerOrder.id}`);
-      this.logger.log(`Taker order executed: ${takerOrder.id}`);
-
-      this.logger.log(
-        `Taker placing limit SELL: ${tradeAmount.toFixed(6)} ${pair} @ ${newMakerPrice.toFixed(6)} on ${takerExchange.id}`,
-      );
-
-      const updatedTradesExecuted = tradesExecuted + 1;
-
-      await this.volumeService.updateStrategyAfterTrade(id, {
-        tradesExecuted: updatedTradesExecuted,
-        currentMakerPrice: newMakerPrice,
-      });
-
-      await this.updateStrategyLastTradingAttempt(id, new Date());
-    } catch (error) {
-      this.logger.error(`Error executing trade: ${error.stack || error}`);
-
-      this.logger.error(
-        `Failed executing trade for strategy ${data.id}: ${error instanceof Error ? error.message : error}`,
-      );
-      await this.updateStrategyStatusById(
-        data.id,
-        StrategyInstanceStatus.PAUSED,
-      );
-      await this.updateStrategyPausedReasonById(
-        data.id,
-        error instanceof Error ? error.message : String(error),
-      );
-    }
+  private async handleTradeError(id: number, error: any) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    this.logger.error(`Error executing trade: ${error.stack || error}`);
+    this.logger.error(
+      `Failed executing trade for strategy ${id}: ${errorMessage}`,
+    );
+    await this.updateStrategyStatusById(id, StrategyInstanceStatus.PAUSED);
+    await this.updateStrategyPausedReasonById(id, errorMessage);
   }
 }

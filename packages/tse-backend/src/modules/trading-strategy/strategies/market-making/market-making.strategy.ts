@@ -14,6 +14,7 @@ import {
 } from './model/market-making.dto';
 import { StrategyInstanceStatus } from '../../../../common/enums/strategy-type.enums';
 import {
+  buildPair,
   calculateOrderDetails,
   getPriceSource,
   isExchangeSupported,
@@ -53,9 +54,8 @@ export class MarketMakingStrategy implements Strategy {
         userId: command.userId,
       });
 
-    const ticker = await exchangeInstance.fetchTicker(
-      `${command.sideA}/${command.sideB}`,
-    );
+    const pair = buildPair(command.sideA, command.sideB);
+    const ticker = await exchangeInstance.fetchTicker(pair);
 
     await this.marketMakingService.createStrategy({
       userId: command.userId,
@@ -148,7 +148,7 @@ export class MarketMakingStrategy implements Strategy {
       StrategyInstanceStatus.STOPPED,
     );
 
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    const pair = buildPair(strategyEntity.sideA, strategyEntity.sideB);
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeName,
       pair,
@@ -170,7 +170,7 @@ export class MarketMakingStrategy implements Strategy {
       StrategyInstanceStatus.DELETED,
     );
 
-    const pair = `${strategyEntity.sideA}/${strategyEntity.sideB}`;
+    const pair = buildPair(strategyEntity.sideA, strategyEntity.sideB);
     await this.tradeService.cancelUnfilledOrders(
       strategyEntity.exchangeName,
       pair,
@@ -201,15 +201,15 @@ export class MarketMakingStrategy implements Strategy {
 
     const supportedSymbols =
       await this.exchangeDataService.getSupportedPairs(exchangeName);
-    const pair = `${sideA}/${sideB}:${sideB}`;
-    const altPair = `${sideA}/${sideB}`;
+    const pair = buildPair(sideA, sideB);
+    const altPair = `${pair}:${sideB}`;
     if (
       !isPairSupported(pair, supportedSymbols) &&
       !isPairSupported(altPair, supportedSymbols)
     ) {
       throw new NotFoundException(
         MarketMakingStrategy.ERROR_MESSAGES.SYMBOL_NOT_SUPPORTED(
-          altPair,
+          pair,
           exchangeName,
         ),
       );
@@ -235,15 +235,7 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice,
     } = command;
 
-    const pair = `${sideA}/${sideB}`;
-
-    this.tradeService
-      .cancelUnfilledOrders(exchangeName, pair, userId)
-      .then((canceledCount) => {
-        this.logger.debug(
-          `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeName}`,
-        );
-      });
+    const pair = buildPair(sideA, sideB);
 
     const exchangeInstance =
       await this.exchangeRegistryService.getExchangeByName({
@@ -256,9 +248,6 @@ export class MarketMakingStrategy implements Strategy {
       source = await this.exchangeRegistryService.getExchangeByName({
         exchangeName: oracleExchangeName,
       });
-      this.logger.debug(
-        `Oracle exchange provided, price is calculated from ${source.name}`,
-      );
     } else {
       source = exchangeInstance;
     }
@@ -277,51 +266,85 @@ export class MarketMakingStrategy implements Strategy {
       floorPrice,
     );
 
-    const orderPromises = orderDetails.map(async (detail) => {
-      const adjustedAmount = this.ccxtGateway.amountToPrecision(
-        exchangeInstance,
-        pair,
-        detail.currentOrderAmount,
-      );
+    const executedOrders: {
+      type: 'BUY' | 'SELL';
+      price: string;
+      amount: string;
+    }[] = [];
 
-      let adjustedPrice = this.ccxtGateway.priceToPrecision(
-        exchangeInstance,
-        pair,
-        detail.buyPrice,
-      );
+    const placeOrdersPromise = Promise.all(
+      orderDetails.map(async (detail) => {
+        const buyOrderFormatted = await this.ccxtGateway.formatOrderValues(
+          exchangeInstance,
+          pair,
+          detail.buyPrice,
+          detail.currentOrderAmount,
+        );
 
-      await this.handleBuyOrder(
-        detail,
-        adjustedAmount,
-        adjustedPrice,
-        pair,
-        priceSource,
-        userId,
-        clientId,
-        exchangeName,
-        ceilingPrice,
-      );
+        const buyResult = await this.handleBuyOrder(
+          detail,
+          buyOrderFormatted.amount,
+          buyOrderFormatted.price,
+          pair,
+          priceSource,
+          userId,
+          clientId,
+          exchangeName,
+          ceilingPrice,
+        );
 
-      adjustedPrice = this.ccxtGateway.priceToPrecision(
-        exchangeInstance,
-        pair,
-        detail.sellPrice,
-      );
+        if (buyResult) {
+          executedOrders.push({
+            type: 'BUY',
+            price: buyOrderFormatted.price,
+            amount: buyOrderFormatted.amount,
+          });
+        }
 
-      await this.handleSellOrder(
-        detail,
-        adjustedAmount,
-        adjustedPrice,
-        pair,
-        priceSource,
-        userId,
-        clientId,
-        exchangeName,
-        floorPrice,
-      );
-    });
+        const sellPrice = await this.ccxtGateway.priceToPrecision(
+          exchangeInstance,
+          pair,
+          detail.sellPrice,
+        );
 
-    await Promise.all(orderPromises);
+        const sellResult = await this.handleSellOrder(
+          detail,
+          buyOrderFormatted.amount,
+          sellPrice,
+          pair,
+          priceSource,
+          userId,
+          clientId,
+          exchangeName,
+          floorPrice,
+        );
+
+        if (sellResult) {
+          executedOrders.push({
+            type: 'SELL',
+            price: sellPrice,
+            amount: buyOrderFormatted.amount,
+          });
+        }
+      }),
+    );
+
+    const cancelOrdersPromise = this.tradeService.cancelUnfilledOrders(
+      exchangeName,
+      pair,
+      userId,
+    );
+
+    const [, canceledCount] = await Promise.all([
+      placeOrdersPromise,
+      cancelOrdersPromise,
+    ]);
+
+    this.logger.debug(
+      `Cancelled ${canceledCount} unfilled orders for ${pair} on ${exchangeName}. ` +
+        `Placed ${executedOrders.filter((o) => o.type === 'BUY').length} BUY and ${executedOrders.filter((o) => o.type === 'SELL').length} SELL orders: ` +
+        JSON.stringify(executedOrders),
+    );
   }
 
   private async handleBuyOrder(
@@ -347,6 +370,8 @@ export class MarketMakingStrategy implements Strategy {
         amount: new Decimal(adjustedAmount),
         price: parseFloat(adjustedPrice),
       });
+
+      return true;
     } else {
       this.logger.debug(
         `Skipping buy order for ${pair} as price source ${priceSource} is above the ceiling price ${ceilingPrice}.`,
@@ -377,6 +402,8 @@ export class MarketMakingStrategy implements Strategy {
         amount: new Decimal(adjustedAmount),
         price: parseFloat(adjustedPrice),
       });
+
+      return true;
     } else {
       this.logger.debug(
         `Skipping sell order for ${pair} as price source ${priceSource} is below the floor price ${floorPrice}.`,
