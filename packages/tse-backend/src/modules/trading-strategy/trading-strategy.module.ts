@@ -26,6 +26,12 @@ import { StrategyVolume } from '../../common/entities/strategy-volume.entity';
 import { GetAdditionalAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-additional-account.strategy';
 import { GetDefaultAccountStrategy } from '../exchange-registry/exchange-manager/strategies/get-default-account.strategy';
 import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-manager/strategies/get-all-default-accounts.strategy';
+import { AlpacaStrategy } from './strategies/alpaca/alpaca.strategy';
+import { AlpacaService } from './strategies/alpaca/alpaca.service';
+import { AlpacaStrategyRepository } from './strategies/alpaca/alpaca.repository';
+import { AlpacaStrategyProfile } from './strategies/alpaca/alpaca.mapper';
+import { AlpacaController } from './strategies/alpaca/alpaca.controller';
+import { StrategyAlpaca } from '../../common/entities/strategy-alpaca.entity';
 
 @Module({
   imports: [
@@ -33,6 +39,7 @@ import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-man
       StrategyArbitrage,
       StrategyMarketMaking,
       StrategyVolume,
+      StrategyAlpaca,
     ]),
     ExchangeRegistryModule,
     ExchangeOperationModule,
@@ -43,16 +50,20 @@ import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-man
     ArbitrageStrategy,
     MarketMakingStrategy,
     VolumeStrategy,
+    AlpacaStrategy,
     ArbitrageService,
     MarketMakingService,
     VolumeService,
+    AlpacaService,
     ArbitrageStrategyRepository,
     MarketMakingRepository,
     VolumeStrategyRepository,
+    AlpacaStrategyRepository,
     ExchangeTradeService,
     MarketMakingStrategyProfile,
     ArbitrageStrategyProfile,
     VolumeStrategyProfile,
+    AlpacaStrategyProfile,
     GetDefaultAccountStrategy,
     GetAdditionalAccountStrategy,
     GetAllDefaultAccountsStrategy,
@@ -64,7 +75,14 @@ import { GetAllDefaultAccountsStrategy } from '../exchange-registry/exchange-man
     MarketMakingService,
     VolumeStrategy,
     VolumeService,
+    AlpacaStrategy,
+    AlpacaService,
   ],
-  controllers: [ArbitrageController, MarketMakingController, VolumeController],
+  controllers: [
+    ArbitrageController,
+    MarketMakingController,
+    VolumeController,
+    AlpacaController,
+  ],
 })
 export class TradingStrategyModule {}
