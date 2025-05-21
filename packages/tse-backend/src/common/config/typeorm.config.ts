@@ -13,6 +13,7 @@ import { ExchangeApiKeyReadOnly } from '../entities/exchange-api-key-read-only.e
 import { StrategyVolume } from '../entities/strategy-volume.entity';
 import { ExchangeDeposit } from '../entities/exchange-deposit.entity';
 import { ExchangeWithdrawal } from '../entities/exchange-withdrawal.entity';
+import { StrategyAlpaca } from '../entities/strategy-alpaca.entity';
 
 @Injectable()
 export class TypeormConfig {
@@ -35,6 +36,7 @@ export class TypeormConfig {
         StrategyArbitrage,
         StrategyMarketMaking,
         StrategyVolume,
+        StrategyAlpaca,
         ExchangeApiKey,
         Web3IdentityKey,
         Web3IdentityRpc,

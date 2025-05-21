@@ -2,6 +2,13 @@ export enum StrategyTypeEnums {
   ARBITRAGE = 'arbitrage',
   MARKET_MAKING = 'market_making',
   VOLUME = 'volume',
+  ALPACA = 'alpaca',
+}
+
+export enum DerivativeType {
+  SPOT = 'spot',
+  FUTURE = 'future',
+  OPTION = 'option',
 }
 
 export enum StrategyInstanceStatus {
