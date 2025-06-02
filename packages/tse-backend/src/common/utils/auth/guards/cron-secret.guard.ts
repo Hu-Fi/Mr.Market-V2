@@ -8,13 +8,14 @@ import {
 @Injectable()
 export class CronSecretGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
+    if (!process.env.CRON_SECRET) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 
-    if (
-      !process.env.CRON_SECRET ||
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       throw new UnauthorizedException(
         'Invalid or missing authorization header',
       );
