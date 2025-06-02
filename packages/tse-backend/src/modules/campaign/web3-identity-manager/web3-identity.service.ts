@@ -33,13 +33,13 @@ export class Web3IdentityService implements OnModuleInit {
       this.logger.warn('No web3 private key found. Skipping initialization.');
       return;
     }
-    const decryptedPrivateKey =
-      await this.encryptionService.decrypt(privateKey);
+    // const decryptedPrivateKey = await this.encryptionService.decrypt(privateKey);
     const networks = await this.getAllIdentityRpc();
 
     for (const network of networks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
-      this.signers[network.chainId] = new Wallet(decryptedPrivateKey, provider);
+      // this.signers[network.chainId] = new Wallet(decryptedPrivateKey, provider);
+      this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
   }
 
@@ -50,7 +50,7 @@ export class Web3IdentityService implements OnModuleInit {
   async addIdentityPrivateKey(command: IdentityKeyCommand) {
     const data = this.mapper.map(command, IdentityKeyCommand, IdentityKeyData);
 
-    data.privateKey = await this.encryptionService.encrypt(data.privateKey);
+    // data.privateKey = await this.encryptionService.encrypt(data.privateKey);
 
     await this.repository.saveKey(data);
 

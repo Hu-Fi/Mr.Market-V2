@@ -31,6 +31,7 @@ Below are links to the documentation files located in the `architecture/docs` fo
 - [HOW_TO_RUN.md](architecture/docs/HOW_TO_RUN.md)
 - [HOW_TO_DEPLOY.md](architecture/docs/HOW_TO_DEPLOY.md)
 - [CREATE_MIXIN_APP.md](architecture/docs/CREATE_MIXIN_APP.md)
+- [WEB3_IDENTITY.md](architecture/docs/WEB3_IDENTITY.md)
 - [CI_TESTS.md](architecture/docs/CI_TESTS.md)
 - [DB_MIGRATION_CMD.md](architecture/docs/DB_MIGRATION_CMD.md)
 - [LOGS_MONITORING.md](architecture/docs/LOGS_MONITORING.md)

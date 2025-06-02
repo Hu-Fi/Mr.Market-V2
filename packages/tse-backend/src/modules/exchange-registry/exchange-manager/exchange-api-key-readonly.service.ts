@@ -41,7 +41,7 @@ export class ExchangeApiKeyReadonlyService {
       ExchangeApiKeyReadonlyData,
     );
 
-    data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
+    // data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
 
     return await this.exchangeApiKeyReadonlyRepository.save(data);
   }
