@@ -65,7 +65,7 @@ export class ExchangeApiKeyService {
       ExchangeApiKeyData,
     );
 
-    data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
+    // data.apiSecret = await this.encryptionService.encrypt(data.apiSecret);
 
     return await this.exchangeApiKeyRepository.save(data);
   }

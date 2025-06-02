@@ -90,7 +90,8 @@ export class ExchangeRegistryService {
     return Promise.all(
       data.map(async (apiKey) => ({
         apiKey: apiKey.apiKey,
-        apiSecret: await this.encryptionService.decrypt(apiKey.apiSecret),
+        apiSecret: apiKey.apiSecret,
+        // apiSecret: await this.encryptionService.decrypt(apiKey.apiSecret),
         isDefaultAccount: apiKey.isDefaultAccount,
       })),
     );
