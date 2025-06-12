@@ -34,7 +34,6 @@ import { ExchangeBalanceModule } from './modules/exchange-balance/exchange-balan
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
-        DATABASE_PORT: Joi.string().required(),
         REDIS_URL: Joi.string().required(),
       }),
     }),
