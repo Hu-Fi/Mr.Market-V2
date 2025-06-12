@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import {
   base64RawURLEncode,
   buildSafeTransaction,
@@ -28,30 +28,35 @@ import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class MixinIntegrationService implements OnModuleInit {
+  private readonly logger = new Logger(MixinIntegrationService.name);
   private readonly keystore: Keystore;
   private readonly _clientSecret: string;
   private _client: KeystoreClientReturnType;
   private readonly spendPrivateKey: string;
   private readonly scope: string;
+  private isConfigured: boolean = false;
 
   constructor(private configService: ConfigService) {
+    const appId = this.configService.get<string>('MIXIN_APP_ID');
+    const sessionId = this.configService.get<string>('MIXIN_SESSION_ID');
+    const serverPublicKey = this.configService.get<string>('MIXIN_SERVER_PUBLIC_KEY');
+    const sessionPrivateKey = this.configService.get<string>('MIXIN_SESSION_PRIVATE_KEY');
+    const oauthSecret = this.configService.get<string>('MIXIN_OAUTH_SECRET');
+    const spendPrivateKey = this.configService.get<string>('MIXIN_SPEND_PRIVATE_KEY');
+
+    this.isConfigured = !!(appId && sessionId && serverPublicKey && sessionPrivateKey && oauthSecret && spendPrivateKey);
+
     this.keystore = {
-      app_id: this.configService.get<string>('MIXIN_APP_ID'),
-      session_id: this.configService.get<string>('MIXIN_SESSION_ID'),
-      server_public_key: this.configService.get<string>(
-        'MIXIN_SERVER_PUBLIC_KEY',
-      ),
-      session_private_key: this.configService.get<string>(
-        'MIXIN_SESSION_PRIVATE_KEY',
-      ),
+      app_id: appId,
+      session_id: sessionId,
+      server_public_key: serverPublicKey,
+      session_private_key: sessionPrivateKey,
     };
-    this._clientSecret = this.configService.get<string>('MIXIN_OAUTH_SECRET');
+    this._clientSecret = oauthSecret;
     this._client = MixinApi({
       keystore: this.keystore,
     });
-    this.spendPrivateKey = this.configService.get<string>(
-      'MIXIN_SPEND_PRIVATE_KEY',
-    );
+    this.spendPrivateKey = spendPrivateKey;
     this.scope = this.configService.get<string>(
       'MIXIN_OAUTH_SCOPE',
       'PROFILE:READ ASSETS:READ SNAPSHOTS:READ',
@@ -59,6 +64,11 @@ export class MixinIntegrationService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    if (!this.isConfigured) {
+      this.logger.warn('Mixin integration is not configured. All Mixin-related operations will be disabled.');
+      return;
+    }
+
     try {
       await this._client.user.profile();
     } catch (error) {
@@ -68,7 +78,15 @@ export class MixinIntegrationService implements OnModuleInit {
     }
   }
 
+  private checkMixinConfiguration() {
+    if (!this.isConfigured) {
+      this.logger.warn('Attempted to use Mixin integration without proper configuration');
+      throw new Error('Mixin integration is not configured. Please set all required Mixin environment variables.');
+    }
+  }
+
   async oauthHandler(code: string): Promise<OAuthResponse> {
+    this.checkMixinConfiguration();
     const { seed, publicKey } = getED25519KeyPair();
     const encodedPublicKey = base64RawURLEncode(publicKey);
     const encodedPrivateKey = Buffer.from(seed).toString('hex');
@@ -110,6 +128,7 @@ export class MixinIntegrationService implements OnModuleInit {
   }
 
   async createDepositAddress(command: DepositCommand) {
+    this.checkMixinConfiguration();
     const { chainId } = command;
     const payload = {
       members: [this.keystore.app_id],
@@ -122,12 +141,14 @@ export class MixinIntegrationService implements OnModuleInit {
   }
 
   async getUnspentTransactionOutputs() {
+    this.checkMixinConfiguration();
     return await this._client.utxo.safeOutputs({
       state: 'unspent',
     });
   }
 
   async handleWithdrawal(command: WithdrawCommand) {
+    this.checkMixinConfiguration();
     const { assetId, destination } = command;
     const asset = await this._client.safe.fetchAsset(assetId);
     const chain = await this.getChainAsset(asset);
@@ -369,10 +390,12 @@ export class MixinIntegrationService implements OnModuleInit {
   }
 
   async fetchTransactionDetails(txHash: string) {
+    this.checkMixinConfiguration();
     return await this._client.utxo.fetchTransaction(txHash);
   }
 
   async fetchUserBalanceDetails(clientSession: ClientSession) {
+    this.checkMixinConfiguration();
     const client = await this.createMixinClientForUser(clientSession);
 
     const utxoOutputs = await client.utxo.safeOutputs({ state: 'unspent' });
