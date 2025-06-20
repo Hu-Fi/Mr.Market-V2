@@ -34,7 +34,6 @@ import { SecretGeneratorUtils } from './common/utils/auth/secret-generator.utils
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
-        DATABASE_PORT: Joi.string().required(),
         REDIS_URL: Joi.string().required(),
       }),
     }),
