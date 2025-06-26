@@ -250,6 +250,12 @@ export class VolumeStrategy implements Strategy {
       strategyEntity.userId,
     );
   }
+  private async cancelAllOrdersOnExchange(exchangeInstance: any, strategyEntity: VolumeStrategyData, pair: string,
+  ) {
+    await this.tradeService.cancelAllOrdersOnExchange(exchangeInstance, 
+      pair,
+    strategyEntity.userId);
+  }
 
   async executeVolumeStrategy(data: VolumeStrategyData): Promise<void> {
     const now = new Date();
@@ -302,6 +308,10 @@ export class VolumeStrategy implements Strategy {
         return await this.pauseStrategyDueToOrderBook(id, pair);
       }
 
+      await this.cancelAllOrdersOnExchange(defaultAccount, data, pair);
+      await this.cancelAllOrdersOnExchange(additionalAccount, data, pair);
+
+
       const bestBid = orderBook.bids[0][0];
       const bestAsk = orderBook.asks[0][0];
 
@@ -314,12 +324,18 @@ export class VolumeStrategy implements Strategy {
         : defaultAccount;
 
       const tradeAmount = this.calculateTradeAmount(amountToTrade);
+      const midPrice = (bestBid + bestAsk) / 2;
       const newMakerPrice = this.calculateMakerPrice(
-        currentMakerPrice,
         bestBid,
-        bestAsk,
-        incrementPercentage,
-        pricePushRate,
+        bestAsk
+      );
+
+      await this.rebalance(
+        makerExchange,
+        takerExchange,
+        pair,
+        tradeAmount,
+        midPrice,
       );
 
       await this.placeOrders(
@@ -396,22 +412,10 @@ export class VolumeStrategy implements Strategy {
   }
 
   private calculateMakerPrice(
-    currentMakerPrice: number | null,
     bestBid: number,
     bestAsk: number,
-    incrementPercentage: number,
-    pricePushRate: number,
   ): number {
-    let newPrice: number;
-
-    if (currentMakerPrice === null) {
-      const midPrice = (bestBid + bestAsk) / 2;
-      newPrice = midPrice * (1 + incrementPercentage / 100);
-    } else {
-      newPrice = currentMakerPrice * (1 + pricePushRate / 100);
-    }
-
-    return Math.min(newPrice, bestAsk - 0.000001);
+    return bestBid + Math.random() * (bestAsk - bestBid);
   }
 
   private async placeOrders(
@@ -438,14 +442,72 @@ export class VolumeStrategy implements Strategy {
         price,
       ),
     ]);
-
-    this.logger.log(
-      `Maker placing limit BUY: ${tradeAmount.toFixed(6)} ${pair} @ ${price.toFixed(6)} on ${makerExchange.id}`,
-    );
-    this.logger.log(
-      `Taker placing limit SELL: ${tradeAmount.toFixed(6)} ${pair} @ ${price.toFixed(6)} on ${takerExchange.id}`,
-    );
   }
+  private async rebalance(
+    makerExchange: any,
+    takerExchange: any,
+    pair: string,
+    tradeAmount: Decimal,
+    midPrice: number,
+  ) {
+    const [makerBalances, takerBalances] = await Promise.all([
+      this.getFree(makerExchange, pair.split('/')[0], pair.split('/')[1]),
+      this.getFree(takerExchange, pair.split('/')[0], pair.split('/')[1]),
+    ]);
+      /* maker side sufficient? */
+      if (
+        makerBalances.quote < tradeAmount.mul(midPrice).mul(1.01)
+      ) {
+        const deficitBase = tradeAmount.mul(midPrice).sub(makerBalances.quote).div(midPrice);
+        await this.executeRebalance(makerExchange, TradeSideType.SELL, pair, deficitBase, midPrice);
+      } 
+
+      /* taker side sufficient? */
+      if (takerBalances.base < tradeAmount.mul(1.01)) {
+        const deficitQuote = tradeAmount.sub(takerBalances.base);
+        await this.executeRebalance(takerExchange, TradeSideType.BUY, pair, deficitQuote, midPrice);
+      }
+  }
+
+  private async executeRebalance(
+    exch: any,
+    side: TradeSideType,
+    pair: string,
+    amountNeeded: Decimal,
+    price: number,
+  ) {
+    if (side === TradeSideType.BUY) {
+      /* need more base, so buy base with quote */
+      if (amountNeeded.gt(0)) {
+        //The minimum transaction volume cannot be less than：1USDT
+        const tempPrice = price * 0.90;
+        const amount = (amountNeeded.mul(tempPrice).gte(1)) ? amountNeeded : new Decimal(1).div(tempPrice);
+        await exch.createOrder(pair, MarketOrderType.MARKET_ORDER, TradeSideType.BUY, amount, price);
+    }} else {
+      /* need more quote, so sell base for quote */
+      const baseToSell = amountNeeded.div(price);
+      if (baseToSell.gt(0)) {
+        const tempPrice = price * 1.1;
+        const amount = (baseToSell.mul(tempPrice).gte(1)) ? baseToSell : new Decimal(1).div(tempPrice);
+        await exch.createOrder(pair, MarketOrderType.MARKET_ORDER, TradeSideType.SELL, amount, price);
+      }
+
+    }
+  }
+
+  private async getFree(
+    exch: any,
+    base: string,
+    quote: string,
+  ) {
+    const bal = await exch.fetchBalance();
+    return {
+      base: bal.free[base] ?? 0,
+      quote: bal.free[quote] ?? 0,
+    };
+  }
+
+
 
   private async handleTradeError(id: number, error: any) {
     const errorMessage = error instanceof Error ? error.message : String(error);

@@ -37,11 +37,11 @@ export class CampaignService {
   ) {
     this.CAMPAIGN_LAUNCHER_API_URL = this.configService.get<string>(
       'CAMPAIGN_LAUNCHER_API_URL',
-      'https://hufi-campaign-launcher-server-testnet.onrender.com',
+      'https://hufi-campaign-launcher-server.onrender.com',
     );
     this.RECORDING_ORACLE_API_URL = this.configService.get<string>(
       'RECORDING_ORACLE_API_URL',
-      'https://hufi-recording-oracle-testnet.onrender.com',
+      'https://hufi-recording-oracle-server.onrender.com',
     );
     this.RECORDING_ORACLE_API_KEY = this.configService.get<string>(
       'RECORDING_ORACLE_API_KEY',
